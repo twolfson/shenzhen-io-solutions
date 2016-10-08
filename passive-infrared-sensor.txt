@@ -8,13 +8,17 @@
 # alarm, 0 to 100
 
 # Gist:
+# Controller 1:
+#   Normalize SENSOR into _ALARM (i.e. 0-100 -> 0/100)
+# Controller 2:
+#   When _ALARM, after ON TIME, and before OFF TIME, send ALARM
+
 # Controller 1
-# Check if sensor is at least 20
+# If sensor is at least 20
 tgt SENSOR 20
-  # If not, reset our alarm
-  # DEV: We move `-` here to avoid other comparisons
-- mov 0 _ALARM
-  # Otherwise
-  # If we are
+  # Send alarm signal to controller 2
 + mov 100 _ALARM
-      # Send alarm signal to controller 2
+  # Otherwise, reset alarm signal for controller 2
+- mov 0 _ALARM
+
+# Controller 2
