@@ -10,5 +10,7 @@
 # Gist:
 # Controller 1
 # If sensor is at least 20
-teq
+tgt SENSOR 20
   # Send alarm signal to controller 2
+  # TODO: We are verifying no on/off time atm
+  mov 100 ALARM
