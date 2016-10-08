@@ -21,6 +21,7 @@
 #   Sleep until ENABLE (D), normalize SENSOR into ALARM (i.e. 0-100 -> 0/100)
 
 # TODO: We could prob improve efficiency by only using `X_ENABLE` on change
+# TODO: We could prob improve efficiency via `slx` for `X_ENABLE`
 
 # Controller 1
 # DEV: By default, we assume rtc === 69 as per simulation
@@ -31,16 +32,20 @@ tgt P_RTC X_OFF_TIME
 # Check if we are (at/after off time) and we are before on time (e.g. rtc=90, on_time=88)
 + tlt P_RTC X_ON_TIME
   # If not, enable alarm
-  + mov 100 X_ENABLE
-  # Otherwise, disable alarm (do nothing)
+  - mov 100 X_ENABLE
+  # If so, disable alarm
+  + mov 0 X_ENABLE
 slp 1
 
 # Controller 2
-# Wait until we are enabled
-slx ENABLE
-# if sensor is at least 20
-tgt SENSOR 20
-  # Enable alarm
-+ mov 100 ALARM
-  # Otherwise, disable alarm
+# If we are enabled
+teq x0 100
+# If not: Disable alarm
 - mov 0 ALARM
+# If so: If sensor is at least 20
++ tgt SENSOR 20
+  # Enable alarm
+  + mov 100 ALARM
+  # Otherwise, disable alarm
+  - mov 0 ALARM
+slp 1
