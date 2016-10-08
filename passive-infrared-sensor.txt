@@ -1,0 +1,14 @@
+# Input variables
+# rtc, 0 to 100
+# sensor, 0 to 100
+# on time, -999 to 999
+# off time, -999 to 999
+
+# Output variables
+# alarm, 0 to 100
+
+# Gist:
+# Controller 1
+# If sensor is at least 20
+teq
+  # Send alarm signal to controller 2
