@@ -9,8 +9,12 @@
 
 # Gist:
 # Controller 1
-# If sensor is at least 20
+# Check if sensor is at least 20
 tgt SENSOR 20
-  # Send alarm signal to controller 2
-  # TODO: We are verifying no on/off time atm
-  mov 100 ALARM
+  # If not, reset our alarm
+  # DEV: We move `-` here to avoid other comparisons
+- mov 0 _ALARM
+  # Otherwise
+  # If we are
++ mov 100 _ALARM
+      # Send alarm signal to controller 2
