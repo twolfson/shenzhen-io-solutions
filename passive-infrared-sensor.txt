@@ -27,14 +27,18 @@
 # DEV: By default, we assume rtc === 69 as per simulation
 # Check if we are at/after off time (e.g. rtc=30, off_time=28)
 tgt P_RTC X_OFF_TIME
+- jmp ENABLE
+# If we are (at/after off time) and we are before on time (e.g. rtc=90, on_time=88)
+tlt P_RTC X_ON_TIME
 # If not, enable alarm
-- mov 100 X_ENABLE
-# Check if we are (at/after off time) and we are before on time (e.g. rtc=90, on_time=88)
-+ tlt P_RTC X_ON_TIME
-  # If not, enable alarm
-  - mov 100 X_ENABLE
-  # If so, disable alarm
-  + mov 0 X_ENABLE
+- jmp ENABLE
+# If so, disable alarm
++ mov 0 X_ENABLE
+jmp END
+
+ENABLE:
+mov 100 X_ENABLE
+END:
 slp 1
 
 # Controller 2
