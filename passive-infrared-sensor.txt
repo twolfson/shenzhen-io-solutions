@@ -20,28 +20,26 @@
 # Controller 2:
 #   Sleep until ENABLE (D), normalize SENSOR into ALARM (i.e. 0-100 -> 0/100)
 
+# TODO: We could prob improve efficiency by only using `X_ENABLE` on change
+
 # Controller 1
 # DEV: By default, we assume rtc === 69 as per simulation
 # If we are before off time (e.g. rtc=10, off_time=28)
-tlt RTC OFF_TIME
+tlt P_RTC X_OFF_TIME
   # Enable alarm
-+ mov 100 ENABLE
++ mov 100 X_ENABLE
 # Otherwise (after off time)
-- tgt RTC ON_TIME
+- tgt P_RTC X_ON_TIME
   # Enable alarm
-  + mov 100 ENABLE
-  # Otherwise, disable alarm
-  - mov 0 ENABLE
+  + mov 100 X_ENABLE
+  # Otherwise, disable alarm (do nothing)
 
-# Controller 1
-# Check if we are enabled
-teq ENABLE 100
-# If not, disable alarm
-# DEV: We use `not` early to prevent `teq` nesting
+# Controller 2
+# Wait until we are enabled
+slx ENABLE
+# if sensor is at least 20
+tgt SENSOR 20
+  # Enable alarm
++ mov 100 ALARM
+  # Otherwise, disable alarm
 - mov 0 ALARM
-# Otherwise if sensor is at least 20
-+ tgt SENSOR 20
-      # Enable alarm
-    + mov 100 ALARM
-      # Otherwise, disable alarm
-    - mov 0 ALARM
