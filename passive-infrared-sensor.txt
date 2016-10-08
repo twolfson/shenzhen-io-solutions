@@ -7,11 +7,14 @@
 # Output variables
 # alarm, 0 to 100
 
+# TODO: Alternative structure is to normalize TIME_ON/TIME_OFF
+#   Then make it an `&&`
+
 # Gist:
 # Controller 1:
 #   Normalize SENSOR into _ALARM (i.e. 0-100 -> 0/100)
 # Controller 2:
-#   When _ALARM, after ON TIME, and before OFF TIME, send ALARM
+#   When _ALARM, after ON_TIME, and before OFF_TIME, send ALARM
 
 # Controller 1
 # If sensor is at least 20
@@ -22,3 +25,15 @@ tgt SENSOR 20
 - mov 0 _ALARM
 
 # Controller 2
+# DEV: By default, we assume rtc === 69 as per simulation
+# If we are before off time (e.g. rtc=10, off_time=28)
+tlt RTC OFF_TIME
+  # Pass through alarm signal
++ mov _ALARM ALARM
+# Otherwise (after off time)
+  # If we are after on time
+- tgt RTC ON_TIME
+  # Pass through alarm signal
+  + mov _ALARM ALARM
+  # Otherwise, turn off alarm
+  - mov 0 ALARM
