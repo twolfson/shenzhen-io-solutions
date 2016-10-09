@@ -84,7 +84,51 @@ tgt acc 0
 - mov x2 p1
 slp 1
 
+
 TODO: Try out 1 controller to reset addresses
   and another to play back tracks
+
+It works!
+
+# Controller 1 (MC6000)
+# If we have RANDOM = 1 or 2 (i.e. between 0 and 3)
+tgt p0 0
++ tlt p0 3
+# Tell controller 2 about new track to play
+# DEV: This comes first as simple pins don't wait
++ mov p0 p1
+# Reset positions on RAM
++ mov 0 x0
++ mov 0 x3
+# Reset decrement counter
++ mov 14 acc
+# If we are waiting for music to finish, count down
+tgt acc 0
++ sub 1
+# If music has stopped, tell controller 2 to stop
+teq acc 0
++ mov 0 p1
+# Wait
+slp 1
+
+# Controller 4 (MC4000)
+# Placeholders to make sure addresses are reset before we go
+nop
+nop
+nop
+
+# Reset speaker to default
+mov 50 p1
+
+# If we are playing track 1, then read in data
+teq p0 1
++ mov x0 p1
+
+# If we are playing track 2, then read in data
+teq p0 2
++ mov x1 p1
+
+# Sleep
+slp 1
 
 TODO: Set excess music to 50 if we are using acc/14 technique
