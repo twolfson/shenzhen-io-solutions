@@ -40,20 +40,26 @@ slx x1
 # Save input
 mov x1 dat
 
-# If we should start then send start signal
+# If we should start
 teq dat 3
+# Drop bread + sleep
++ gen p1 1 0
+# Send start signal
 + mov 100 x2
-# DEV: Jump to prevent touching memory
+# Wait for completion
++ mov x2 null
+# Drop bread + sleep
++ gen p1 1 0
+# Drop flag + sleep
++ gen p0 3 0
+# Jump to prevent touching memory
 + jmp START
 
 # If we are at -1
 teq dat -1
-# Move to first option offset
-+ mov 1 x0
-# Set it to 0 (RAM jumps to next option -- i.e. 2)
-+ mov 0 x3
-# Set it to 0 also
-+ mov 0 x3
+# TODO: Implement me
+# Send restart signal to
++ mov -1 x2
 # Otherwise, jump to option offset and set it
 # DEV: Security flaw since it's outside input \o/
 - mov dat x0
