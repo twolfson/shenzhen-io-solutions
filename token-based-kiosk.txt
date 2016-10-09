@@ -24,4 +24,9 @@ If TOTAL over X_PRICE
         OUT_1 += 1
         LOOP
 
-# Requirements
+# Components
+After visual exploration:
+
+- 1 MC4000 to convert P_IN_1/5 to X_IN_COIN
+- 1 MC6000 to read P_IN_12, X_IN_COIN + perform logic
+- 1 DX300 to multiplex X signal to outputs
