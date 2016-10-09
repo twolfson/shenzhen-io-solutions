@@ -195,17 +195,16 @@ teq p1 100
 # Reset our counter
 mov 0 acc
 LOOP:
-# If we have 6 digits
-teq acc 6
-# TODO: How do we flush and swap?
-# Tell controller 2 which digit and value
-- mov acc x2
-- mov p0 x2
+# Tell controller 2 which value and digit
+mov p0 x2
+mov acc x2
+mov acc x2
 
 # Increment our digit counter
-- add 1
+add 1
 
-# Loop again
+# If we don't have 6 digits, loop again
+teq acc 6
 - slp 1
 - jmp LOOP
 
@@ -220,17 +219,26 @@ Controller 2
 # When we get a new digit
 slx x1
 
-# Add the number to our counter
+# Move past 2 digits 1 left (bitshift)
+mul 10
 
-# If it's the third digit
-# TODO: Swap ACC to DAT
-# TODO: If it's the sixth digit, dump and reset
-tcp x1 3
-+ jmp NEXT
-- jmp NEXT
-mov acc x3
-mov dat x2
+# If we have a 100, insert to our 0
+teq x1 100
++ add 1
 
-NEXT:
-mov x1 dat
+# If we are on the 3rd digit, flush acc to dat and reset
+teq x1 2
++ mov acc dat
++ mov 0 acc
+
+# If we are on the 6th digit, flush it all and reset
+teq x1 5
++ mov acc x3
++ mov dat x2
++ mov 0 acc
++ mov 0 dat
 ```
+
+This gets close but numbers are flipped
+
+Going to try again with `dst` variant
