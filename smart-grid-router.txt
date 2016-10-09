@@ -254,5 +254,10 @@ teq p0 0
 # tgt p0 0
 # tlt p0 0
 + mov x0 x1
-+ sub 1
 + jmp LOOP
+```
+
+
+Had an idea where we store ACC runner in second controller
+
+Not working as planned though since not all controllers have access to length...
