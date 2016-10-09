@@ -29,14 +29,11 @@ In tool controller
 
 # Code
 # MC6000
-# Start with P_MOTOR = 50
-@mov 50 P_MOTOR
-
 # On first new signal
 mov x0 P_PLACEHOLDER
 teq P_PLACEHOLDER -999
 # Overwrite position
-- mov dat P_PLACEHOLDER
+- mov P_PLACEHOLDER dat
 # TODO: Send location to other controllers
 # - mov x0 x1
 # - mox x0 x1
@@ -48,11 +45,12 @@ teq P_PLACEHOLDER -999
 tlt ACC /* < */ DAT
 + gen P_MOTOR 1 0
 + add 1
-+ mov 50 P_MOTOR
 # If we are over position, move back
 tgt DAT /* > */ ACC
 + gen P_MOTOR 0 1
 + sub 1
-+ mov 50 P_MOTOR
+
+# Reset motor and sleep
+mov 50 P_MOTOR
 slp 1
 ```
