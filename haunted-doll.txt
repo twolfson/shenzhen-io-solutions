@@ -13,3 +13,29 @@ If random is 1
       but going for 12 units is fine too
 If random is 2
   then play track 2
+
+# Code
+Too many lines but gist is as above
+
+# If play track 1
+teq p0 1
+  # Reset RAM 1
++ mov 0 x1
+  # Play RAM 1
++ jmp LOOP1
+teq p0 2
+  # Reset RAM 2
++ mov 0 x3
+  # Play RAM 2
++ jmp LOOP2
+# Go to sleep (do nothing)
+jmp SLEEP
+
+LOOP1:
+  mov x0 acc
+  teq acc -1
+  + jmp SLEEP
+LOOP2:
+
+SLEEP:
+slp 1
