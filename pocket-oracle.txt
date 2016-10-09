@@ -14,7 +14,7 @@
 - Need to save oracle data in memory somehow
     - Maybe directly to pins via DX300?
 
-# Gist
+# Gist - Too bulky
 3 controllers
 
 Controller 1:
@@ -44,3 +44,34 @@ When X signal
   No sleep (this is second half)
   Flush to DX300
 
+
+# Gist - Too long for 1 controller
+1 controller
+
+If button is pressed
+  Reset acc
+  3 times
+    DST set to ACC from oracle
+    Sleep
+  Flush to DX300 (already bad)
+  Reset acc
+  3 times
+    DST set to ACC from oracle
+    Sleep
+  Flush to DX300 (already bad)
+Sleep
+
+teq p1 100
++ dst 0 p0
++ slp 1
++ dst 1 p0
++ slp 1
++ dst 2 p0
++ slp 1
++ mov acc dat
++ mov 000 acc
++ dst 0 p0
++ slp 1
++ dst 1 p0
++ slp 1
++ dst 2 p0
