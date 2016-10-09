@@ -36,3 +36,12 @@ TODO: METER_IN has 3 cases =/
 After doing some exploration and logic
   We would need a 5X board to handle METER_IN on its own
   So instead of that, send data as to HIGHER_IN and LOWER_IN controllers
+
+More realizations
+  We can send METER_IN to both HIGHER_IN and LOWER_IN
+  If id is higher in HIGHER_IN, do nothing
+  If id is lower in LOWER_IN, do nothing
+  If id is same in HIGHER_IN, send to METER_OUT
+  If id is same in LOWER_IN, do nothing (prevent double sends)
+  If id is lower in HIGHER_IN, send to LOWER_OUT
+  If id is higher in LOWER_IN, send to HIGHER_OUT
