@@ -27,14 +27,17 @@ teq dat -999
 - dst x0 1
   # Wait for motor controller to tell us it's done
 - slx x3
+  # Noop to drain read
+- mov x3 null
   # Backup ACC to DAT as we will lose it with `dgt`
   # Restore digits from original input and send to tools
 - mov acc dat
 - dgt 1
-- gen p0 acc 0
+- gen p1 acc 0
 - mov dat acc
 - dgt 0
-- gen p1 acc 0
+- gen p0 acc 0
+slp 1
 
 --------
 Likely to change vvv
