@@ -45,3 +45,27 @@ More realizations
   If id is same in LOWER_IN, do nothing (prevent double sends)
   If id is lower in HIGHER_IN, send to LOWER_OUT
   If id is higher in LOWER_IN, send to HIGHER_OUT
+
+Ran into issues
+  - Cannot share inputs across METER_IN as it spreads from LOWER_IN to HIGHER_IN
+  - Too much logic for proxying
+
+  ```
+  HEAD:
+  slx x0
+  mov x0 dat
+  tgt dat x1
+  + jmp HEAD
+  # TODO: Set track
+  # teq dat x1
+  # + mov 0 dat
+  # - mov 1 dat
+  mov x0 acc
+  LOOP:
+  teq dat 0
+  + mov x0 x2
+  - mov x0 x3
+  teq acc 0
+  - sub 1
+  - jmp LOOP
+  ```
