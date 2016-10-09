@@ -1,5 +1,8 @@
 # Input variables
-# X_KEYPAD = {-1: Cancel, 1: No cheese, 2: Add extra mustard, 3: Build?}
+# X_KEYPAD = {
+#   -1: Cancel, 1: No cheese,
+#   2: Add extra mustard, 3: Build
+# }
 
 # Output variables
 # P_BREAD
@@ -28,16 +31,27 @@ but going to be too bulky
 so swapping to ram and this is an interim state
 
 START:
+# Wait for signal
 slx x0
+
+# Save input
 mov x0 dat
+
+# If we should start then send start signal
+teq dat 3
++ mov 100 x2
+# DEV: Jump to prevent touching memory
++ jmp START
+
+# If we are at -1
 teq dat -1
+# Move to first option offset
++ mov 1 x0
+# Set it to 0 (RAM jumps to next option -- i.e. 2)
 + mov 0 x3
+# Set it to 0 also
 + mov 0 x3
-+ mov 1 x2
-+ mov
-+ jmp START
-tcp dat 2
-+ mov 0 x3
-+ mov 1 x3
-+ jmp START
-- mov
+# Otherwise, jump to option offset and set it
+# DEV: Security flaw since it's outside input \o/
+- mov dat x0
+- mov 1 x3
