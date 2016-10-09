@@ -182,3 +182,55 @@ TODO: Maybe 1 controller that sends data packets
 
 Also, instead of DST. Maybe multiply + add
   It's ignorant of digits :+1:
+
+This is going to be madenning... maybe...
+
+Controller 1
+
+```
+# If the button wasn't pushed, jump to SLEEP
+teq p1 100
+- jmp SLEEP
+
+# Reset our counter
+mov 0 acc
+LOOP:
+# If we have 6 digits
+teq acc 6
+# TODO: How do we flush and swap?
+# Tell controller 2 which digit and value
+- mov acc x2
+- mov p0 x2
+
+# Increment our digit counter
+- add 1
+
+# Loop again
+- slp 1
+- jmp LOOP
+
+# Sleep
+SLEEP:
+slp 1
+```
+
+Controller 2
+
+```
+# When we get a new digit
+slx x1
+
+# Add the number to our counter
+
+# If it's the third digit
+# TODO: Swap ACC to DAT
+# TODO: If it's the sixth digit, dump and reset
+tcp x1 3
++ jmp NEXT
+- jmp NEXT
+mov acc x3
+mov dat x2
+
+NEXT:
+mov x1 dat
+```
