@@ -92,3 +92,40 @@ Then 3 smaller controllers to read?
   ```
 
   For RAM, we add `mov 0 x3`
+
+Using RAM as auto incrementer will work great
+
+# Wait for signal
+slx x1
+
+# Save ID
+mov x1 dat
+
+# Default to address 2
+mov 2 p1
+
+# Compare to expected address
+tcp dat x0
+# If we are going up, then use address 1
++ mov 1 p1
+# Otherwise, use address 3
+- mov 3 p1
+
+# Write ID to RAM + auto-incr
+mov dat x3
+
+# Save message length
+mov x1 acc
+
+# Write message length to RAM + auto-incr
+mov acc x3
+
+# For remaining data, write to RAM + auto-incr
+LOOP:
+mov x1 x3
+teq acc 1
+- sub 1
+- jmp LOOP
+
+# TODO: Need to set p1 to 0 at end
+# Hey, I think this is like heartbleed =P
