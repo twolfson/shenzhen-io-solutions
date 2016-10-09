@@ -15,12 +15,13 @@ Send data [P_X, P_Y, CALC_A_B] to X_RADIO_TX
 
 # Requirements
 # DEV: Explored visually on board
-1 MC6000 for 2X (radio) + 2P (buttons) + 1X (other calcs)
-1 MC4000 for 2P (2 buttons) -> 1X (other calcs)
+1 MC6000 for 2X (radio) + 2P (buttons) + 2X (other calcs)
+1 MC4000 for 2P (2 buttons) -> 2X (other calcs)
 
 # Fine grained gist
 # Controller 1 (MC6000)
-# Wait for rx signal
+# Check for signal
+# DEV: Cannot wait for signal due to -999
 
 # Write out X and Y
 
@@ -32,3 +33,33 @@ Send data [P_X, P_Y, CALC_A_B] to X_RADIO_TX
 # Wait for signal from Controller 1
 
 # Calculate and write value to Controller 1
+
+Code:
+
+```
+# If have signal
+teq x0 -1
+# Write X/Y
++ mov p0 x1
++ mov p1 x1
+# Ask/write A+B
++ mov 0 x2
++ mov x2 x1
+
+# Sleep
+slp 1
+```
+
+Hooray bitmasking \o/
+
+```
+# Wait for SIG
+slx x0
+# Reset + add
+mov x0 acc
+teq p0 100
++ add 1
+teq p1 100
++ add 2
+mov acc x0
+```
