@@ -39,3 +39,22 @@ LOOP2:
 
 SLEEP:
 slp 1
+
+
+teq p0 1
++ mov 100
++ jmp LOOP1
+teq p0 2
++ mov 0 x3
++ jmp LOOP2
+LOOP1:
+  mov x0 acc
+  teq acc -1
+  + jmp SLEEP
+LOOP2:
+
+SLEEP:
+slp 1
+
+Tried a circuit with same speaker but realized normal is 50
+  so that won't work
