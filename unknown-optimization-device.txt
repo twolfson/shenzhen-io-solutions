@@ -16,9 +16,33 @@
 #   ELSE, P_POWER = 30
 # When 80 <= P_X, P_POWER = 30
 
+# Observation:
+P_POWER = P_X_POWER + P_Y_POWER
+
+When       P_X < 20, P_X_POWER = 30
+When 20 <= P_X < 40, P_X_POWER = 0
+When 40 <= P_X < 60, P_X_POWER = 0
+When 60 <= P_X < 80, P_X_POWER = 30
+When 80 <= P_X     , P_X_POWER = 30
+
+When       P_Y < 40, P_Y_POWER = 0
+When 40 <= P_Y < 80, P_Y_POWER = 50
+When 80 <= P_Y     , P_Y_POWER = 0
+
+Simplified:
+When       P_X < 20, P_X_POWER = 30
+When 20 <= P_X < 60, P_X_POWER = 0
+When 60 <= P_X     , P_X_POWER = 30
+
+When       P_Y < 40, P_Y_POWER = 0
+When 40 <= P_Y < 80, P_Y_POWER = 50
+When 80 <= P_Y     , P_Y_POWER = 0
+
 # Requirements:
 We need 3 different P pins so at least 2 controllers
 
+# SIMPLE GIST
+# ABANDONED TEMPORARILY
 # Gist:
 ## Controller 1
 Convert P_X and P_Y to X_X and X_Y
@@ -37,16 +61,38 @@ mov P_Y X_Y
 mov X_X ACC
 
 # If X_X (ACC) is under 20, then output 30
-tlt X_X 20
+tlt X_X__ACC 20
 + mov P_POWER 30
 + jmp SLEEP
 # Perform similar logic for outer edges
-tlt X_X 40
-+ mov P_POWER 30
+tlt X_X__ACC 40
++ mov 30 P_POWER
 + jmp SLEEP
-tgt X_X 79 # (i.e. >= 80)
-+ mov P_POWER 30
+tgt X_X__ACC 79 # (i.e. >= 80)
++ mov 30 P_POWER
 + jmp SLEEP
 
 SLEEP:
 slp 1
+
+# COMPLEX GIST
+# Gist:
+## Controller 1
+Convert P_X and P_Y to X_X_POWER and X_Y_POWER
+
+## Controller 2
+Add X_X_POWER and X_Y_POWER
+Export to P_POWER
+
+# Proof of concept
+## Controller 1
+# If P_X is under 20 AND over 60, then output 30
+# Otherwise, output 0
+
+# If P_Y is under 40 AND over 80, then output 0
+# Otherwise, output 50
+
+# Controller 2
+# Overwrite ACC with X_X_POWER
+# Add X_Y_POWER to ACC
+# Export total as P_POWER
