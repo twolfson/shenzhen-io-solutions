@@ -261,3 +261,9 @@ teq p0 0
 Had an idea where we store ACC runner in second controller
 
 Not working as planned though since not all controllers have access to length...
+
+Next shot
+
+1 controller which determines P setting
+3 controllers which count down, proxy, and reset P
+  Pretty sure this is too bulky but whatevs
