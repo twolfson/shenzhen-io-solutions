@@ -6,6 +6,9 @@ DX300 can be used to bitmask numbers. For example:
 - 100 on p0 -> 1
 - 100 on p1 -> 10
 
+# Additional registers
+I think this is more theory at the moment but DX300 should be able to convert P registers into long term ones
+
 # Event based wait
 **Controller 1:**
 
