@@ -9,6 +9,7 @@
 # P_FLAG
 
 # Gist
+Use RAM for flags as ACC is bulky
 Possibly use RAM?
 
 Save flags on ACC as digits
@@ -16,3 +17,27 @@ Save flags on ACC as digits
 Follow instructions procedurally
 
 Use DX300 for multiplexing easily
+
+# Code
+Wait for signal
+
+Initial thoughts were to use ACC
+and then handle all instructions in single script
+but going to be too bulky
+
+so swapping to ram and this is an interim state
+
+START:
+slx x0
+mov x0 dat
+teq dat -1
++ mov 0 x3
++ mov 0 x3
++ mov 1 x2
++ mov
++ jmp START
+tcp dat 2
++ mov 0 x3
++ mov 1 x3
++ jmp START
+- mov
