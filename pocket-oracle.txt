@@ -250,3 +250,10 @@ Going to try multiply with DAT storage
 
 What about passing modular counter for DST?
 Maybe we can do something with ACC and DAT in original...
+
+We moved digit access to Controller 2 directly
+
+
+Maybe use DX300 as external memory
+
+Using DX300 to conver 100 to 1, neat
