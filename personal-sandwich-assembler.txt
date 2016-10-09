@@ -71,25 +71,58 @@ Controller 2 MC6000
 slx x1
 # Flush signal
 mov x1 null
-# Drop bread + sleep
-gen p1 1 0
-# Drop meat + sleep
-mov 100 x2
-slp 1
-# Access cheese RAM
+# Trigger bread + meat drop
 mov 1 x0
-# If cheese (i.e. not "no cheese"), drop it + sleep
-teq x3 1
-- mov 010 x2
-- slp 1
-- mov 000 x2
-# Drop mustard
-gen p0 1 0
-# Mustard RAM already accessed
-# If extra mustard, drop it + sleep
-teq x3 1
-+ gen p0 1 0
+# Wait for finish
+slp 2
+# Trigger cheese + mustard drop
+mov 1 x2
+# Wait for finish
+slx x2
+mov x2 null
+# Trigger bread drop
+mov 0 x0
+# Wait for finish
+slp 1
+# Drop flag
+gen p1 3 0
+
+Controller 3 MC4000 (bread/meat controller)
+
+# Wait for signal
+slx x0
+# Move signal for inspection later
+mov x0 acc
 # Drop bread + sleep
 gen p1 1 0
+# If drop meat, then drop meat + sleep
+teq acc 1
++ gen p0 1 0
 
-# TODO: Need to drop + hold flag
+Controller 4 (MC6000)
+
+# Wait for + flush signal
+slx x3
+mov x3 null
+
+# Access cheese RAM
+mov 1 x1
+# If cheese (i.e. not "no cheese"), drop it + sleep
+teq x0 1
+- mov 100 x2
+- slp 1
+
+# Drop mustard
+mov 010 x2
+slp 1
+
+# If extra mustard, hold it open for 1 second longer
+# DEV: Mustard RAM already accessed due to auto-increment
+teq x3 1
++ slp 1
+
+# Stop sending mustard
+mov 000 x2
+
+# Report completion
+move 100 x3
