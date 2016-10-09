@@ -23,8 +23,8 @@ mov x0 dat
 teq dat -999
   # Send new position to motor controller
 - mov dat x3
-- dst x0 0
-- dst x0 1
+- dst 1 x0
+- dst 0 x0
   # Wait for motor controller to tell us it's done
 - slx x3
   # Noop to drain read
