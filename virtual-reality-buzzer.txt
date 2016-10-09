@@ -15,9 +15,22 @@
 # Send ACC to P_BUZZER
 
 # Controller 1 (MC6000):
-teq X_RADIO_RX -999
+# Compare X_RADIO_RX to 0
+tcp X_RADIO_RX 0
+# On 1, set DAT to 1 + jump to buzz
++ mov 1 DAT
 + jmp BUZZ
-# DEV: Will `X_RADIO_RX` be flushed by now?
-mov X_RADIO_RX dat
+# On -999, jump to buzz
+- jmp BUZZ
+# On 0, set DAT to 0
+mov 0 DAT
 
-BUZZ
+BUZZ:
+# If we are enabled, then flip `acc` (i.e. buzz)
+teq DAT 1
++ not
+# Othewise, shut off acc
+- mov 0 ACC
+
+# Send ACC to P_BUZZER
+mov ACC P_BUZZER
