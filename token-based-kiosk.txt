@@ -1,0 +1,27 @@
+# Input variables
+# P_IN_1
+# P_IN_5
+# P_IN_12
+# X_PRICE
+
+# Output variables
+# P_BELL
+# P_OUT_1
+# P_OUT_5
+
+# Gist
+Add P_IN_* to TOTAL
+If TOTAL over X_PRICE
+  Ring bell
+  Subtract X_PRICE from TOTAL
+  Loop:
+    If TOTAL >= 5
+        TOTAL -= 5
+        OUT_5 += 1
+        LOOP
+    If TOTAL >= 1
+        TOTAL -= 1
+        OUT_1 += 1
+        LOOP
+
+# Requirements
