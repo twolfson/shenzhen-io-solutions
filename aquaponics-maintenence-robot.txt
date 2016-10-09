@@ -30,10 +30,12 @@ In tool controller
 # Code
 # MC6000
 # On first new signal
-mov x0 P_PLACEHOLDER
-teq P_PLACEHOLDER -999
+# DEV: _TARGET_POSITION = DAT
+# DEV: _CURRENT_POSITION = ACC
+mov x0 _SIG
+teq _SIG -999
 # Overwrite position
-- mov P_PLACEHOLDER dat
+- mov _SIG _TARGET_POSITION
 # TODO: Send location to other controllers
 # - mov x0 x1
 # - mox x0 x1
@@ -42,11 +44,11 @@ teq P_PLACEHOLDER -999
 # TODO: Prob break up in separate controllers for v1
 
 # If we are under position, move forward
-tlt ACC /* < */ DAT
+tlt _CURRENT_POSITION /* < */ _TARGET_POSITION
 + gen P_MOTOR 1 0
 + add 1
 # If we are over position, move back
-tgt DAT /* > */ ACC
+tgt _TARGET_POSITION /* > */ _CURRENT_POSITION
 + gen P_MOTOR 0 1
 + sub 1
 
