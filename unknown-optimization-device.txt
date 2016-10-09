@@ -99,24 +99,20 @@ tgt P_X 39
 # DEV: We must write to this pin as it's digital
 mov X_Y_POWER 0
 
-# Controller 2 (MC6000)
+# Controller 2 (MC4000)
 # Save X_X to DAT
 mov X_X DAT
 
 # DEV: We are moving X_X_POWER onto acc and adding X_Y_POWER to it
-# If X_X (DAT) is < 20, then output 30
-tlt X_X__DAT 20
-+ mov acc 30
-+ jmp OUTPUT
-
-# If X_X (DAT) is < 60, then add with 0
+# If X_X (DAT) is <= 20 AND < 60, then set X_X_POWER to 0
 tlt X_X__DAT 60
++ tgt X_X__DAT 19 # (i.e. 20)
 + mov acc 0
-# Otherwise, add with 30
 - mov acc 30
 
-OUTPUT:
 # Add X_Y_POWER to X_X_POWER
 add X_Y_POWER
 mov acc P_POWER
 slp 1
+
+# TODO: We can downgrade to MC4000 as we don't need X_Y anymore
