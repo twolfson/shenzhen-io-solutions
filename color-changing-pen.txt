@@ -28,7 +28,7 @@
 
 # Let's do that last one...
 
-# Gist
+# First idea
 ## Controller 1 (MC4000)
 Read RX[R_INT] to P_LED_R
 Read RX[G_INT] to P_LED_G
@@ -70,3 +70,50 @@ sub 1
 teq acc 0
 + mov 0 P_LED_R
 + mov 0 P_LED_G
+
+# Second idea
+1 MC6000 to write out R and G as P and B as X
+Then we use `slx` to shut off `B` when appropriate
+
+## Controller 1 (MC4000)
+Read RX[R_INT] to P_LED_R
+Read RX[G_INT] to P_LED_G
+Write RX[B_INT] to X_LED_B
+Save RX[DUR] to ACC_1
+
+Countdown ACC_1
+Flush P_LED_R
+Flush P_LED_G
+Flush X_LED_B
+
+## Controller 2
+Wait for signal on X_LED_B
+Write X_LED_B on P_LED_B
+
+# Code
+## Controller 1 (MC6000 as we need data)
+# Check for new data (e.g. R_INT)
+mov RX DAT
+
+# If we have new data
+# DEV: We use negation to save a JMP
+teq DAT -999
+# Restore data as R_INT
+- mov DAT R_INT
+# Read RX[G_INT] to P_LED_G
+- mov RX G_INT
+# Write RX[B_INT] to X_LED_B
+- mov RX X_LED_B
+# Save RX[DUR] to ACC_1
+- mov RX ACC
+
+# Countdown
+# If we are over 0, then subtract 1 from counter
+# Otheriwse, turn off all LEDs
+# TODO: We should be able to only run this when we hit 0
+teq acc 0
++ sub 1
+- mov 0 P_LED_R
+- mov 0 P_LED_G
+- mov 0 P_LED_B
+
