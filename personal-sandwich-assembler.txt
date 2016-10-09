@@ -32,10 +32,10 @@ so swapping to ram and this is an interim state
 
 START:
 # Wait for signal
-slx x0
+slx x1
 
 # Save input
-mov x0 dat
+mov x1 dat
 
 # If we should start then send start signal
 teq dat 3
