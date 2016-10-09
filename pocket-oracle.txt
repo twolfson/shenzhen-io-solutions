@@ -257,3 +257,48 @@ We moved digit access to Controller 2 directly
 Maybe use DX300 as external memory
 
 Using DX300 to conver 100 to 1, neat
+
+Revisited orignal simple approach with DX300 and it's on the cusp \o/
+
+Controller 1 (lower)
+
+# If the button hasn't been pushed, sleep
+teq p0 100
+- jmp SLEEP
+
+# Save the current value to 1's place and rest for next digit
+dst 0 x0
+slp 1
+# Save the current value to 10's place and rest for next digit
+dst 1 x0
+slp 1
+# Save the current value to 100's place
+dst 2 x0
+# Wait for other half to complete
+slp 3
+# Flush our total
+mov acc x2
+# Sleep
+SLEEP:
+slp 1
+
+Controller 2 (upper)
+
+# If the button has been pushed, wait for first half's digits
+teq p0 100
++ slp 3
+# Otherwise, do nothing (sleep)
+- jmp SLEEP
+# Save the current value to 1's place and rest for next digit
+dst 0 x0
+slp 1
+# Save the current value to 10's place and rest for next digit
+dst 1 x0
+slp 1
+# Save the current value to 100's place
+dst 2 x0
+# Flush our total
+mov acc x2
+# Sleep
+SLEEP:
+slp 1
