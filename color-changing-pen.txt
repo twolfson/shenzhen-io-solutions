@@ -11,3 +11,12 @@
 # On acc, count down for pulse duration
 # Leverage DX300 to persist X values (need to verify)
 # When acc hits zero, flush DX300
+
+# Explore
+# Write digital input to DX300
+# Sleep for a while
+
+# Nope, no intensity preserved
+# but maybe we can use p1 on microcontrollers
+
+# Can we read different numbers from rx on 2 mc?
