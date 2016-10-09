@@ -44,7 +44,6 @@ When X signal
   No sleep (this is second half)
   Flush to DX300
 
-
 # Gist - Too long for 1 controller
 1 controller
 
@@ -75,3 +74,104 @@ teq p1 100
 + dst 1 p0
 + slp 1
 + dst 2 p0
+
+# Gist
+2 controllers
+
+Controller 1
+
+If button is pressed
+  Reset acc
+  DST set to ACC from oracle
+  Sleep
+  DST set to ACC from oracle
+  Sleep
+  DST set to ACC from oracle
+  Trigger Controller 2? (maybe it detects itself?)
+  Sleep 3
+  Flush to DX300 (already bad)
+Sleep
+
+teq p1 100
+- jmp SLEEP
+mov 000 acc
+teq p0 100
++ dst 0 1
+slp 1
+teq p0 100
++ dst 1 1
+slp 1
+
++ slp 3
++ mov acc x3
+SLEEP:
+slp 1
+
+Not enough lines again...
+
+# Try it with RAM...
+
+Haha, nope -- not enough space
+
+# Gist
+2 controllers
+First 3 digits in 1 controller
+
+Then next 3 digits in second
+
+teq p1 100
+- jmp SLEEP
+teq p0 100
++ dst 0 1
+slp 1
+teq p0 100
++ dst 1 1
+slp 1
+teq p0 100
++ dst 2 1
+slp 3
+mov acc x2
+SLEEP:
+slp 1
+
+teq p1 100
++ slp 3
+- jmp SLEEP
+teq p0 100
++ dst 0 1
+slp 1
+teq p0 100
++ dst 1 1
+slp 1
+teq p0 100
++ dst 2 1
+mov acc x2
+SLEEP:
+slp 1
+
+TODO: Evens and odds?
+TODO: Move first digit overwrite to HEAD label and jump there always? (saves us a sleep)
+  Nope, doesn't work due to sleeping too early
+
+Using addition instead of DST
+  Didn't work, same lines
+
+teq p1 100
+- jmp SLEEP
+mov 0 acc
+add p0
+sub 99
+slp 1
+add p0
+sub 90
+slp 1
+add p0
+slp 3
+mov acc x2
+SLEEP:
+slp 1
+
+TODO: Output lag in 3rd controller?
+- Still can't get placement working...
+
+TODO: Maybe replace DX300 with controllers somehow?
