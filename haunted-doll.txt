@@ -132,3 +132,43 @@ teq p0 2
 slp 1
 
 TODO: Set excess music to 50 if we are using acc/14 technique
+
+
+-------
+
+Revisited this...
+
+Leverage RAM address PIN (thanks manual)
+  to avoid accumulator bloat
+
+1 Controller MC6000
+
+# If we have RANDOM = 1 or 2 (i.e. between 0 and 3)
+tgt p0 0
++ tlt p0 3
+  # Save it as our track
++ mov p0 dat
+
+# Reset speaker to 50
+mov 50 p1
+
+# If we are playing track 1
+teq dat 1
+  # Load its info to speaker
++ mov x0 p1
+# If we are playing track 2
+teq dat 2
+  # Load its info to speaker
++ mov x2 p1
+
+# If we have cycled to 0 on both RAMs
+# DEV: This will run a lot but has less logic
+#   We cycle to 0 after 14th register of RAM
+#   and when no tracks playing at all
+teq x1 0
++ teq x3 0
+  # Wipe track info
++ mov 0 dat
+
+# Sleep
+slp 1
