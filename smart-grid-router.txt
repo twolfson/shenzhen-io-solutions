@@ -1,0 +1,34 @@
+# Input variables
+# X_METER_IN
+# X_LOWER_IN
+# X_HIGHER_IN
+
+# Output variables
+# X_METER_OUT
+# X_LOWER_OUT
+# X_HIGHER_OUT
+
+# Gist
+Packet = [ID, length, ...]
+
+# DEV: Coming from higher ID so only send to meter or lower
+On signal from HIGHER_IN
+  If ID == METER_ID
+    # While length--
+    ACC = LENGTH
+    LOOP1:
+      # Proxy data to meter
+      MOV HIGHER_IN METER_OUT
+      ACC -= 1
+      JMP LOOP1
+  ELSE (ID != METER_ID, I.E. ID < METER_ID)
+    # While length--
+    # TODO: Any way to join loops?
+    ACC = LENGTH
+    LOOP2:
+      # Proxy data to meter
+      MOV HIGHER_IN LOWER_OUT
+      ACC -= 1
+      JMP LOOP2
+
+TODO: METER_IN has 3 cases =/
