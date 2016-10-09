@@ -1,0 +1,18 @@
+# Input variables
+# X_KEYPAD = {-1: Cancel, 1: No cheese, 2: Add extra mustard, 3: Build?}
+
+# Output variables
+# P_BREAD
+# P_MEAT
+# P_CHEESE
+# P_MUSTARD
+# P_FLAG
+
+# Gist
+Possibly use RAM?
+
+Save flags on ACC as digits
+
+Follow instructions procedurally
+
+Use DX300 for multiplexing easily
