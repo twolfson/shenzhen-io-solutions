@@ -47,11 +47,50 @@ SLEEP:
 slp 1
 
 ## Controller 2 (MC6000)
-# Add our coins to the total
-add X_IN_COIN
-add P_IN_12
+# Initialize with price as total
+# DEV: We are using subtraction due to `tgt`
+#   not being able to do equality and price is dynamic
+@mov X_PRICE TOTAL
 
-# If we are over the price
-tge X_PRICE TOTAL
-    # TODO: Ring our bell
+# Remove coins from total
+sub X_IN_COIN
+teq P_IN_12 100
++ sub 12
 
+# If we are > 0, continue to sleep
+tgt TOTAL 0
+- jmp SLEEP
+
+# Ring our bell
+mov 1 X_BELL
+
+# Loop and dispense coins
+LOOP:
+    # If we have over 5 due, dispense 5 and loop
+    tlt TOTAL 5
+    + mov 100 X_COIN_OUT # 5x1, 1x0, N/Ax0
+    + slp 1
+    + jmp LOOP
+    tlt TOTAL 1
+    + mov 010 X_COIN_OUT # 5x1, 1x0, N/Ax0
+    + slp 1
+    + jmp LOOP
+
+# Reset counter
+mov X_PRICE TOTAL
+
+SLEEP:
+slp 1
+
+## Controller 3 (MC4000)
+# When we get a bell signal
+slx X_BELL
+
+# Turn on bell
+mov 100 P_BELL
+
+# Sleep for 4 seconds
+slp 4
+
+# Turn off bell
+mov 0 P_BELL
