@@ -316,6 +316,7 @@ teq p0 2
 
 Attempt again but now we tried to duplicate LENGTH at head of message
 
+```
 slx x0
 mov x0 acc
 mov x0 dat
@@ -330,7 +331,9 @@ tcp acc x3
 mov acc x0
 mov dat x0
 slp 1
+```
 
+```
 slx x0
 slx x0
 mov x0 acc
@@ -340,3 +343,12 @@ teq p0 2
 + mov x0 x1
 + sub 1
 + jmp LOOP
+```
+
+Some weird half awake thought:
+
+- Could reuse decrement loop
+- Tell it to wait for 2 items
+- It proxies ID and length
+- Tell it to wait for LENGTH items
+- It proxies remainder
