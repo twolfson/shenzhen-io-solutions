@@ -148,3 +148,22 @@ We are getting shafted by 1 line to reset `p1`
 Going to try multiple controllers:
 - 1 for setting channel
 - 1 for proxying data
+
+We actually don't need proxy data either...
+  We can directly wire in to *_IN
+
+Ahhh... can't do it because we flush all data items from *_IN
+
+slx x0
+mov x0 acc
+mov 2 p0
+tcp acc x3
++ mov 1 p0
+- mov 3 p0
+mov x0 acc
+LOOP:
+teq acc 0
+- mov x0 null
+- sub 1
+- jmp LOOP
+
