@@ -69,3 +69,26 @@ Ran into issues
   - sub 1
   - jmp LOOP
   ```
+
+Explore:
+  1 controller per output and cascading ownership
+  Nope, still too bulky
+
+1 controller to write to RAM
+Then 3 smaller controllers to read?
+
+  Smallest loop for proxying data:
+
+  ```
+  slx x0
+  mov x0 x2
+  mov x0 acc
+  mov acc x2
+  LOOP:
+  mov x0 x2
+  teq acc 0
+  - sub 1
+  - jmp LOOP
+  ```
+
+  For RAM, we add `mov 0 x3`
