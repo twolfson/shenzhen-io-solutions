@@ -8,26 +8,37 @@
 
 # Gist
 # Read in latest packet
-# TODO: If this gets too complicated, move to DAT
-#   or use loop
 Save RX to ACC
 # If we have new instructions
 IF ACC !== -999
-  Pass along tool instructions to another controller
-  Toggle motor in current controller
-
-In tool controller
-  Sleep for motor pulses x2
-  Pulse signal for tool clean
-    Send signal for tool clean
-    Sleep
-    Disable tool clean
-  Pulse signal for tool feed
-    Send signal for tool feed
-    Sleep
-    Disable tool feed
+  Save data as digits in acc
+  Send off to motor for moving
+  Wait for motor finish
+  Restore and send digits in acc to pins
 
 # Code
+## MC6000
+# If we have new instruction
+mov x0 dat
+teq dat -999
+  # Send new position to motor controller
+- mov dat x3
+- dst x0 0
+- dst x0 1
+  # Wait for motor controller to tell us it's done
+- slx x3
+  # Backup ACC to DAT as we will lose it with `dgt`
+  # Restore digits from original input and send to tools
+- mov acc dat
+- dgt 1
+- gen p0 acc 0
+- mov dat acc
+- dgt 0
+- gen p1 acc 0
+
+--------
+Likely to change vvv
+
 # MC6000
 # On first new signal
 # DEV: _TARGET_POSITION = DAT
@@ -56,3 +67,19 @@ tgt _TARGET_POSITION /* > */ _CURRENT_POSITION
 mov 50 P_MOTOR
 slp 1
 ```
+
+
+mov x0 p0
+teq p0 -999
+- mov p0 dat
+# - mov dat x1
+# - mov x0 x1
+# - mox x0 x1
+tlt acc dat
++ gen p1 1 0
++ add 1
+tgt dat acc
++ gen p1 0 1
++ sub 1
+mov 50 p1
+slp 1
