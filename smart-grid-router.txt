@@ -129,3 +129,22 @@ teq acc 1
 
 # TODO: Need to set p1 to 0 at end
 # Hey, I think this is like heartbleed =P
+
+Oh hey, same logic works without RAM
+
+Here's our METER_OUT controller
+
+# Wait for data
+slx x0
+LOOP:
+# If we are being written to
+teq p0 2
+  # Proxy data and check again
++ mov x0 x1
++ jmp LOOP
+
+We are getting shafted by 1 line to reset `p1`
+
+Going to try multiple controllers:
+- 1 for setting channel
+- 1 for proxying data
