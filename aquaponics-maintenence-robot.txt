@@ -26,3 +26,20 @@ In tool controller
     Send signal for tool feed
     Sleep
     Disable tool feed
+
+# Code
+# MC6000
+```
+@mov 50 p1
+mov x0 dat
+teq x0 -999
+- mov dat acc
+# - mov dat x1
+# - mov x0 x1
+# - mox x0 x1
+teq acc 0
+- gen p1 1 0
+- sub 1
+- mov 50 p1
+slp 1
+```
