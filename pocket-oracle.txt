@@ -175,3 +175,10 @@ TODO: Output lag in 3rd controller?
 - Still can't get placement working...
 
 TODO: Maybe replace DX300 with controllers somehow?
+- Noooope
+
+TODO: Maybe 1 controller that sends data packets
+  and another to accumulate then send data
+
+Also, instead of DST. Maybe multiply + add
+  It's ignorant of digits :+1:
