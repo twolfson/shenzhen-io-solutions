@@ -9,8 +9,8 @@
 
 # Gist
 # On acc, count down for pulse duration
-# Leverage DX300 to persist X values (need to verify)
-# When acc hits zero, flush DX300
+# Somehow persist X values to P
+# When acc hits zero, flush P values
 
 # Explore
 # Write digital input to DX300
@@ -25,3 +25,7 @@
 # Worst case: MC4000X to break up values?
 # Or maybe 2 MC4000 which dump P0 (R_INT), P1 (G_INT)
 #   then [B_INT, DUR]
+
+# Let's do that last one...
+
+# Gist
