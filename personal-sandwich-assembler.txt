@@ -148,12 +148,13 @@ teq dat -1
 
 # If we are making a sandwich
 teq dat 3
-# Output options
+# Output options to DX300 (breaks it down)
 + mov acc x2
 # Put down bread
 + gen p1 1 0
 # Trigger and wait for ingredients
-+ mov acc x3
+# DEV: We could use `mov x3 null` to reset `acc`
++ mov 100 x3
 + slx x3
 + mov x3 null
 # Put down bread
@@ -170,12 +171,28 @@ Controller 2 MC6000
 # When we get instructions
 slx x0
 
-# Save our options
+# Flush data buffer
 mov x0 dat
 
 # Put down meat
 mov 100 x2
 slp 1
+
+# If no "no cheese" was set (from DX300)
+teq p1 100
+- mov 010 x2
+- slp 1
+
+# Start putting down mustard
+mov 100 x2
+slp 1
+
+# If we want extra mustard, wait longer before turning off
+teq p0 100
++ slp 1
+
+# Turn off all ingredients
+mov 000 x2
 
 # Tell Controller we are done
 mov 100 x0
