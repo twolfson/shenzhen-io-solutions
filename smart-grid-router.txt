@@ -167,3 +167,58 @@ teq acc 0
 - sub 1
 - jmp LOOP
 
+TODO: Back to original COPY COPY COPY and try writing ID + COMPARISON to STREAM
+
+```
+# Wait for data
+slx x1
+
+# Save ID
+mov x1 dat
+
+# Enable listeners
+mov 1 p0
+
+# Send input ID
+mov dat x3
+# Send METER ID
+mov x0 x3
+
+# Save message length
+mov x1 acc
+
+# Send message length
+mov acc x3
+LOOP:
+
+# If we are done sending packet
+teq acc 0
+  # Reset listeners
++ mov 0 p0
+  # Otherwise, send packet
+- mov x1 x3
+- sub 1
+- jmp LOOP
+```
+
+```
+# Wait for signal
+slx x0
+# Compare id to meter id
+# DEV: In this case, look for an exact match to enable ourselves
+#   This is the meter out controller
+mov x0 acc
+teq x0 acc
++ mov 1 acc
+
+# Until we are told to shut off
+LOOP:
+# If we are a match and data is coming
+# DEV: Ordering of `teq` is super important
+#   We need to make sure we check `p0` after its completed
+teq acc 1
++ teq p0 1
+# Output our data
++ mov x0 x1
++ jmp LOOP
+```
