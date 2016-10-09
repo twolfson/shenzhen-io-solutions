@@ -1,0 +1,17 @@
+# Input variables
+# P_X
+# P_Y
+
+# Output variables
+# P_POWER
+
+# Gist:
+# When P_X < 20, P_POWER = 30
+# When 20 <= P_X < 40, P_POWER = 0
+# When 40 <= P_X < 60
+#   If 40 <= P_Y < 80, P_POWER = 50
+#   ELSE, P_POWER = 0
+# When 60 <= P_X < 80
+#   If 40 <= P_Y < 80, P_POWER = 80
+#   ELSE, P_POWER = 30
+# When 80 <= P_X, P_POWER = 30
