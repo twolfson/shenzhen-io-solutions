@@ -267,3 +267,7 @@ Next shot
 1 controller which determines P setting
 3 controllers which count down, proxy, and reset P
   Pretty sure this is too bulky but whatevs
+
+Ugh, sleep doesn't work as expected...
+
+Thankfully that's not what we wants to do already... o_o
