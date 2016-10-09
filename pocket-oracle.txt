@@ -242,3 +242,11 @@ teq x1 5
 This gets close but numbers are flipped
 
 Going to try again with `dst` variant
+
+  Unable to reset digits for DST due to no register
+
+Going to try multiply with DAT storage
+  Nah too bulky
+
+What about passing modular counter for DST?
+Maybe we can do something with ACC and DAT in original...
