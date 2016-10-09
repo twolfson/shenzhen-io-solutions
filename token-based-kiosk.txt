@@ -12,24 +12,28 @@
 # Gist
 Add P_IN_* to TOTAL
 If TOTAL over X_PRICE
-  Ring bell
+  Ring bell for 4 seconds
   Subtract X_PRICE from TOTAL
-  Loop:
+  LOOP:
     If TOTAL >= 5
         TOTAL -= 5
         OUT_5 += 1
+        SLEEP for 1 second
         LOOP
     If TOTAL >= 1
         TOTAL -= 1
         OUT_1 += 1
+        SLEEP for 1 second
         LOOP
 
 # Components
-After visual exploration:
+After visual exploration
+  and problems with looping/sleeping and not hearing input
 
 - 1 MC4000 to convert P_IN_1/5 to X_IN_COIN
-- 1 MC6000 to read P_IN_12, X_IN_COIN + perform logic
-- 1 DX300 to multiplex X signal to outputs
+- 1 MC4000 to read P_IN_12, X_IN_COIN, and trigger bell/output controllers
+- 1 MC4000 to ring bell for 4 seconds (what a waste)
+- 1 MC4000 to output coins
 
 # Code
 ## Controller 1 (MC4000)
@@ -46,7 +50,7 @@ mov 0 X_IN_COIN
 SLEEP:
 slp 1
 
-## Controller 2 (MC6000)
+## Controller 2 (MC4000)
 # Initialize with price as total
 # DEV: We are using subtraction due to `tgt`
 #   not being able to do equality and price is dynamic
@@ -57,12 +61,31 @@ sub X_IN_COIN
 teq P_IN_12 100
 + sub 12
 
-# If we are > 0, continue to sleep
+# If we are <= 0, trigger bell, coin dispenser, and reset counter
 tgt TOTAL 0
-- jmp SLEEP
++ mov 100 X_BELL_SIG
++ mov TOTAL X_COIN_SIG
++ mov X_PRICE TOTAL
 
-# Ring our bell
-mov 1 X_BELL
+## Controller 3 (MC4000)
+# When we get a bell signal
+slx X_BELL_SIG
+
+# Turn on bell
+mov 100 P_BELL
+
+# Sleep for 4 seconds
+slp 4
+
+# Turn off bell
+mov 0 P_BELL
+
+## Controller 4 (MC4000)
+# When we get a coin signal
+slx X_COIN_SIG
+
+# Save our total
+mov X_COIN_SIG acc
 
 # Loop and dispense coins
 LOOP:
@@ -76,21 +99,5 @@ LOOP:
     + slp 1
     + jmp LOOP
 
-# Reset counter
-mov X_PRICE TOTAL
 
 SLEEP:
-slp 1
-
-## Controller 3 (MC4000)
-# When we get a bell signal
-slx X_BELL
-
-# Turn on bell
-mov 100 P_BELL
-
-# Sleep for 4 seconds
-slp 4
-
-# Turn off bell
-mov 0 P_BELL
