@@ -41,34 +41,30 @@ mov P_X X_X
 mov P_Y X_Y
 
 # Controller 2
-# Save X_X to ACC
-mov X_X ACC
+# Save X_X to DAT
+mov X_X DAT
 
-# If X_X (ACC) is < 20, then output 30
-tlt X_X__ACC 20
-+ mov P_POWER 30
-+ jmp SLEEP
+# If X_X (DAT) is < 20, then output 30
+tlt X_X__DAT 20
++ mov acc 30
++ jmp OUTPUT
 
-# If X_X (ACC) is <= 60, set `dat` to 0 (X_POWER)
+# If X_X (DAT) is <= 60, set `acc` to 0 (X_POWER)
 # DEV: Now that non-summation case is done, we use summation logic
-tlt X_X__ACC 61
-+ mov 0 dat
-# Otherwise, set `dat` to 30 (X_POWER)
-- mov 30 dat
+tlt X_X__DAT 61
++ mov 0 acc
+# Otherwise, set `acc` to 30 (X_POWER)
+- mov 30 acc
 
-# Save X_Y to ACC
-mov X_Y ACC
+# Save X_Y to DAT
+mov X_Y DAT
 
-# If X_Y (ACC) is <= 40 AND < 80
-tgt X_Y__ACC 39
-+ tlt X_Y__ACC 80
-    # Move `dat` (X_POWER) to `acc`
-    + mov dat acc
-    # Add 50
-    + add 50
-    # Output `acc` as P_POWER
-# Otherwise, output `dat` as P_POWER
-- mov dat P_POWER
+# If X_Y (DAT) is <= 40 AND < 80, add 50 to total (ACC)
+tgt X_Y__DAT 39
++ tlt X_Y__DAT 80
+  + add 50
 
-SLEEP:
+OUTPUT:
+# Output total (ACC) as power (P_POWER)
+mov ACC P_POWER
 slp 1
