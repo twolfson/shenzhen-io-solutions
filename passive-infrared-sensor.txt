@@ -46,7 +46,7 @@ slp 1
 
 # Controller 2
 # If we are enabled
-teq x0 100
+teq X_ENABLE 100
 # If not: Disable alarm
 - mov 0 ALARM
 # If so: If sensor is at least 20 (i.e. > 19)
