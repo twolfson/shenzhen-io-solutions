@@ -34,36 +34,34 @@ Controller 1 MC6000
 
 ```
 START:
-# Wait for signal
+# Wait for start signal
 slx x1
 
 # Save input
 mov x1 dat
 
-# If we should start
-teq dat 3
-# Drop bread + sleep
-+ gen p1 1 0
-# Send start signal
-+ mov 100 x2
-# Wait for completion
-+ mov x2 null
-# Drop bread + sleep
-+ gen p1 1 0
-# Drop flag + sleep
-+ gen p0 3 0
-# Jump to prevent touching memory
+# If we are <= 1 and <= 2 as input
+tlt 1 dat
++ tgt dat 2
+  # Save option in its RAM slot
+  # DEV: This is a security hole as it's user input for memory
++ mov dat x0
++ mov 1 x3
+  # Jump to START to prevent reset
 + jmp START
 
-# If we are at -1
-teq dat -1
-# TODO: Implement me
-# Send restart signal to
-+ mov -1 x2
-# Otherwise, jump to option offset and set it
-# DEV: Security flaw since it's outside input \o/
-- mov dat x0
-- mov 1 x3
+# If we should start, then start
+teq dat 3
+  # Send start signal
++ mov 100 x2
+  # Wait for RAM to be used before reset
+  # DEV: Not accurate but good enough
++ slp 7
+# Otherwise (-1), continue with a reset
+# Reset after completion too
+mov 1 x0
+mov 0 x3
+mov 0 x3
 ```
 
 Controller 2 MC6000
