@@ -311,3 +311,32 @@ teq p0 2
 + mov x0 x1
 + jmp LOOP
 ```
+
+-----------
+
+Attempt again but now we tried to duplicate LENGTH at head of message
+
+slx x0
+mov x0 acc
+mov x0 dat
+mov dat x0
+mov 2 p1
+tcp acc x3
++ mov 1 p1
+- mov 3 p1
+
+# mov dat x0
+# mov dat x0
+mov acc x0
+mov dat x0
+slp 1
+
+slx x0
+slx x0
+mov x0 acc
+LOOP:
+teq p0 2
++ tgt acc 0
++ mov x0 x1
++ sub 1
++ jmp LOOP
