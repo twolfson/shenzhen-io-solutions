@@ -1,0 +1,15 @@
+# Input variables
+# X_RADIO_RX, -999 to 999
+
+# Output variables
+# P_BUZZER, 0 to 100
+
+# Gist:
+# DAT will be last seen value
+# If X_RADIO_RX === -999, go to BUZZ
+# Save X_RADIO_RX to DAT
+
+# BUZZ:
+# If DAT === 1, NOT ACC
+# If DAT === 0, ACC = 0
+# Send ACC to P_BUZZER
