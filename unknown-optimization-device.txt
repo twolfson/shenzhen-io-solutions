@@ -86,11 +86,20 @@ Export to P_POWER
 
 # Proof of concept
 ## Controller 1
-# If P_X is under 20 AND over 60, then output 30
-# Otherwise, output 0
+# If P_X is between 20 AND 60, then output 0
+# DEV: IF ordering gets confusing here so trust me...
+tgt P_X 19 (i.e. >= 20)
++ tlt P_X 60 (i.e. < 60)
++ mov 0 X_X_POWER
+# Otherwise, output 30
+- mov 30 X_X_POWER
 
-# If P_Y is under 40 AND over 80, then output 0
+# If P_Y is between 40 AND 80, then output 50
+tgt P_Y 39 (i.e. >= 40)
++ tlt P_Y 80 (i.e. < 80)
++ mov 50 X_Y_POWER
 # Otherwise, output 50
+- mov 0 X_Y_POWER
 
 # Controller 2
 # Overwrite ACC with X_X_POWER
