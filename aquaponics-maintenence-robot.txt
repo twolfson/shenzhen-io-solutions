@@ -39,23 +39,7 @@ teq dat -999
 - gen p0 acc 0
 slp 1
 
---------
-Likely to change vvv
-
-# MC6000
-# On first new signal
-# DEV: _TARGET_POSITION = DAT
-# DEV: _CURRENT_POSITION = ACC
-mov x0 _SIG
-teq _SIG -999
-# Overwrite position
-- mov _SIG _TARGET_POSITION
-# TODO: Send location to other controllers
-# - mov x0 x1
-# - mox x0 x1
-
-# TODO: Save clean cycles as digits in an acc?
-# TODO: Prob break up in separate controllers for v1
+# TODO: Use tcp for less lines?
 
 # If we are under position, move forward
 tlt _CURRENT_POSITION /* < */ _TARGET_POSITION
@@ -71,18 +55,16 @@ mov 50 P_MOTOR
 slp 1
 ```
 
-
-mov x0 p0
-teq p0 -999
-- mov p0 dat
-# - mov dat x1
-# - mov x0 x1
-# - mox x0 x1
-tlt acc dat
+@mov 50 p1
+slx x0
+mov x0 dat
+LOOP:
+mov 50 p1
+tcp dat acc
 + gen p1 1 0
 + add 1
-tgt dat acc
-+ gen p1 0 1
-+ sub 1
-mov 50 p1
-slp 1
++ jmp LOOP
+- gen p1 0 1
+- sub 1
+- jmp LOOP
+mov 100 x0
