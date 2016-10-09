@@ -78,3 +78,45 @@ OUTPUT:
 # Output total (ACC) as power (P_POWER)
 mov ACC P_POWER
 slp 1
+
+# Reframed into 2 controllers due to too much logic in C2
+# Controller 1: Convert P to X and calculate Y power
+# Controller 2: Calculate and add X power
+
+## Controller 1 (MC6000)
+# Convert P_X and P_Y to X_X and X_Y
+mov P_X X_X
+mov P_Y X_Y
+
+# If between P_X is <= 40 AND < 80
+#   AND P_Y is <= 40 and < 80, output X_Y_POWER = 30
+tgt P_X 39
++ tlt P_X 80
++ tgt P_Y 39
++ tlt P_Y 80
+  + mov X_Y_POWER 30
+# Otherwise, output X_Y_POWER = 0
+# DEV: We must write to this pin as it's digital
+mov X_Y_POWER 0
+
+# Controller 2 (MC6000)
+# Save X_X to DAT
+mov X_X DAT
+
+# DEV: We are moving X_X_POWER onto acc and adding X_Y_POWER to it
+# If X_X (DAT) is < 20, then output 30
+tlt X_X__DAT 20
++ mov acc 30
++ jmp OUTPUT
+
+# If X_X (DAT) is < 60, then add with 0
+tlt X_X__DAT 60
++ mov acc 0
+# Otherwise, add with 30
+- mov acc 30
+
+OUTPUT:
+# Add X_Y_POWER to X_X_POWER
+add X_Y_POWER
+mov acc P_POWER
+slp 1
