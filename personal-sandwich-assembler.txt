@@ -40,9 +40,10 @@ slx x1
 # Save input
 mov x1 dat
 
-# If we are <= 1 and <= 2 as input
-tlt 1 dat
-+ tgt dat 2
+# If DAT < 3 and DAT > 0 as input
+# DEV: This means option inputs
+tlt dat 3
++ tgt dat 0
   # Save option in its RAM slot
   # DEV: This is a security hole as it's user input for memory
 + mov dat x0
@@ -91,6 +92,4 @@ teq x3 1
 # Drop bread + sleep
 gen p1 1 0
 
-# TODO: Need to reset RAM on complete
-#  (could prob do it via signal back to Controller 1)
 # TODO: Need to drop + hold flag
