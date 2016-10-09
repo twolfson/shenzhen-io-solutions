@@ -5,7 +5,7 @@
 # Output variables
 # P_POWER
 
-# Gist:
+# Interpretation of sheet:
 # When P_X < 20, P_POWER = 30
 # When 20 <= P_X < 40, P_POWER = 0
 # When 40 <= P_X < 60
@@ -15,3 +15,38 @@
 #   If 40 <= P_Y < 80, P_POWER = 80
 #   ELSE, P_POWER = 30
 # When 80 <= P_X, P_POWER = 30
+
+# Requirements:
+We need 3 different P pins so at least 2 controllers
+
+# Gist:
+## Controller 1
+Convert P_X and P_Y to X_X and X_Y
+
+## Controller 2
+Implement logic with X_X and X_Y
+
+# Proof of concept
+## Controller 1
+# Convert P_X and P_Y to X_X and X_Y
+mov P_X X_X
+mov P_Y X_Y
+
+# Controller 2
+# Save X_X to ACC
+mov X_X ACC
+
+# If X_X (ACC) is under 20, then output 30
+tlt X_X 20
++ mov P_POWER 30
++ jmp SLEEP
+# Perform similar logic for outer edges
+tlt X_X 40
++ mov P_POWER 30
++ jmp SLEEP
+tgt X_X 79 # (i.e. >= 80)
++ mov P_POWER 30
++ jmp SLEEP
+
+SLEEP:
+slp 1
