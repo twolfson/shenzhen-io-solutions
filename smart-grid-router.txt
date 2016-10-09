@@ -32,3 +32,7 @@ On signal from HIGHER_IN
       JMP LOOP2
 
 TODO: METER_IN has 3 cases =/
+
+After doing some exploration and logic
+  We would need a 5X board to handle METER_IN on its own
+  So instead of that, send data as to HIGHER_IN and LOWER_IN controllers
