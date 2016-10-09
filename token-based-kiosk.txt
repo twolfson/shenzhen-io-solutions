@@ -45,3 +45,13 @@ mov 0 X_IN_COIN
 
 SLEEP:
 slp 1
+
+## Controller 2 (MC6000)
+# Add our coins to the total
+add X_IN_COIN
+add P_IN_12
+
+# If we are over the price
+tge X_PRICE TOTAL
+    # TODO: Ring our bell
+
