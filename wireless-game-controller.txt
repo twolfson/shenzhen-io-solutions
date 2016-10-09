@@ -1,0 +1,16 @@
+# Input variables
+# P_X
+# P_Y
+# P_A
+# P_B
+# X_RADIO_RX
+
+# Output values
+# X_RADIO_TX
+
+# Gist
+When we get X_RADIO_RX
+Run logic on P_A and P_B
+Send data [P_X, P_Y, CALC_A_B] to X_RADIO_TX
+
+# Going to try free handing this...
