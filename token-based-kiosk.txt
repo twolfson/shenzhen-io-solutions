@@ -80,7 +80,7 @@ slp 4
 # Turn off bell
 mov 0 P_BELL
 
-## Controller 4 (MC4000)
+## Controller 4 (MC6000 for lines of code)
 # When we get a coin signal
 slx X_COIN_SIG
 
@@ -89,16 +89,12 @@ mov X_COIN_SIG acc
 
 # Loop and dispense coins
 LOOP:
-    # If TOTAL >= 5, dispense 5 and loop
+    # If TOTAL >= 5, dispense 5 (on pulse) and loop
     tgt TOTAL 4 # > 4 === >= 5
-    + mov 100 P_OUT_5
+    + gen P_OUT_5 1 1
     + sub 5
-    + slp 1
-    + mov 0 P_OUT_5
     + jmp LOOP
     tgt TOTAL 0 # > 0 === >= 1
-    + mov 100 P_OUT_1
+    + gen P_OUT_1 1 1
     + sub 1
-    + slp 1
-    + mov 0 P_OUT_1
     + jmp LOOP
