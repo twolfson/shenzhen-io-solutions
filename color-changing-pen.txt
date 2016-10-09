@@ -111,9 +111,15 @@ teq DAT -999
 # If we are over 0, then subtract 1 from counter
 # Otheriwse, turn off all LEDs
 # TODO: We should be able to only run this when we hit 0
-teq acc 0
+tgt acc 0
 + sub 1
 - mov 0 P_LED_R
 - mov 0 P_LED_G
-- mov 0 P_LED_B
+- mov 0 X_LED_B
 
+# Controller 2
+# Wait for LED update
+slx X_LED_B
+
+# Convert X to P
+mov X_LED_B P_LED_B
