@@ -31,15 +31,16 @@ tlt P_RTC X_OFF_TIME
 + jmp ENABLE
 
 # If we are after on time (e.g. rtc=80, on_time=88)
-tgt P_RTC X_ON_TIME
+tlt P_RTC X_ON_TIME
   # Enable alarm
 + mov 100 X_ENABLE
 # Otherwise, disable alarm
-- mov 0 X_ENABLE
++ mov 0 X_ENABLE
 jmp END
 
 ENABLE:
 mov 100 X_ENABLE
+
 END:
 slp 1
 
