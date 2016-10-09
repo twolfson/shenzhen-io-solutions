@@ -13,3 +13,11 @@
 # If DAT === 1, NOT ACC
 # If DAT === 0, ACC = 0
 # Send ACC to P_BUZZER
+
+# Controller 1 (MC6000):
+teq X_RADIO_RX -999
++ jmp BUZZ
+# DEV: Will `X_RADIO_RX` be flushed by now?
+mov X_RADIO_RX dat
+
+BUZZ
