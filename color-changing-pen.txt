@@ -20,3 +20,8 @@
 # but maybe we can use p1 on microcontrollers
 
 # Can we read different numbers from rx on 2 mc?
+# We can but that'll be confusing
+
+# Worst case: MC4000X to break up values?
+# Or maybe 2 MC4000 which dump P0 (R_INT), P1 (G_INT)
+#   then [B_INT, DUR]
