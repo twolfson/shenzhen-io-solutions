@@ -1,5 +1,16 @@
 We have been collecting various ideas. Here's our docs on them:
 
+# Bridges
+As insighted by forums, all crossings are horizontal and vertical
+
+For any bridge that you want horizontal, we can use a vertical one instead:
+
+```
+  |        |
+----- =  --|--
+  |        |
+```
+
 # Bitmasking
 DX300 can be used to bitmask numbers. For example:
 
