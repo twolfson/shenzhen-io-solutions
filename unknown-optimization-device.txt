@@ -49,6 +49,16 @@ tlt X_X__DAT 20
 + mov acc 30
 + jmp OUTPUT
 
+# If X_X (DAT) is < 40, then output 0
+tlt X_X__DAT 20
++ mov acc 0
++ jmp OUTPUT
+
+# If X_X (DAT) is >= 80, then output 30
+tgt X_X__DAT 79
++ mov acc 30
++ jmp OUTPUT
+
 # If X_X (DAT) is <= 60, set `acc` to 0 (X_POWER)
 # DEV: Now that non-summation case is done, we use summation logic
 tlt X_X__DAT 61
