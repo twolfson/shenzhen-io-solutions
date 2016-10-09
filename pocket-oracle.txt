@@ -1,0 +1,15 @@
+# Input variables
+# P_BUTTON
+# P_ORACLE
+
+# Output variables
+# P_DISPLAY_0
+# P_DISPLAY_1
+# P_DISPLAY_2
+# P_DISPLAY_3
+# P_DISPLAY_4
+# P_DISPLAY_5
+
+# Thoughts
+- Need to save oracle data in memory somehow
+    - Maybe directly to pins via DX300?
