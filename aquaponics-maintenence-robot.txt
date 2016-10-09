@@ -29,17 +29,30 @@ In tool controller
 
 # Code
 # MC6000
-```
-@mov 50 p1
-mov x0 dat
-teq x0 -999
-- mov dat acc
-# - mov dat x1
+# Start with P_MOTOR = 50
+@mov 50 P_MOTOR
+
+# On first new signal
+mov x0 P_PLACEHOLDER
+teq P_PLACEHOLDER -999
+# Overwrite position
+- mov dat P_PLACEHOLDER
+# TODO: Send location to other controllers
 # - mov x0 x1
 # - mox x0 x1
-teq acc 0
-- gen p1 1 0
-- sub 1
-- mov 50 p1
+
+# TODO: Save clean cycles as digits in an acc?
+# TODO: Prob break up in separate controllers for v1
+
+# If we are under position, move forward
+tlt ACC /* < */ DAT
++ gen P_MOTOR 1 0
++ add 1
++ mov 50 P_MOTOR
+# If we are over position, move back
+tgt DAT /* > */ ACC
++ gen P_MOTOR 0 1
++ sub 1
++ mov 50 P_MOTOR
 slp 1
 ```
