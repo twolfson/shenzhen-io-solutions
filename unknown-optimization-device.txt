@@ -83,10 +83,9 @@ slp 1
 # Controller 1: Convert P to X and calculate Y power
 # Controller 2: Calculate and add X power
 
-## Controller 1 (MC6000)
-# Convert P_X and P_Y to X_X and X_Y
+## Controller 1 (MC4000)
+# Convert P_X to X_X
 mov P_X X_X
-mov P_Y X_Y
 
 # If between P_X is <= 40 AND < 80
 #   AND P_Y is <= 40 and < 80, output X_Y_POWER = 30
@@ -94,19 +93,19 @@ tgt P_X 39
 + tlt P_X 80
 + tgt P_Y 39
 + tlt P_Y 80
-  + mov X_Y_POWER 30
+  + mov X_Y_POWER 50
 # Otherwise, output X_Y_POWER = 0
 # DEV: We must write to this pin as it's digital
 mov X_Y_POWER 0
 
 # Controller 2 (MC4000)
-# Save X_X to DAT
-mov X_X DAT
+# Save X_X to ACC
+mov X_X ACC
 
 # DEV: We are moving X_X_POWER onto acc and adding X_Y_POWER to it
-# If X_X (DAT) is <= 20 AND < 60, then set X_X_POWER to 0
-tlt X_X__DAT 60
-+ tgt X_X__DAT 19 # (i.e. 20)
+# If X_X (ACC) is <= 20 AND < 60, then set X_X_POWER to 0
+tlt X_X__ACC 60
++ tgt X_X__ACC 19 # (i.e. 20)
 + mov acc 0
 - mov acc 30
 
@@ -114,5 +113,3 @@ tlt X_X__DAT 60
 add X_Y_POWER
 mov acc P_POWER
 slp 1
-
-# TODO: We can downgrade to MC4000 as we don't need X_Y anymore
