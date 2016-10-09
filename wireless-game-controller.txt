@@ -13,4 +13,22 @@ When we get X_RADIO_RX
 Run logic on P_A and P_B
 Send data [P_X, P_Y, CALC_A_B] to X_RADIO_TX
 
-# Going to try free handing this...
+# Requirements
+# DEV: Explored visually on board
+1 MC6000 for 2X (radio) + 2P (buttons) + 1X (other calcs)
+1 MC4000 for 2P (2 buttons) -> 1X (other calcs)
+
+# Fine grained gist
+# Controller 1 (MC6000)
+# Wait for rx signal
+
+# Write out X and Y
+
+# Write to Controller 2 for data
+
+# Read from Controller 2 and write to data
+
+# Controller 2 (MC4000)
+# Wait for signal from Controller 1
+
+# Calculate and write value to Controller 1
