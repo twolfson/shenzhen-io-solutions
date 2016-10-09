@@ -1,0 +1,28 @@
+# Input variables
+# X_RADIO_RX = [DESTINATION_STATION, TOOL_CLEAN_TIME, TOOL_FEED_TIME]
+
+# Output variables
+# P_MOTOR
+# P_TOOL_CLEAN
+# P_TOOL_FEED
+
+# Gist
+# Read in latest packet
+# TODO: If this gets too complicated, move to DAT
+#   or use loop
+Save RX to ACC
+# If we have new instructions
+IF ACC !== -999
+  Pass along tool instructions to another controller
+  Toggle motor in current controller
+
+In tool controller
+  Sleep for motor pulses x2
+  Pulse signal for tool clean
+    Send signal for tool clean
+    Sleep
+    Disable tool clean
+  Pulse signal for tool feed
+    Send signal for tool feed
+    Sleep
+    Disable tool feed
