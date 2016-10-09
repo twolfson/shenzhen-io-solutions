@@ -13,3 +13,34 @@
 # Thoughts
 - Need to save oracle data in memory somehow
     - Maybe directly to pins via DX300?
+
+# Gist
+3 controllers
+
+Controller 1:
+
+When button is pressed
+  Send X signal to child #1
+  Sleep 3
+  Send X signal to child #2
+
+Child 1:
+
+When X signal
+  Reset acc
+  3 times
+    DST set to ACC from oracle
+    Sleep
+  Sleep 3
+  Flush to DX300
+
+Child 2:
+
+When X signal
+  Reset acc
+  3 times
+    DST set to ACC from oracle
+    Sleep
+  No sleep (this is second half)
+  Flush to DX300
+
