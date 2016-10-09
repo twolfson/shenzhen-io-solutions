@@ -30,6 +30,9 @@ but going to be too bulky
 
 so swapping to ram and this is an interim state
 
+Controller 1 MC6000
+
+```
 START:
 # Wait for signal
 slx x1
@@ -55,3 +58,35 @@ teq dat -1
 # DEV: Security flaw since it's outside input \o/
 - mov dat x0
 - mov 1 x3
+```
+
+Controller 2 MC6000
+
+# Wait for start signal
+slx x1
+# Flush signal
+mov x1 null
+# Drop bread + sleep
+gen p1 1 0
+# Drop meat + sleep
+mov 100 x2
+slp 1
+# Access cheese RAM
+mov 1 x0
+# If cheese (i.e. not "no cheese"), drop it + sleep
+teq x3 1
+- mov 010 x2
+- slp 1
+- mov 000 x2
+# Drop mustard
+gen p0 1 0
+# Mustard RAM already accessed
+# If extra mustard, drop it + sleep
+teq x3 1
++ gen p0 1 0
+# Drop bread + sleep
+gen p1 1 0
+
+# TODO: Need to reset RAM on complete
+#  (could prob do it via signal back to Controller 1)
+# TODO: Need to drop + hold flag
