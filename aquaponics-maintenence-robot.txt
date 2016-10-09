@@ -38,33 +38,48 @@ teq dat -999
 - dgt 0
 - gen p0 acc 0
 slp 1
-
-# TODO: Use tcp for less lines?
-
-# If we are under position, move forward
-tlt _CURRENT_POSITION /* < */ _TARGET_POSITION
-+ gen P_MOTOR 1 0
-+ add 1
-# If we are over position, move back
-tgt _TARGET_POSITION /* > */ _CURRENT_POSITION
-+ gen P_MOTOR 0 1
-+ sub 1
-
-# Reset motor and sleep
-mov 50 P_MOTOR
-slp 1
 ```
 
-@mov 50 p1
+## MC6000
+```
+# Wait for signal
 slx x0
+
+# Overwrite new position
 mov x0 dat
+
+# While we are off position
 LOOP:
-mov 50 p1
 tcp dat acc
-+ gen p1 1 0
+# If we are under, send a signal to move forward
++ mov 1 x3
++ slp 2
 + add 1
 + jmp LOOP
-- gen p1 0 1
+# If we are over, send a signal to backward forward
+- mov -1 x3
+- slp 2
 - sub 1
 - jmp LOOP
+
+# Notify parent we are done
 mov 100 x0
+```
+
+## MC6000
+```
+# Reset motor
+mov 50 p1
+
+# Wait for signal
+slx x0
+
+# Determine which direction to move
+tcp x0 acc
+  # If we are moving forward, pulse forward for 1 second
++ gen p1 1 0
+  # Otherwise, pulse backward for 1 second
+- gen p1 0 1
+
+# DEV: Motor will be reset by `mov 50 p1`
+```
