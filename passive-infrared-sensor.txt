@@ -23,6 +23,11 @@
 # TODO: We could prob improve efficiency by only using `X_ENABLE` on change
 # TODO: We could prob improve efficiency via `slx` for `X_ENABLE`
 
+# DEV: Comparisons are confusing...
+# The trick is as long as comparison is truthy, we stay in `+` lane
+# and same for falsy and `-`
+# So keep them to ANDs?
+
 # Controller 1
 # DEV: By default, we assume rtc === 69 as per simulation
 # If we are before off time (e.g. rtc=10, off_time=28)
