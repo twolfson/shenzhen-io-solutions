@@ -271,3 +271,43 @@ Next shot
 Ugh, sleep doesn't work as expected...
 
 Thankfully that's not what we wants to do already... o_o
+
+Heh, nope -- too much space for small outer proxies
+
+
+```
+# Get signal
+slx x0
+mov x0 acc
+
+# Determine controller
+mov 2 p1
+tcp acc x3
++ mov 1 p1
+- mov 3 p1
+
+# Resent next 2 packets
+mov acc x0
+mov x0 dat
+mov dat x0
+
+# Sleep for LENGTH
+slp dat
+```
+
+```
+# Get signal
+slx x0
+# If we are on
+teq p0 2
+# Send ID
++ mov x0 x1
+# Save length
++ mov x0 acc
+# TODO: Resend
+LOOP:
+teq p0 2
+# TODO: Decrement
++ mov x0 x1
++ jmp LOOP
+```
