@@ -98,6 +98,3 @@ LOOP:
     + mov 010 X_COIN_OUT # 5x1, 1x0, N/Ax0
     + slp 1
     + jmp LOOP
-
-
-SLEEP:
