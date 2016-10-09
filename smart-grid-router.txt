@@ -226,3 +226,33 @@ teq acc 1
 Nooope, not done yet
 
 We are draining x3 due to new id checks... fuuuuuck...
+
+Subtraction kind of works but we are on same channel for `+50` and `+100`
+  so any constant will be identified as our NULL at some point
+
+```
+mov 100 p0
+slx x1
+mov x1 acc
+sub x0
+mov acc p0
+add x0
+mov acc x3
+mov x1 acc
+mov acc x3
+LOOP:
+teq acc 0
+- mov x1 x3
+- sub 1
+- jmp LOOP
+```
+
+```
+slx x0
+LOOP:
+teq p0 0
+# tgt p0 0
+# tlt p0 0
++ mov x0 x1
++ sub 1
++ jmp LOOP
