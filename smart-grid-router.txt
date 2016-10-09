@@ -222,3 +222,7 @@ teq acc 1
 + mov x0 x1
 + jmp LOOP
 ```
+
+Nooope, not done yet
+
+We are draining x3 due to new id checks... fuuuuuck...
