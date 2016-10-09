@@ -1,0 +1,13 @@
+# Input variables
+# X_RADIO_RX = [R_INTENSITY, G_INTENSITY, B_INTENSITY, DURATION]
+# We will use R_INT, G_INT, B_INT for short
+
+# Output variables
+# P_LED_R
+# P_LED_G
+# P_LED_B
+
+# Gist
+# On acc, count down for pulse duration
+# Leverage DX300 to persist X values (need to verify)
+# When acc hits zero, flush DX300
