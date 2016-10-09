@@ -259,6 +259,7 @@ Maybe use DX300 as external memory
 Using DX300 to conver 100 to 1, neat
 
 Revisited orignal simple approach with DX300 and it's on the cusp \o/
+  heh, we were missing a wire from DX300 to display
 
 Controller 1 (lower)
 
