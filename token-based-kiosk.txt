@@ -51,25 +51,25 @@ SLEEP:
 slp 1
 
 ## Controller 2 (MC4000)
-# Initialize with price as total
-# DEV: We are using subtraction due to `tgt`
-#   not being able to do equality and price is dynamic
-@mov X_PRICE TOTAL
-
 # Remove coins from total
-sub X_IN_COIN
+add X_IN_COIN
 teq P_IN_12 100
-+ sub 12
++ add 12
 
-# If we are <= 0, trigger bell, coin dispenser, and reset counter
-tgt TOTAL 0
-+ mov 100 X_BELL_SIG
-+ mov TOTAL X_COIN_SIG
-+ mov X_PRICE TOTAL
+# If TOTAL >= PRICE, trigger bell, coin dispenser, and reset counter
+# DEV: `! <` = `>=`
+tlt TOTAL X_PRICE
+- mov 100 X_BELL_SIG
+# Detract price so we have remainder before sending signal
+- sub X_PRICE
+- mov TOTAL X_COIN_SIG
 
 ## Controller 3 (MC4000)
 # When we get a bell signal
 slx X_BELL_SIG
+
+# Noop for handling signal
+mov X_BELL_SIG null
 
 # Turn on bell
 mov 100 P_BELL
@@ -89,12 +89,16 @@ mov X_COIN_SIG acc
 
 # Loop and dispense coins
 LOOP:
-    # If we have over 5 due, dispense 5 and loop
-    tlt TOTAL 5
-    + mov 100 X_COIN_OUT # 5x1, 1x0, N/Ax0
+    # If TOTAL >= 5, dispense 5 and loop
+    tgt TOTAL 4 # > 4 === >= 5
+    + mov 100 P_OUT_5
+    + sub 5
     + slp 1
+    + mov 0 P_OUT_5
     + jmp LOOP
-    tlt TOTAL 1
-    + mov 010 X_COIN_OUT # 5x1, 1x0, N/Ax0
+    tgt TOTAL 0 # > 0 === >= 1
+    + mov 100 P_OUT_1
+    + sub 1
     + slp 1
+    + mov 0 P_OUT_1
     + jmp LOOP
