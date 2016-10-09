@@ -1,0 +1,15 @@
+# Input variables
+# P_RANDOM
+
+# Output variables
+# P_SPEAKER
+
+# Gist
+Read from random
+If random is 1
+  then play track 1
+    Read from RAM 1
+    DEV: We could use -1 terminators
+      but going for 12 units is fine too
+If random is 2
+  then play track 2
