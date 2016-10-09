@@ -30,3 +30,18 @@ After visual exploration:
 - 1 MC4000 to convert P_IN_1/5 to X_IN_COIN
 - 1 MC6000 to read P_IN_12, X_IN_COIN + perform logic
 - 1 DX300 to multiplex X signal to outputs
+
+# Code
+## Controller 1 (MC4000)
+# If we have a 1 or 5 coin, send its info to Controller 2
+# DEV: We use `jmp` as we lack if/else and we need to write to `X_IN_COIN` always
+teq P_IN_1 100
++ mov 1 X_IN_COIN
++ jmp SLEEP
+teq P_IN_5 100
++ mov 5 X_IN_COIN
++ jmp SLEEP
+mov 0 X_IN_COIN
+
+SLEEP:
+slp 1
