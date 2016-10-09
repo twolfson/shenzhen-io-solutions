@@ -58,3 +58,33 @@ slp 1
 
 Tried a circuit with same speaker but realized normal is 50
   so that won't work
+
+Broken by if/else logic and not enough lines
+
+# If we have 1 or 2 (i.e. between 0 and 3)
+tgt p0 0
++ tlt p0 3
+# Reset addresses
++ mov 0 x1
++ mov 0 x3
+# Reset decrement counter
++ mov 14 acc
+# Save which track to use
++ mov p0 dat
+# Reset speaker
+mov 50 p1
+# If we have music to play
+tgt acc 0
+# Decrement counter
++ sub 1
+# If we are playing track 1, play it
++ teq dat 1
++ mov x1 p1
+# Otherwise, play track 2
+- mov x2 p1
+slp 1
+
+TODO: Try out 1 controller to reset addresses
+  and another to play back tracks
+
+TODO: Set excess music to 50 if we are using acc/14 technique
