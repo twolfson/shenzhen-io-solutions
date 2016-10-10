@@ -21,3 +21,46 @@ TODO: To accept hotel card, use 2 controllers and an OR gate?
 
 Let's see how we do with no hotel support
   like lines...
+
+Current variant
+
+```
+# Wait for signal
+SLEEP: slx x0
+
+# Reset RAM position to 0 (good for read and write)
+mov 0 x3
+
+# Reset comparator to 1
+# TODO: Should be 100 and sub 100...
+mov 1 acc
+
+# Save LEARN vs VALIDATE status for looping
+mov p0 dat
+LOOP:
+
+# If we are at the end of memory, go to start
+teq x3 10
++ jmp SLEEP
+
+# If we are LEARNing, write packet to RAM and LOOP
+teq dat 100
++ mov x0 x2
++ jmp LOOP
+
+# Otherwise, we are validating
+
+# If the value is different, invalidate ourselves
+# TODO: This should be sub 100
+teq x0 x2
+- sub 1
+
+# If we are at the end of key
++ teq x3 10
+TODO: Need to pulse unlock with ACC
+  But -999 to 0 will be 0 and 100 will be 100 for UNLOCK :+1:
+
+# Go to loop check
+jmp LOOP
+```
+
