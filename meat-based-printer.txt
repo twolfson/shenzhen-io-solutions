@@ -1,0 +1,34 @@
+# Input variables
+# X_KEYPAD
+
+# Output variables
+# P_EXTRUDE
+# P_VALVE_0
+# P_VALVE_1
+# P_VALVE_2
+
+# Overview
+On keypress
+If track 1
+  Turn on extrude
+  Turn on/off valves for pattern + sleep
+  Turn off extrude
+  Turn off valves
+Same for other tracks
+
+# First thoughts
+Save valve-0 + valve-1 in READ only RAM (e.g. [valve-0[0], valve-1[0], valve-0[1], valve-1[1], ...)
+  Then use mirroring for type 1 and type 2
+  TODO: We would need to write valve-0 track to register, is that okay?
+
+Hmm, what if we store all the data? How big would that be?
+
+Maybe jump to different addresses at start?
+  14 / 3
+  4.667
+  so 4 parts per meat per RAM
+  There are 7 * 3 meat parts = 21
+  21 / 4 = 5.25 -> 6
+  which means read only RAM
+  I don't think we could get enough pins to that if we wanted.
+  Get clever.
