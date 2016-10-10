@@ -427,3 +427,80 @@ mov x1 acc
 teq acc 100
 + mov dat x3
 ```
+
+-------
+
+Simplified again. There is prob a smart and passive way to do this but I'm feel this is good enough
+
+- Offset weight calc, MC6000
+- Enable/disable, MC4000
+- DX300
+- Display output, MC4000
+
+Offset weight calc, same as above
+
+```
+# Output last offset weight (we only need to verify it's 0)
+mov acc x1
+
+# If button is pressed
+teq p0 100
+  # Calculate new weight offset
++ mov 0 acc
++ sub p1
++ mov acc dat
+
+# Calculate weight + offset
+# DEV: We calculate this every second, even if off
+#   This is tricky as enable/disable relies on offset itself
+#   There's prob something smarter to do here...
+mov dat acc
+add p1
+
+# Send out weight + offset to display cibtrikker
+mov acc x3
+
+# Wait for next second
+slp 1
+```
+
+Enable/disable
+
+```
+# If last offset weight was 0
+teq x0 0
+  # and true weight is 0 (tare on 0)
++ teq p1 0
+  # and button was pressed
++ teq p0 100
+  # Toggle our state (0 <-> 100)
+  # DEV: We leverage 100's place via DX300
+  #   so display controller must read from 100's port
++ not
+  # Output state to DX300
++ mov acc x1
+slp 1
+```
+
+Display
+
+```
+# Wait for offset weight computation
+slx x0
+
+# If we are disabled (100's place on DX300)
+#  but were enabled
+#  Shut off display
+teq p0 0
++ teq acc 100
++ mov -999 x1
+
+# If we are now enabled, send latest weight
+teq p0 100
++ mov x0 x1
+# Otherwise, flush buffer
+- mov x0 null
+
+# Save current weight
+mov p0 acc
+```
