@@ -5,9 +5,8 @@
 # Output variables
 # X_DISPLAY
 
-# Overview
-Init: Internal X_DISPLAY=-999
-
+# First iteration
+## Overview
 If button press
   AND if OFFSET === 0
   Set X_DISPLAY = -999
@@ -21,3 +20,26 @@ If button press
 Set ACC to OFFSET
 Add weight
 Update display
+
+## Code
+Content is more/less what's above but it's wrong...
+  so that's changing...
+
+```
+teq p0 100
++ teq dat 0
++ mov -999 x3
++ jmp SLEEP
+teq p0 100
++ mov 0 acc
++ sub p1
++ mov acc dat
+mov dat acc
+add p1
+mov p1 x3
+SLEEP: slp 1
+```
+
+TODO: Need to keep display off when -999
+TODO: Not properly handling reset =/
+  Thinking we need 2 controllers: 1 for on/off, 1 for weight calc
