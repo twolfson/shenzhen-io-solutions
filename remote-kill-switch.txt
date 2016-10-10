@@ -78,3 +78,67 @@ tgt dat -1
 # Send out new config
 mov acc x3
 ```
+
+--------
+
+First working version:
+
+- 1 MC6000, heartbeat counter + data proxy
+- 1 MC6000, keeps track of on/off + resets them
+1 DX300
+
+
+```
+# Read packet
+mov x0 dat
+
+# Increment counter
+add 1
+
+# If no info and over countdown, send reset signal
+teq dat -999
++ teq acc 5
++ mov -1 x1
+
+# If no info, continue
+teq dat -999
++ jmp SLEEP
+
+# Reset counter (not dead signal)
+mov 0 acc
+
+# If no actions, continue
+tlt dat 0
++ jmp SLEEP
+
+# Forward action + motor signals
+mov dat x1
+mov x0 x1
+# Sleep
+SLEEP: slp 1
+```
+
+Second controller same as first iteration
+
+```
+# When we get a packet
+slx x0
+
+# Save ID
+mov x0 dat
+
+# If ID isn't a special code
+tgt dat -1
+  # Set on/off to its corresponding digit
++ dst x0 dat
+  # Otherwise, reset power
+- mov 000 acc
+
+# Send out new config
+mov acc x3
+```
+
+TODO: Can we consolidate `teq dat -999` JMP SLEEP and `tlt dat 0` `jmp SLEEP`?
+
+TODO: Move to 2xP instead of 1xX for second controller
+  Increases power but should be able to ditch `dat`
