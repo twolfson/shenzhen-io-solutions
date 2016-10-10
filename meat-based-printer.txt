@@ -71,3 +71,100 @@ Sleep 1
 Same as controller 2 but for middle track only
   so not ACC necessary
   and need to turn on extrude flag
+
+-------
+
+Looks like we need to use DX300
+  and only have room for 1 MC6000
+  Let's see what happens
+
+TODO: Can we switch from `p0` to `x1` for first controller
+  Then move to MC4000X
+
+Got close with P signal but not enough NOP room
+
+Time for X signal
+
+X signal won't work as we need a decrement counter
+
+Got it working after lots of wiggling \o/
+
+Solution:
+
+- Signal sender + countdown (MC6000)
+- RAM reader (MC6000)
+- 2 read only RAM
+- 1 DX300
+
+Code:
+
+Signal sender + countdown
+
+```
+# Wait for keypad
+slx x0
+
+# Save meat type
+mov x0 dat
+
+# ACC acting as RAM index temporarily
+
+# If it's the second type, offset RAM to 7
+# DEV: ACC will be 0 due to countdown loop
+teq dat 2
++ add 7
+
+# Offset our RAM
+mov acc x3
+mov acc x2
+
+# Start our countdown
+mov 7 acc
+
+LOOP:
+# If we aren't done looping
+tgt acc 0
+  # Trigger another printning
++ mov dat x1
+  # Decrement
++ sub 1
+  # Wait (as required)
++ slp 1
+  # Loop
++ jmp LOOP
+
+# Otherwise, signal end event
+mov 0 x1
+```
+
+RAM reader
+
+```
+# Wait for signal
+SLEEP: slx x2
+
+# Save data for comparison
+mov x2 dat
+
+# If we are done, turn off extrude and shut off valves
+teq dat 0
++ mov 0 p1
++ mov 000 x3
++ jmp SLEEP
+
+# Turn on extrude
+mov 100 p1
+
+# If we are printing bacon
+teq dat 3
+  # Print its pattern directly
++ mov 011 x3
+  # Otherwise, read top track into memory
+- mov x1 dat
+  # Configure top, middle, and bottom (mirror of top for types 1/2)
+- dst 0 dat
+- dst 1 x0
+- dst 2 dat
+  # Export configuration to DX300 (valves)
+- mov acc x3
+```
