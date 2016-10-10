@@ -150,3 +150,43 @@ slp 1
 ```
 
 TODO: Simplified 2 where we use different a1/d1 entirely
+
+----
+
+Simplified v2
+
+Uses both sides of RAM to remove unnecessary backup/restore of position
+
+```
+# Write out sensor to RAM
+mov p0 x2
+
+# If we are over 8 sample edge, reset to 0
+teq x3 8
++ mov 0 x3
+
+# Reset RAM to position 0
+mov 0 x1
+
+# Move counter to 400
+mov 400 acc
+
+LOOP:
+# Subtract from 400 (i.e. get below 0 will close window
+sub x0
+
+# If we are still gathering, loop
+tlt x1 8
++ jmp LOOP
+
+# Convert `-X` to `-999`, `0` to `0`, and `+X` to `+999`
+mul 999
+
+# Write result to window
+#   This is average is over 400 or not
+#   DEV: Since pin is simple, it's normalized to 0 and 100
+mov acc p1
+
+# Sleep
+slp 1
+```
