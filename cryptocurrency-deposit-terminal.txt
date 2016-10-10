@@ -189,3 +189,102 @@ tgt acc 0
 # TODO: Dump money
 # TODO: Use pulsing to indicate reset on cash
 ```
+
+
+Added count and dump but we have no X pin to read from...
+  Either: Move data signaling from X to P (e.g. pulse it)
+  Or have cash intake write directly to RAM
+
+RAM we don't have enough space I think
+Can't move to P as we need >= 100 support for numbers
+  Also timing is effed due to looong loop
+
+-------
+
+Got it working \o/
+
+- RAM writer (MC6000)
+- Cash counter (MC6000) + DX300
+- RAM reader (MC6000)
+
+```
+# Save incoming packet
+mov x1 dat
+
+# If the packet is -1, kick off reading from RAM
+# DEV: This comes first to make sure we write to cash P pin in time
+teq dat -1
++ mov 0 x3
+
+# If the packet is a NOOP, CONTINUE
+# TODO: We can remove these lines as LOOP does nothing
+  since `acc = 0`
+teq dat -999
++ jmp SLEEP
+
+# If the packet wasn't -1, then dump it to RAM and start looping
+tgt dat -1
++ mov dat x2
++ mov 7 acc
+
+LOOP:
+
+# Write out remaining packet parts
+tgt acc 0
++ mov x1 x2
++ sub 1
++ jmp LOOP
+SLEEP: slp 1
+```
+
+```
+# Delay for P pin to change
+nop
+nop
+
+# Convert/add cash 20 and 50
+teq x0 010
++ add 20
+teq x0 100
++ add 50
+# Add cash 100 directly (saves 1 line \o/)
+add p0
+
+# If we are supposed to dump, then dump and reset
+teq p1 100
++ mov acc x3
++ mov 0 acc
+slp 1
+```
+
+```
+# When we get signal to read from RAM
+slx x2
+
+# Write to cash P pin ASAP
+# DEV: We ask cash reader to output it's ACC on an X channel
+#   It doesn't read from X due to it blocking
+#   We have no other X pins to use something like a DX300 so we are effed
+mov 100 p1
+
+# Reset RAM address
+# DEV: This also flushes x2 which is :+1:
+mov x2 x1
+
+# Flush 8 card digits
+mov 8 acc
+LOOP:
+tgt acc 0
++ mov x1 x3
++ sub 1
++ jmp LOOP
+
+# Dump money (uses shared wired from start signal)
+mov x2 x3
+
+# Reset P dump pin
+mov 0 p1
+
+# Reset RAM position for next customer
+mov 0 x1
+```
