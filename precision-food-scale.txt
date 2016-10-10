@@ -122,3 +122,73 @@ Maybe X is good...
 Controller 1, enable/disable
 Controller 2, always calculate offset weight
 Controller 3, if enable -> render offset weight
+
+Here's our iteration on that, super close to working solution \o/
+
+```
+# If offset weight is 0 and button was pressed
+# DEV: This waits for weight compute to finish
+# DEV: Also make this first so we always drain it
+#   and don't lag `p0` set too much
+teq x1 0
++ teq p0 100
+  # Turn on/off
++ not
+
+# Export on/off status to pin
+mov acc p1
+
+# Wait for next second
+slp 1
+```
+
+```
+# If button is pressed
+teq p0 100
+  # Calculate new weight offset
++ mov 0 acc
++ sub p1
++ mov acc dat
+
+# Calculate weight + offset
+# DEV: We calculate this every second, even if off
+#   This is tricky as enable/disable relies on offset itself
+#   There's prob something smarter to do here...
+mov dat acc
+add p1
+
+# Send out weight + offset to controllers
+mov acc x3
+mov acc x3
+
+# Wait for next second
+slp 1
+```
+
+```
+# Wait for signal
+SLEEP: slx x0
+
+# Save offset weight
+mov x0 dat
+
+# If we were previously on but are now off, send shut down info
+teq p0 0
++ teq acc 100
++ jmp SHUTOFF
+
+# If we are on, render data and save on state
+teq p0 100
++ mov dat x3
+# TODO: Maybe move acc saving to head?
++ mov 100 acc
+
+# Skip shut down
+jmp SLEEP
+
+# Perform shut down (i.e.
+# TODO: Can we relocate this label somehow...?
+SHUTOFF:
+mov 0 acc
+mov -999 x3
+```
