@@ -37,3 +37,75 @@ Next iteration
 - Writes data as with above
 - Checks id from radio, if good -- send type to reader, proxy data from reader
 - Same for reader logic as before
+
+TODO: We were worried we could hit 13 and loop but no, we always reset to 0 after write and before sleep \o/
+
+Looks good:
+
+Writer (MC4000)
+
+```
+# Save sensor data to RAM
+mov p1 x1
+mov p0 x1
+
+# If aren't under 12, then jump to 0 index
+tlt x0 12
+- mov 0 x0
+
+# Sleep
+slp 1
+```
+
+Radio
+
+```
+# If ID is good (i.e. -999 !== ID, BAD_ID !== ID)
+teq x3 x0
+  # Send sensor data request
++ mov x0 x2
+  # Proxy data back to transmitter
+  # DEV: Hooray for unwrapped loops \o/
++ mov x2 x1
++ mov x2 x1
++ mov x2 x1
++ mov x2 x1
++ mov x2 x1
++ mov x2 x1
+
+# Sleep
+slp 1
+```
+
+Reader
+
+```
+# Wait for signal
+slx x3
+
+# Load sensor variant (1 or 2)
+mov x3 acc
+
+# Correct to usable offset (1 -> 0, 2 -> 1)
+sub 1
+
+# Save offset for wrapping
+mov acc dat
+
+# Jump to offset of current write
+add x0
+mov acc x2
+
+LOOP:
+# Read current inputs
+mov x1 x3
+mov x1 null
+
+# If we are over edge, then wrap
+tlt x2 12
+- mov dat x2
+
+# If we didn't loop all data, then loop
+teq x2 acc
+- jmp LOOP
+```
