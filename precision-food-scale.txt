@@ -535,7 +535,7 @@ Weight circuit
   tare
   jmp HEAD
 
-Display
+Display (move to MC4000X for this)
   Wait for signal
   If signal === SHUTDOWN
   Else
