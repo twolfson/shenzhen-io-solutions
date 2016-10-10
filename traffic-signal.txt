@@ -17,7 +17,7 @@ Show light 3
 If emergency is enabled, cancel all others
 
 # First iteration
-## Code
+## Gist
 Turn on P_LIGHT_0
 Sleep X_PHASE_0
 Turn on P_LIGHT_1
@@ -38,3 +38,20 @@ Then READ from RAM and loop
 Still no simple solution for 3rd P pin
 
 Oh, right DX300
+
+## Code
+- 1 MC4000X
+- 1 inverter
+- 1 DX300
+- 3 AND gates
+
+```
+mov 100 x3
+slp x0
+mov 010 x3
+slp x1
+mov 001 x3
+slp x2
+```
+
+Unfortunately it doesn't work due to sequence restarting =(
