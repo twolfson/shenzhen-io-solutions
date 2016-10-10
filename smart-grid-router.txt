@@ -539,3 +539,5 @@ teq p0 2
 teq p0 3
 + mov x1 x2
 ```
+
+Want to explore `acc + sub 1` idea but we don't have enough X pins on the outer proxy to handle this =/
