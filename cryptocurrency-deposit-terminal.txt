@@ -174,7 +174,7 @@ Dumper
 # When we get signal to read from RAM
 slx x2
 
-# Reset RAM
+# Reset RAM address
 # DEV: This also flushes x2 which is :+1:
 mov x2 x0
 
