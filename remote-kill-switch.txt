@@ -138,7 +138,60 @@ tgt dat -1
 mov acc x3
 ```
 
+-------
+
 TODO: Can we consolidate `teq dat -999` JMP SLEEP and `tlt dat 0` `jmp SLEEP`?
+  Yep, did it in 1 less line \o/
 
 TODO: Move to 2xP instead of 1xX for second controller
   Increases power but should be able to ditch `dat`
+
+  Didn't quite work as expected due to timing issues
+  but we got an 1xX, 1xP alternative :+1:
+
+MC6000
+
+```
+# Wait for signal
+mov x0 dat
+
+# Increment counter
+add 1
+
+# If not dead packet, reset counter
+teq dat -999
+- mov 0 acc
+
+# If dead packet and over counter, send reset signal
+teq dat -999
++ teq acc 5
++ mov -1 x1
+
+# If no actions (i.e. dead packet || heartbeat), continue
+tlt dat 0
++ jmp SLEEP
+
+# Set motor number
+# DEV: We like doing this before X signals but not necessary
+mov x0 p1
+
+# Double send motor action (avoids extra `dat` register)
+mov dat x1
+mov dat x1
+SLEEP: slp 1
+```
+
+MC4000
+
+```
+# Wait for signal
+slx x0
+# If signal is not to reset
+tgt x0 -1
+  # Then set motor on/off (p1 = on/off bool, x0 = id [double sent])
++ dst p1 x0
+  # Otherwise (it is signal to reset), reset
+- mov 000 acc
+# Export our update
+mov acc x1
+```
