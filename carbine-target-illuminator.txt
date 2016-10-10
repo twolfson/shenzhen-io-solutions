@@ -10,8 +10,70 @@
 # Overview
 Similar to last one (remote kill switch) but no timeout
 
-If RADAR_OUT, set OUT flag
-If OUT flag, count up
-If RADAR_IN, unset OUT flag
+If RADAR_OUT, reset counter
+Increment counter
+If RADAR_IN, send counter
 
-TODO: Can prob ditch flag and use counter + reset
+On counter update
+Reset all
+If counter <= 2
+  Turn on flood 60
+  Continue
+If counter > 2 AND counter <= 4
+  Turn on flood 20
+  Turn on laser 50
+  Continue
+Turn on laser 100
+
+# Code
+Works on first iteration (with a couple one-offs)
+
+1 MC4000, counter + sender
+1 MC6000, light toggler
+
+```
+# When radar out is sent, reset our counter (-1 to account for add 1)
+teq p1 100
++ mov -1 acc
+
+# Increment our counter
+add 1
+
+# When radar in is received, send our count
+# DEV: Sent 3 times to save lines of code
+teq p0 100
++ mov acc x1
++ mov acc x1
++ mov acc x1
+
+# Sleep
+slp 1
+```
+
+```
+# Wait for signal
+SLEEP: slx x0
+
+# Reset lights
+mov 0 p1
+mov 000 x3
+
+# If we are 1-2 units, turn on flood 60 and continue
+tlt x0 3
++ mov 001 x3
++ jmp SLEEP
+# If we are 3-4 units (i.e. > 2 and < 5)
+#   turn on flood 20 + 50% laser and continue
+tgt x0 2
++ tlt x0 5
++ mov 50 p1
++ mov 100 x3
++ jmp SLEEP
+# Otherwise (5-6 units), turn on 100% laser
+mov 100 p1
+```
+
+# DEV: We could save power in controller by moving around `mov 0 p1`
+    but then we lose lines due to duplicate lines
+# DEV: We could save power by not triple sending count
+    but then we lose lines storing + recalling value
