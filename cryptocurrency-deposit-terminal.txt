@@ -37,7 +37,52 @@ TODO: Need to see if we have enough lines for these 2 loops (prob not)
   - And cash reader
 
 Read cash in via DX300
-Flush cash via X pin
-  - On X SIGNAL
-  - Write ACC to X
-  - Write 0 to ACC
+DEV: We can't use X pin due to reading value every second
+If P SIGNAL is 1
+- Write ACC to P
+- Write 0 to ACC
+
+## Code
+Completed count and dump which is 2 controllers to count and dump...
+
+```
+# Save incoming packet
+mov x0 dat
+
+# If packet is to flush
+# DEV: We run this first to make sure we beat add instructions
+teq dat -1
+  # Turn on flag for accumulator to dump
+  # DEV: We can use `gen p0 0 0` but need really good timing
++ mov 100 p0
+  # Collect from accumulator (blocks us until it's written)
+  # DEV: We can also use good timing here too
+  # TODO: This should write to RAM for simpler final flush
++ mov x2 dat
+  # Reset flag to avoid halts
++ mov 0 p0
++ jmp SLEEP
+
+# If packet is useless, continue
+teq dat -999
++ jmp SLEEP
+SLEEP: slp 1
+```
+
+TODO: We should be able to avoid SLEEP jmps via `tgt -1`
+
+```
+# Convert/add cash 20 and 50
+teq x0 010
++ add 20
+teq x0 100
++ add 50
+# Add cash 100 directly (saves 1 line \o/)
+add p0
+
+# If we are supposed to dump, then dump and reset
+teq p1 100
++ mov acc x1
++ mov 0 acc
+slp 1
+```
