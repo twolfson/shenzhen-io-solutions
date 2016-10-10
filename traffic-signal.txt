@@ -46,11 +46,17 @@ Oh, right DX300
 - 3 AND gates
 
 ```
+# Turn on LIGHT_0
 mov 100 x3
+# Sleep for PHASE_0
 slp x0
+# Turn on LIGHT_1
 mov 010 x3
+# Sleep for PHASE_1
 slp x1
+# Turn on LIGHT_2
 mov 001 x3
+# Sleep for PHASE_2
 slp x2
 ```
 
