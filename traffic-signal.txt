@@ -79,3 +79,88 @@ If looping over last phase
   Jump SLEEP
 
 ... How do I know which phase comes next =_=
+
+```
+teq p0 100
++ mov x0 acc
++ mov 0 dat
++ jmp SLEEP
+tgt acc 0
++ sub 1
++ jmp SLEEP
+mov dat acc
+add 1
+mov acc dat
+SLEEP: slp 1
+```
+
+# Third iteration
+
+Write values to RAM on start
+Cycle those as phase
+
+It works \o/
+
+Items:
+
+- RAM backfiller (MC4000X)
+- RAM
+- RAM looper (MC6000)
+- DX300
+
+Code:
+
+RAM backfiller
+
+```
+# Backfill phase values and values to use in DX300
+# This is PHASE_0 length
+mov x0 x3
+# This is DX300 for PHASE_0
+mov 100 x3
+# This is PHASE_1 length
+mov x1 x3
+# This is DX300 for PHASE_1
+mov 010 x3
+# etc
+mov x2 x3
+mov 001 x3
+# Sleep forever
+# DEV: We technically should loop here but this is a toy env
+slp 999
+```
+
+RAM looper
+
+```
+# If we are in emergency
+teq p0 100
+  # Reset counter so it loops on end
++ mov 0 acc
+  # Turn off all lights
++ mov 000 x0
+  # Move to end of RAM memory
++ mov 6 x3
+  # Don't go through loop logic
++ jmp SLEEP
+
+# Decrement our count
+sub 1
+
+# If we haven't hit zero, loop again
+tgt acc 0
++ jmp SLEEP
+
+# If we are at the end of memory, jump to the start
+teq x3 6
++ mov 0 x3
+
+# Read in phase length
+mov x2 acc
+
+# Output new light settings
+mov x2 x0
+
+# Sleep
+SLEEP: slp 1
+```
