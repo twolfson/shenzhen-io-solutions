@@ -1,0 +1,23 @@
+# Input variables
+# X_CARD_READER
+# P_LEARN
+
+# Output variables
+# P_UNLOCK
+
+# First iteration
+## Concept
+Save card info to RAM
+
+On card reader
+If LEARN === 100
+  Write card reader to RAM
+  (use RAM address as counter for 8 digits)
+Else
+  Verify card reader matches RAM
+
+TODO: To accept hotel card, use 2 controllers and an OR gate?
+  We will need to duplicate card reader info
+
+Let's see how we do with no hotel support
+  like lines...
