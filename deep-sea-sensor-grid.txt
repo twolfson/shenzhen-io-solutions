@@ -27,3 +27,13 @@ Other controller checks ID
   # Read every 2nd
   Export RAM info to TX
   Export RAM info to NULL
+
+Not enough pins for that... (need 2 + 1 for RAM, 1 for ID, 2 for radio)
+
+Next iteration
+
+3 controllers:
+
+- Writes data as with above
+- Checks id from radio, if good -- send type to reader, proxy data from reader
+- Same for reader logic as before
