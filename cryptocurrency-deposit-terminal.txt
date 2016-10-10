@@ -31,7 +31,10 @@ MOV ACC 7
 JMP INPUT_LOOP
 
 TODO: Need to see if we have enough lines for these 2 loops (prob not)
-
+  If not, 3 controllers:
+  - 1 to write card id to RAM + send -1 to next controller
+  - 1 to read from RAM and flush cash via X pin
+  - And cash reader
 
 Read cash in via DX300
 Flush cash via X pin
