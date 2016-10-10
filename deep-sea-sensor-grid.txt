@@ -1,0 +1,29 @@
+# Input variables
+# P_SONAR
+# P_MAGNETIC
+# X_RADIO_RX (non-blocking, ugh)
+
+# Output variables
+# X_RADIO_TX
+
+# First iteration
+## Gist
+2 controllers
+
+Use RAM
+
+1 controller to writes data like [sonar_0, magnetic_0, sonar_1, magnetic_1, ...]
+  it also cycles at 13th index so when we read, it's always oldest to most recent
+
+Both controllers should either with same address pin
+  or read a0 to a1 at loop start on read
+
+Other controller checks ID
+  If ID bad, sleep
+  Load a0 into ACC
+  If reading magnetic
+    Add 1
+  Set ACC to a1
+  # Read every 2nd
+  Export RAM info to TX
+  Export RAM info to NULL
