@@ -523,6 +523,19 @@ teq p0 0
 TODO: What if we use `acc + sub 1` instead of `slx x1` in outer?
   Then we could remove `mov -1 x1` from routing info
   And possible relocate content into main controller
+
 TODO: Remove label, jmp, by only using `teq p0` with `slx x1` at end or remove it altogether??
 
-TODO: Can we use `slx` technique with `slx x0` on original??
+We were able to remove `teq p0 0` altogether \o/
+
+```
+# Wait for incoming signal (this might be more info in a packet)
+slx x1
+# Send to matching output based on routing calc
+teq p0 1
++ mov x1 x0
+teq p0 2
++ mov x1 x3
+teq p0 3
++ mov x1 x2
+```
