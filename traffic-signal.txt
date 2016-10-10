@@ -61,3 +61,21 @@ slp x2
 ```
 
 Unfortunately it doesn't work due to sequence restarting =(
+
+# Second iteration
+
+Phase change observer
+Phase change lighter
+
+Observer:
+
+If emergency
+  Reset counter to phase 0
+  Send -1 to lighter (or use AND gates to neutralize)
+  TODO: Add 1 for later decrement? or use jump SLEEP
+# DEV: This will run in emergency
+If looping over last phase
+  Decrement
+  Jump SLEEP
+
+... How do I know which phase comes next =_=
