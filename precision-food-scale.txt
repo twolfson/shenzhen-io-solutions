@@ -504,3 +504,40 @@ teq p0 100
 # Save current weight
 mov p0 acc
 ```
+
+TODO: Probably something like...
+
+Button watcher:
+  If button pushed:
+    If enabled:
+      If offset weight on P is 0
+        and true weight is 0:
+        Send shutdown to display? (or some other way to execute)
+      Else:
+        Send tare request
+        CONTINUE TO RENDER
+    Else:
+      Disable
+      CONTINUE TO SLEEP
+
+  RENDER:
+  If enabled:
+    Send weight recalc request
+    Send render request display
+
+Weight circuit
+  X: 0 to recalc and 1 to tare
+  P: Outputs value
+  Wait for signal
+  If signal === recalc
+    recalc
+    jmp HEAD
+  tare
+  jmp HEAD
+
+Display
+  Wait for signal
+  If signal === SHUTDOWN
+  Else
+    Read from P offset weight
+    Render P offset weight
