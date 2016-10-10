@@ -12,8 +12,68 @@ If data packet[0] === -999 || data packet[0] === -1 (use < 0)
   Increment counter
   If data packet[0] < 0 AND counter === 5
     Reset all power out
+    Continue
 
+Reset counter
 If data packet[0] === 0
   Turn motor $(data packet[1]) off
 If data packet[0] === 1
   Turn motor $(data packet[1]) on
+
+# Gist
+Use DX300 to set P values elegantly
+
+# First iteration
+
+TODO: Need to understand that `-1` is a reset packet
+
+2 MC6000 (dev for now, could be smaller)
+1 DX300
+
+```
+# Read current packet
+mov x0 dat
+
+# If data packet[0] === -999 || data packet[0] === -1 (use < 0)
+tlt dat 0
+  # Increment timeout
++ add 1
+tlt dat 0
+
+# If data packet[0] < 0 and timed out
+  # Send reset power signal
++ teq acc 6
++ mov -1 x1
+
+# If data packet[0] < 0, continue
+tlt dat 0
++ jmp SLEEP
+
+# Reset counter
+mov 0 acc
+
+# Proxy motor id + on/off
+mov dat x1
+mov x0 x1
+
+# Sleep
+SLEEP: slp 1
+```
+
+```
+# When we get a packet
+slx x0
+
+# Save ID
+mov x0 dat
+
+# If ID isn't a special code
+tgt dat -1
+  # Set on/off to its corresponding digit
++ dst x0 dat
+  # Otherwise, reset power
+- mov 000 acc
+
+# Send out new config
+mov acc x3
+```
