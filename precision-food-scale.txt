@@ -216,3 +216,125 @@ teq p0 100
 # Save last enabled state
 mov p0 acc
 ```
+
+---------
+
+
+Trying to fix save last enabled state in enable/disable (not working because need more registers)
+
+mov x3 dat
+teq p0 100
+- jmp NEXT
+teq dat 0
+- jmp NEXT
+teq acc 0
++ mov 100 acc
++ mov 100 p1
+
+NEXT:
+slp 1
+
+TODO: what if we tell enable/disable if weight is same...
+
+----------
+
+Okay, this works but is convoluted as fuck. Should prob use RAM or something...
+
+4 controllers:
+
+- Offset weight calc, MC6000
+- Offset weight same detector, MC6000 (prob can use MC4000X)
+- Enable/disable toggle, MC6000 (prob can use MC4000)
+- Display output combinator
+
+Code:
+
+Offset weight calc
+
+```
+# If button is pressed
+teq p0 100
+  # Calculate new weight offset
++ mov 0 acc
++ sub p1
++ mov acc dat
+
+# Calculate weight + offset
+# DEV: We calculate this every second, even if off
+#   This is tricky as enable/disable relies on offset itself
+#   There's prob something smarter to do here...
+mov dat acc
+add p1
+
+# Send out weight + offset to controllers
+mov acc x3
+mov acc x3
+
+# Wait for next second
+slp 1
+```
+
+Offset weight same detector
+
+```
+# Read latest offset weight
+mov x1 dat
+
+# If weight is same as before
+teq acc dat
+  # Send NO CHANGE signal to enable/disable
++ mov 0 x2
+  # Send CHANGE signal to enable/disable
+- mov 1 x2
+
+# Save offset weight for next iteration
+mov dat acc
+slp 1
+```
+
+Enable/disable
+
+```
+# If the offset weight is the same
+# DEV: We must run this every time to flush it
+teq x2 0
+  # and button is pressed
++ teq p0 100
+  # toggle state
++ not
+# Output state 2x to prevent extra register usage
+mov acc x3
+mov acc x3
+
+NEXT:
+slp 1
+```
+
+Display combinator
+
+```
+# Wait for offset weight computation
+slx x0
+
+# Save latest weight to `dat`
+# DEV: We have this here to guarantee it flushes
+mov x0 dat
+
+# If we are disabled
+#  but were enabled
+#  Shut off display
+teq x1 0
++ teq acc 100
++ mov -999 x3
+
+# Save new state
+mov x1 acc
+
+# If we are now enabled, send latest weight
+teq acc 100
++ mov dat x3
+```
+
+TODO: Can prob move to P over X for something?
+  Not sure of the benefit though...
+  We need architecture change
