@@ -43,3 +43,50 @@ SLEEP: slp 1
 TODO: Need to keep display off when -999
 TODO: Not properly handling reset =/
   Thinking we need 2 controllers: 1 for on/off, 1 for weight calc
+
+# Second iteration
+## Overview
+
+Controller 1
+
+If NOT button press
+  JMP RENDER
+
+If NOT ENABLED
+  ENABLED = 1
+  JMP RENDER
+
+# Otherwise this is tare/off (i.e. button press + enabled)
+
+# TODO: Finish me...
+Send 1 to X (tare update)
+  TODO: Write out subcontroller (should
+Get offset weight via X?
+
+# In case of OFF, skip to SLEEP
+
+RENDER:
+If ENABLED
+  # TODO: Send offset weight to X_DSIPLAY
+  In dev, sending weight to X_DSIPLAY
+
+SLEEP: slp 1
+
+
+```
+# Basic on/off functionality
+# TODO: Don't get fooled by `p1` === `0`. It must be offset weight, not weight
+teq p0 100
+- jmp RENDER
+teq dat 0
++ mov 1 dat
++ jmp RENDER
+
+RENDER:
+teq dat 1
++ mov p1 x3
+
+SLEEP: slp 1
+```
+
+TODO: Prob can always calculate weight and let `button` read from it always
