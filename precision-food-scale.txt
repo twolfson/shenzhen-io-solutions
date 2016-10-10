@@ -1,0 +1,23 @@
+# Input variables
+# P_WEIGHT
+# P_BUTTON
+
+# Output variables
+# X_DISPLAY
+
+# Overview
+Init: Internal X_DISPLAY=-999
+
+If button press
+  AND if OFFSET === 0
+  Set X_DISPLAY = -999
+  # Skips potential logic issues
+  # TODO: Could we set OFFSET = -999?
+  Continue
+
+If button press
+  OFFSET = weight
+
+Set ACC to OFFSET
+Add weight
+Update display
