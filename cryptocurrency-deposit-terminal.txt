@@ -1,0 +1,18 @@
+# Input variables
+# X_CARD_READER (non-blocking, i.e. -999)
+# P_CASH_20
+# P_CASH_50
+# P_CASH_100
+
+# Output variables
+# X_NETWORK
+
+# Overview
+Buffer card to RAM
+Total cash in ACC
+On `-1` from card reader
+  Flush card from RAM to X_NETWORK
+  Flush cash (ACC) to X_NETWORK
+
+# First iteration
+## Gist
