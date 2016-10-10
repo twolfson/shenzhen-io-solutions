@@ -86,3 +86,49 @@ teq p1 100
 + mov 0 acc
 slp 1
 ```
+
+LOOP: mov x0 x3
+tgt acc 0
++ sub 1
++ jmp LOOP
+
+----
+
+Trying alternative where we use RAM index as counter
+
+card reader to RAM dump:
+
+```
+# Save our value
+mov x1 dat
+
+# If it's a useless packet, skip it
+# TODO: We could use LOOP for `jmp` too but this is more clear
+teq dat -999
++ jmp SLEEP
+
+# Save our stored value
+mov dat x2
+
+# If this is our card number, proxy 7 more times
+tgt dat -1
++ mov 7 acc
+LOOP:
+
+# If we have values to proxy
+tgt acc 0
+  # Proxy value
++ mov x1 x2
+  # Loop it
++ sub 1
++ jmp LOOP
+
+# Sleep
+SLEEP: slp 1
+```
+
+Usage outside of this:
+
+Inspect `a0` until we hit 9th index (i.e. `-1`)
+Then flush card info from RAM
+Then flush cash info from second controller
