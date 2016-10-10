@@ -341,8 +341,6 @@ TODO: Can prob move to P over X for something?
 
 -------
 
-RAM concept...
-
 If last true weight === 0
   AND button === 100
   DISABLE/TOGGLE?
@@ -354,3 +352,78 @@ If tare occurred === 0
   AND last true weight === 0
   AND button === 0
   DISABLE/TOGGLE?
+
+Removed 1 controller \o/
+
+Code:
+
+Offset weight calc
+
+```
+# Output last offset weight (we only need to verify it's 0)
+mov acc x1
+
+# If button is pressed
+teq p0 100
+  # Calculate new weight offset
++ mov 0 acc
++ sub p1
++ mov acc dat
+
+# Calculate weight + offset
+# DEV: We calculate this every second, even if off
+#   This is tricky as enable/disable relies on offset itself
+#   There's prob something smarter to do here...
+mov dat acc
+add p1
+
+# Send out weight + offset to display cibtrikker
+mov acc x3
+
+# Wait for next second
+slp 1
+```
+
+Enable/disable
+
+```
+# If last offset weight was 0
+teq x0 0
+  # and true weight is 0 (tare on 0)
++ teq p1 0
+  # and button was pressed
++ teq p0 100
+  # Toggle our state
++ not
+
+# Output current state
+mov acc x3
+mov acc x3
+slp 1
+```
+
+
+Display combinator
+
+```
+# Wait for offset weight computation
+slx x0
+
+# Save latest weight to `dat`
+# DEV: We have this here to guarantee it flushes
+mov x0 dat
+
+# If we are disabled
+#  but were enabled
+#  Shut off display
+teq x1 0
++ teq acc 100
++ mov -999 x3
+
+# Save new state
+mov x1 acc
+
+# If we are now enabled, send latest weight
+teq acc 100
++ mov dat x3
+```
