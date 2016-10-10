@@ -1,0 +1,19 @@
+# Input variables
+# X_RADIO_RX
+
+# Output variables
+# P_POWER_0
+# P_POWER_1
+# P_POWER_2
+
+# Overview
+Read data packet
+If data packet[0] === -999 || data packet[0] === -1 (use < 0)
+  Increment counter
+  If data packet[0] < 0 AND counter === 5
+    Reset all power out
+
+If data packet[0] === 0
+  Turn motor $(data packet[1]) off
+If data packet[0] === 1
+  Turn motor $(data packet[1]) on
