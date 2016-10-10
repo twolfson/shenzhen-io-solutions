@@ -1,0 +1,40 @@
+# Input variables
+# P_EMERGENCY
+# X_PHASE_0
+# X_PHASE_1
+# X_PHASE_2
+
+# Output variables
+# P_LIGHT_0
+# P_LIGHT_1
+# P_LIGHT_2
+
+# Overview
+Show light 1
+Show light 2
+Show light 3
+
+If emergency is enabled, cancel all others
+
+# First iteration
+## Code
+Turn on P_LIGHT_0
+Sleep X_PHASE_0
+Turn on P_LIGHT_1
+Sleep X_PHASE_1
+Turn on P_LIGHT_2
+Sleep X_PHASE_2
+
+AND each of P_LIGHT_* with ! P_EMERGENCY
+
+TODO: How to solve extra pin X and P pin...
+
+Elegant solution
+
+Microcontroller to write out phases to RAM
+
+Then READ from RAM and loop
+
+Still no simple solution for 3rd P pin
+
+Oh, right DX300
