@@ -172,17 +172,17 @@ Dumper
 
 ```
 # When we get signal to read from RAM
-slx x0
+slx x2
 
 # Reset RAM
-# DEV: This also flushes x0 which is :+1:
-mov x0 x1
+# DEV: This also flushes x2 which is :+1:
+mov x2 x0
 
 # Flush 8 card digits
 mov 8 acc
 LOOP:
 tgt acc 0
-+ mov x2 x3
++ mov x1 x3
 + sub 1
 + jmp LOOP
 
