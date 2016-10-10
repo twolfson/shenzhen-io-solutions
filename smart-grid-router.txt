@@ -434,3 +434,95 @@ teq p0 2
   # Loop again
 + jmp LOOP
 ```
+
+----------
+
+Even more efficient:
+
+- 1 controller to duplicate/proxy and count down
+- 1 controller to determine routing info
+- 1 controller to read routing info + move proxy data
+
+Duplicater/counter
+
+```
+# Wait for signal
+slx x0
+
+# Save ID
+mov x0 dat
+
+# Send ID to routing info calc
+mov dat x1
+
+# Send ID to proxy
+mov dat x2
+
+# Save LENGTH for countdown
+mov x0 acc
+
+# Send LENGTH to proxy
+mov acc x2
+LOOP:
+
+# If there is a remaining packet
+teq acc 0
+  # Turn off routing info calc
++ mov -1 x1
+  # Send remaining packet and loop
+- mov x0 x2
+- sub 1
+- jmp LOOP
+```
+
+Route calc
+
+```
+# Wait for signal
+slx x0
+
+# Save ID for comparison
+mov x0 acc
+
+# Determine matching routing number and output it
+teq acc x1
++ mov 2 p1
+tcp acc x1
++ mov 1 p1
+- mov 3 p1
+
+# If we are shutting off, then reset router pin
+# DEV: This must come after `teq` and `tcp` so we can overwrite
+teq acc -1
++ mov 0 p1
+```
+
+Proxy
+
+```
+# Wait for incoming packet
+slx x1
+
+LOOP:
+# Send to matching output based on routing calc
+teq p0 1
++ mov x1 x0
+teq p0 2
++ mov x1 x3
+teq p0 3
++ mov x1 x2
+
+# If routing calc is NOT off
+teq p0 0
+  # Wait for incoming packet (this is like loop decrementing but we know it stops)
+- slx x1
+- jmp LOOP
+# Otherwise, continue to `slx x1` above
+```
+
+TODO: What if we use `acc + sub 1` instead of `slx x1` in outer?
+  Then we could remove `mov -1 x1` from routing info
+  And possible relocate content into main controller
+TODO: Remove label, jmp, by only using `teq p0` with `slx x1` at end or remove it altogether??
+
+TODO: Can we use `slx` technique with `slx x0` on original??

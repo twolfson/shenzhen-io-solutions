@@ -39,15 +39,29 @@ mov x0 null
 ```
 
 # 3 way jump
+Being direct and label-less is more efficient at lines:
 
 ```
 tcp acc 2
 + # Do branch 1
-+ jmp SLEEP
 - # Do branch 2
-- jmp SLEEP
+teq acc 2
++ # Do branch 3
+
+slp 1
+```
+
+as opposed to:
+
+```
+tcp acc 2
++ # Do branch 1
++ jmp SLEEP # EXTRA
+- # Do branch 2
+- jmp SLEEP # EXTRA
+# No `teq acc 2` here but it's 3 to 1
 # Do branch 3
 
-SLEEP:
+SLEEP: # EXTRA
 slp 1
 ```
