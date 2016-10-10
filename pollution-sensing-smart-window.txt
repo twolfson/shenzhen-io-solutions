@@ -4,7 +4,7 @@
 # Output variables
 # P_WINDOW
 
-# Overview
+# First thoughts
 Need to rolling average somehow...
 
 Can we add 1 for each second over 50
@@ -38,3 +38,115 @@ add 1
 mov acc p0
 slp 1
 ```
+
+What about averaging via gates?
+
+Or maybe add up and compare to 400?
+
+How about store to RAM with MC to module when address hits 9
+
+----
+
+Yep, RAM worked great
+
+First solution:
+
+- RAM writer, MC6000 (needed for 1 P + 3 X pins)
+    - but 1 port is for signalling
+- Averager, MC6000 (also needed 1 P and 3 X pins)
+    - but 1 port is for signalling
+- RAM (accessed from both sides)
+
+RAM writer
+
+```
+# If we are at end of RAM, cycle it
+teq x3 8
++ mov 0 x3
+
+# Output sensor info to RAM (auto-increments)
+mov p0 x2
+
+# Signal averager
+mov 0 x0
+
+# Wait
+slp 1
+```
+
+Averager
+
+```
+# Wait for signal
+slx x3
+
+# Reset our RAM position
+# DEV: This also flushes `x3` signal
+mov x3 x1
+
+# Reset running total
+mov 0 acc
+
+LOOP:
+# Add value from RAM (auto-increments)
+add x0
+
+# If we aren't at the end of our 8 entries, loop
+tlt x1 8
++ jmp LOOP
+
+# If we have over an average of 50 (i.e. 50 * 8), close the window
+tgt acc 400
++ mov 0 p1
+# Otherwise, open the window
+- mov 100 p1
+```
+
+--------
+
+Simplified:
+
+- 1 MC6000
+- 1 RAM
+
+```
+# Write out sensor to RAM
+mov p0 x2
+
+# Backup current position to DAT
+mov x3 dat
+
+# If we are over 8 sample edge, reset to 0
+teq dat 8
++ mov 0 dat
+
+# Reset RAM to position 0
+mov 0 x3
+
+# Move counter to 400
+mov 400 acc
+
+LOOP:
+# Subtract from 400 (i.e. get below 0 will close window
+sub x2
+
+# If we are still gathering, loop
+tlt x3 8
++ jmp LOOP
+
+# Convert `-X` to `-999`, `0` to `0`, and `+X` to `+999`
+mul 999
+
+# Write result to window
+#   This is average is over 400 or not
+#   DEV: Since pin is simple, it's normalized to 0 and 100
+mov acc p1
+
+# Restore RAM position
+mov dat x3
+
+# Sleep
+slp 1
+```
+
+TODO: Simplified 2 where we use different a1/d1 entirely
