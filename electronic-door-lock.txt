@@ -143,23 +143,24 @@ Admin validator (similar to normal validator):
 # Wait for signal
 SLEEP: slx x1
 
+# If we are at end of memory
+# DEV: This looks at normal utilizer's RAM pointer
+#   it utilizes that it checks packet to RAM first
+# DEV: We run this before other checks to prevent timing issues
+teq x0 10
+  # Reset ACC
++ mov 0 acc
+
 # If packet isn't as we expect, add 100 to ACC (invalidates ACC)
 teq x1 9
 - add 100
 
 # If we are at end of loop
-# DEV: This looks at normal utilizer's RAM pointer
-#   it utilizes that it checks packet to RAM first
 teq x0 10
   # If key was valid
 + teq acc 0
   # Unlock for 6 seconds
 + gen p1 6 0
-
-# If we are at end of loop
-teq x0 10
-  # Reset ACC
-+ mov 0 acc
 ```
 
 TODO: Can we do count down loop in WRITER portion of first controller?
