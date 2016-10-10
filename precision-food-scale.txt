@@ -338,3 +338,19 @@ teq acc 100
 TODO: Can prob move to P over X for something?
   Not sure of the benefit though...
   We need architecture change
+
+-------
+
+RAM concept...
+
+If last true weight === 0
+  AND button === 100
+  DISABLE/TOGGLE?
+
+  No, because it could be a TARE action
+  soo..
+
+If tare occurred === 0
+  AND last true weight === 0
+  AND button === 0
+  DISABLE/TOGGLE?
