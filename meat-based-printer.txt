@@ -32,3 +32,15 @@ Maybe jump to different addresses at start?
   which means read only RAM
   I don't think we could get enough pins to that if we wanted.
   Get clever.
+
+RAM techniques:
+
+- valve-0 and valve-1 in same memory
+  - Good but lots of equality checks
+
+- valve-0 for type 1 and type 2 in same memory
+  - Need to jump to different locations but that's easy (e.g. 2 lines, not equality)
+
+For type 3, need to output it as is
+
+We could prob even get more clever by not setting type 2 valve 0 as it's all the same
