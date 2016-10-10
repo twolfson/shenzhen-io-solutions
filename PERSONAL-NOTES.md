@@ -38,6 +38,14 @@ slx x0
 mov x0 null
 ```
 
+# Inline labels
+As discovered via forums, labels can be inlined (main concern is line length). For example:
+
+```
+SLEEP:add 1 # Label = "SLEEP"
+slp 1
+```
+
 # 3 way jump
 Being direct and label-less is more efficient at lines:
 
@@ -59,7 +67,7 @@ tcp acc 2
 + jmp SLEEP # EXTRA
 - # Do branch 2
 - jmp SLEEP # EXTRA
-# No `teq acc 2` here but it's 3 to 1
+# No `teq acc 2` here but it's 2 to 1 (3 incl label)
 # Do branch 3
 
 SLEEP: # EXTRA
