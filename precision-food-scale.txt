@@ -92,7 +92,7 @@ SLEEP: slp 1
 TODO: Prob can always calculate weight and let `button` read from it always
 
 Example usage of DX300 as extra register for on/off
-
+m
 ```
 teq p0 100
 - jmp RENDER
@@ -106,3 +106,19 @@ teq x3 100 # Using DX300 as extra register
 
 SLEEP: slp 1
 ```
+
+Hmmm
+
+Store offset in C2 (resets on all button press), query via P? (X is bulky)
+
+Save last offset on each render to DAT
+
+Where do we store enabled/disable?
+
+Maybe X is good...
+
+....
+
+Controller 1, enable/disable
+Controller 2, always calculate offset weight
+Controller 3, if enable -> render offset weight
