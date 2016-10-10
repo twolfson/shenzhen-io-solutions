@@ -64,3 +64,104 @@ TODO: Need to pulse unlock with ACC
 jmp LOOP
 ```
 
+## Next step
+Try doing reader saves all in first controller
+
+and only sending signals to VALIDATE controller
+
+...
+
+Got it working =D
+
+- Writer (MC6000, need for lines + 2 registers + 4 X)
+- Normal validator (MC6000, need for 2 registers, 3 X)
+- Admin validator (MC4000)
+- OR gate between validator outputs
+
+Writer:
+
+```
+# Wait for signal
+SLEEP: slx x0
+
+# Reset RAM location
+mov 0 x3
+
+# Save mode for later
+mov p0 dat
+
+LOOP:
+# If we are LEARNING
+teq dat 100
+  # Write our packet to RAM
++ mov x0 x2
+# Otherwise, we are VALIDATING
+  # Save and double write our packet
+- mov x0 acc
+- mov acc x1
+- mov acc x1
+  # Increment our counter
+- mov x2 null
+
+# If we aren't at the end of the card id, LOOP again
+teq x3 10
+- jmp LOOP
+```
+
+Normal validator:
+
+```
+# Wait for signal
+SLEEP: slx x2
+
+# If packet isn't as we expect, add 100 to ACC (invalidates ACC)
+teq x2 x0
+- add 100
+
+# If we are at end of loop
+teq x1 10
+  # If key was valid
++ teq acc 0
+  # Unlock for 6 seconds
++ gen p1 6 0
+
+# If we are at end of loop
+# DEV: We can't perform these in same `teq` as above
+#   as we need to reset `acc` but can only go into second `teq`
+#   after that which relies on `acc`
+teq x1 10
+  # Reset ACC
++ mov 0 acc
+  # Reset RAM pointer
+  # DEV: Reset memory here last so admin validator reads it before it's reset
++ mov 0 x1
+```
+
+Admin validator (similar to normal validator):
+
+```
+# Wait for signal
+SLEEP: slx x1
+
+# If packet isn't as we expect, add 100 to ACC (invalidates ACC)
+teq x1 9
+- add 100
+
+# If we are at end of loop
+# DEV: This looks at normal utilizer's RAM pointer
+#   it utilizes that it checks packet to RAM first
+teq x0 10
+  # If key was valid
++ teq acc 0
+  # Unlock for 6 seconds
++ gen p1 6 0
+
+# If we are at end of loop
+teq x0 10
+  # Reset ACC
++ mov 0 acc
+```
+
+TODO: Can we do count down loop in WRITER portion of first controller?
+  It won't save us any lines... `mov x2 null` is damn cheap for normal `add` and `jmp`
+
