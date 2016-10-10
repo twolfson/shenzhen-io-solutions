@@ -16,3 +16,25 @@ On `-1` from card reader
 
 # First iteration
 ## Gist
+2 controllers
+
+Cash counter
+If signal === -999
+JMP SLEEP
+
+If signal === -1
+MOV ACC 8
+JMP OUTPUT_LOOP
+
+Else
+MOV ACC 7
+JMP INPUT_LOOP
+
+TODO: Need to see if we have enough lines for these 2 loops (prob not)
+
+
+Read cash in via DX300
+Flush cash via X pin
+  - On X SIGNAL
+  - Write ACC to X
+  - Write 0 to ACC
