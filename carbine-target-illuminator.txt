@@ -1,0 +1,17 @@
+# Input variables
+# P_RADAR_OUT
+# P_RADAR_IN
+
+# Output variables
+# P_LASER
+# P_FLOOD_20
+# P_FLOOD_60
+
+# Overview
+Similar to last one (remote kill switch) but no timeout
+
+If RADAR_OUT, set OUT flag
+If OUT flag, count up
+If RADAR_IN, unset OUT flag
+
+TODO: Can prob ditch flag and use counter + reset
