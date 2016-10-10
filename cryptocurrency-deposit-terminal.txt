@@ -132,3 +132,60 @@ Usage outside of this:
 Inspect `a0` until we hit 9th index (i.e. `-1`)
 Then flush card info from RAM
 Then flush cash info from second controller
+
+-------
+
+Now with proxying from RAM \o/
+
+```
+# Save our value
+mov x1 dat
+
+# If it's a useless packet, skip it
+# TODO: We could use LOOP for `jmp` too but this is more clear
+teq dat -999
++ jmp SLEEP
+
+# Save our stored value
+mov dat x2
+
+# If this is our card number, proxy 7 more times
+tgt dat -1
++ mov 7 acc
+# Otherwise, tell dumper to start dump
+- mov 0 x3
+LOOP:
+
+# If we have values to proxy
+tgt acc 0
+  # Proxy value
++ mov x1 x2
+  # Loop it
++ sub 1
++ jmp LOOP
+
+# Sleep
+SLEEP: slp 1
+```
+
+Dumper
+
+```
+# When we get signal to read from RAM
+slx x0
+
+# Reset RAM
+# DEV: This also flushes x0 which is :+1:
+mov x0 x1
+
+# Flush 8 card digits
+mov 8 acc
+LOOP:
+tgt acc 0
++ mov x2 x3
++ sub 1
++ jmp LOOP
+
+# TODO: Dump money
+# TODO: Use pulsing to indicate reset on cash
+```
