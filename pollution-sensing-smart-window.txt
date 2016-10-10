@@ -1,0 +1,40 @@
+# Input variables
+# P_SENSOR
+
+# Output variables
+# P_WINDOW
+
+# Overview
+Need to rolling average somehow...
+
+Can we add 1 for each second over 50
+  and subtract 1 each time?
+
+Nope, they want an actual average
+
+Here's our exploration
+
+C1:
+
+```
+# If sensor is over 50
+tgt p0 50
+  # Add to our counter
++ add 1
+# If we have 8 units collected
+tgt p1 8
+  # And we are above 0
++ tgt acc 0
+  # Drop us down
++ sub 1
+slp 1
+```
+
+C2:
+
+```
+# Count and export how long we have been running
+add 1
+mov acc p0
+slp 1
+```
