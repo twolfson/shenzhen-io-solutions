@@ -352,3 +352,85 @@ Some weird half awake thought:
 - It proxies ID and length
 - Tell it to wait for LENGTH items
 - It proxies remainder
+
+----------
+
+Back with some things to try:
+
+- Another controller to compute `p0` value
+- Consolidate outer proxies, convert `p` value to ENABLE/DISABLE only (prob going to get bulky with jumps)
+
+# Gist
+It works!
+
+- 1 controller to toggle routing P pin (e.g. on/off and which)
+- 1 controller to calculate routing number
+- 3 outer controllers to proxy data only if enabled/selected
+
+Enabler/Router controller (MC6000)
+
+```
+# Wait for signal
+slx x1
+
+# Save ID for resending
+mov x1 dat
+
+# Write/read ID to see which routing PIN to use (routing controller)
+mov dat x2
+mov x2 p0
+
+# Resend ID
+mov dat x3
+
+# Save message length to ACC
+mov x1 acc
+
+# Resent message length
+mov acc x3
+
+LOOP:
+# For all remaining bytes, proxy them
+teq acc 0
+  # When we are done with all bytes, disable routing
++ mov 0 p0
+  # Otherwise, proxy + loop
+- mov x1 x3
+- sub 1
+- jmp LOOP
+```
+
+Routing controller (MC4000)
+
+```
+# Wait for signal
+HEAD:
+slx x3
+
+# Compare signal and send matching routing path value
+# TODO: We can prob cut out label + `jmp`s via `teq`?
+tcp x3 x2
++ mov 1 x3
++ jmp HEAD
+- mov 3 x3
+- jmp HEAD
+mov 2 x3
+```
+
+Outer proxies
+
+```
+# Wait for signal
+slx x0
+LOOP:
+# If we are enabled
+teq p0 2
+  # Pull down data
++ mov x0 x1
+  # Wait for any `p0` disabling
+  # TODO: Can prob use `slx x0`?
++ nop
++ nop
+  # Loop again
++ jmp LOOP
+```
