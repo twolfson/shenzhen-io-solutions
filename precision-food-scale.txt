@@ -192,3 +192,27 @@ SHUTOFF:
 mov 0 acc
 mov -999 x3
 ```
+
+-------
+
+Got a simpler form of last one:
+
+```
+# Wait for signal
+slx x0
+
+# Save offset weight
+mov x0 dat
+
+# If we were previously on but are now off, send shut down info
+teq p0 0
++ teq acc 100
++ mov -999 x3
+
+# If we are on, render data
+teq p0 100
++ mov dat x3
+
+# Save last enabled state
+mov p0 acc
+```
