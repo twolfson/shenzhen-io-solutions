@@ -48,14 +48,14 @@ We could prob even get more clever by not setting type 2 valve 0 as it's all the
 # First iteration
 ## Controller 1
 On keypress
-Turn on extrude flag (must come first)
-  Maybe do an X ping
-Persist keypad to P pin
+Persist keypad to P pin (signals extrude is on)
+  Must come first
 Reset RAM positions
 Sleep for 7s
+Reset P pin
 
 ## Controller 2
-If extrude is on
+If P_KEYPAD is on
   If style === bacon:
     Write 100 to valve-0
     Write 0 to valve-2
@@ -63,10 +63,11 @@ If extrude is on
     Read from valve-0 memory into ACC
     Write ACC to valve-0
     Write ACC to valve-2
-If extrude is off
+If P_KEYPAD is off
   Shut off vales
 Sleep 1
 
 ## Controller 3
 Same as controller 2 but for middle track only
   so not ACC necessary
+  and need to turn on extrude flag
