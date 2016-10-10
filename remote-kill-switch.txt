@@ -8,13 +8,15 @@
 
 # Overview
 Read data packet
-If data packet[0] === -999 || data packet[0] === -1 (use < 0)
+If data packet[0] === -999
   Increment counter
-  If data packet[0] < 0 AND counter === 5
+  If counter === 5
     Reset all power out
     Continue
 
 Reset counter
+If data packet[0] === -1
+  Do nothing (heartbeat for counter)
 If data packet[0] === 0
   Turn motor $(data packet[1]) off
 If data packet[0] === 1
@@ -24,8 +26,7 @@ If data packet[0] === 1
 Use DX300 to set P values elegantly
 
 # First iteration
-
-TODO: Need to understand that `-1` is a reset packet
+Made progress but didn't understand `data packet[0]` is a heartbeat
 
 2 MC6000 (dev for now, could be smaller)
 1 DX300
