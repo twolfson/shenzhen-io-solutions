@@ -90,3 +90,19 @@ SLEEP: slp 1
 ```
 
 TODO: Prob can always calculate weight and let `button` read from it always
+
+Example usage of DX300 as extra register for on/off
+
+```
+teq p0 100
+- jmp RENDER
+teq x3 000 # Using DX300 as extra register
++ mov 100 p1 # Using DX300 as extra register
++ jmp RENDER
+
+RENDER:
+teq x3 100 # Using DX300 as extra register
++ mov 20 x2
+
+SLEEP: slp 1
+```
