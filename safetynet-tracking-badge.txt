@@ -163,7 +163,6 @@ SLEEP: slp 1
 ```
 
 ```
-
 slx x2
 mov x2 acc
 LOOP:
@@ -175,4 +174,67 @@ mul -1
 #   and we want `200`
 add 199
 mov acc x3
+```
+
+-----
+
+Added in a radio switch (e.g. different logic for 1 or 2)
+
+Everything is looking great but want to record for now
+
+- Same 2 LOOP items as before
+- 1 MC4000 to forward badge number when request
+- 1 MC6000 to read radio packets and trigger actions
+
+Radio reader
+
+```
+# Reset speaker to 50
+HEAD: mov 50 p1
+
+# If packet is a badge request
+# DEV: Signal for 1 and -999 other options but we can determine next via LENGTH
+teq x0 2
+  # and badge number matches
++ teq x0 x2
+  # Let badge sender know to send badge for 1 second
++ gen p0 1 0
+  # Jump to head (we already slept)
++ jmp HEAD
+
+# Record length of speaker broadcast
+mov x0 acc
+LOOP:
+
+# If we have more speaker broadcast to play
+tgt acc 0
+  # DEV: This section isn't yet working
+  #   but reading concept is here...
+
+  # Send speaker broadcast to speaker
++ mov x0 p1
+# TODO: Need delay
+#   Add RAM
+
+  # Decrement and loop
++ sub 1
++ jmp LOOP
+
+# Sleep
+SLEEP: slp 1
+```
+
+Badge sender
+
+```
+# Wait for sector computation to finish
+#  also acts as delay for `gen p0` to trigger in Radio reader
+slx x0
+
+# If we should send the sector number
+teq p1 100
+  # Then send it
++ mov x0 x1
+  # Otherwise, flush sector number
+- mov x0 null
 ```
