@@ -256,3 +256,93 @@ When signal received
   After each read
     Erase value (resets for next LEARN phase)
   Output value + index to Reader
+
+Writer:
+
+```
+# If LEARN button is off, continue
+teq p1 100
+- jmp SLEEP
+
+# Read sensor into memory
+# Perform mapping to 0-5
+mov p0 acc
+dgt 1
+sub 3
+tlt acc 0
++ mov 0 acc
+
+# Save index so we can restore after auto increment
+mov acc dat
+
+# Jump to index
+mov dat x3
+
+# Read value in (index auto-incremented)
+mov x2 acc
+
+# Add 1 to value
+add 1
+
+# Jump to index
+mov dat x3
+
+# Save value
+mov acc x2
+
+# Sleep
+SLEEP: slp 1
+```
+
+Reader:
+
+```
+# If the value of LEARN hasn't changed, continue
+teq dat p0
++ jmp SLEEP
+
+# Save new value to `dat` for later
+mov p0 dat
+
+# If we just started learning (i.e. 0 -> 100), continue
+  # TODO: We can skip a `jmp` if we move all following content into `else` case
+teq dat 100
++ jmp SLEEP
+
+# Request most common value from Finder
+# DEV: We use `-1` as it's reused by Finder as it's reset value
+mov -1 x2
+
+# Read most common value from Finder
+mov x2 acc
+
+# Extract index from (count, index) pair
+#   This is the 10's place + 1's place combo
+dgt 0
+
+# Double offset due to 2 values for 1 index in RAM
+mul 2
+
+# Jump to RAM
+mov acc x1
+
+# Output key pair to X/P proxy
+mov x0 x3
+mov x0 x3
+SLEEP: slp 1
+```
+
+X/P proxy:
+
+```
+# On init, reset (k, n) to (50, 50)
+@mov 50 p1
+@mov 50 p0
+
+# Wait for new data
+SLEEP: slx x0
+
+# Set (k, n) to matching pins
+mov x0 p1
+mov x0 p0
+```
