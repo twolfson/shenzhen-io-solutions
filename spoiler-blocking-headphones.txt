@@ -64,3 +64,65 @@ teq x1 100
 teq acc 100
 - mov p0 p1
 ```
+
+## Solution
+
+Same concept as above
+
+NLP compare
+
+```
+# Save ACC and DAT
+mov x3 acc
+mov x3 dat
+
+# Jump to position 0 in RAM
+mov 0 x1
+
+LOOP:
+# If we match these keywords
+teq acc x0
++ teq dat x0
+  # Send a trigger
++ mov 100 x2
+  # Stop looping
++ jmp SLEEP
+
+# If we reached the end (i.e. no triggers)
+teq x1 12
+  # Send 0 signal
++ mov 0 x2
+
+  # Otherwise, loop
+- jmp LOOP
+
+# Sleep
+SLEEP: slp 1
+```
+
+```
+# Wait for signal (blocks until NLP check completes)
+SLEEP: slx x0
+
+# If override button is pressed (using DX300)
+teq x1 001
+  # Reset spoiler flag
++ mov 0 acc
+
+# If spoiler trigger was fired
+teq x0 100
+  # Set + hold audio at 50
++ mov 50 p1
+  # Set spoiler flag to prevent further actions
++ mov 100 acc
+
+# If spoiler flag is off, then forward audio (unsets 50 too)
+teq acc 100
+- mov p0 p1
+```
+
+TODO: Clever solution by ADD and SUB packets
+  then SUB and ADD then verify 0
+  Nah, won't work as we lose track of ACC
+
+TODO: Power optimiation by sleeping on -999
