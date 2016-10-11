@@ -156,5 +156,30 @@ tgt dat 0
 ```
 
 TODO: Maybe we can ditch `jmp` and `label` by moving around `tgt dat` to `slx`?
+  Yep, looks like we could
 
 A whole other strategy: Use RAM and reset RAM after `000` or before looking at it
+
+We have a chicken/egg problem for `dgt x3` vs telling `x3` to wake up due to knowing new offset
+
+Ooooh, we could use P pin from DX300 setter but how can it read it?
+
+----
+
+Explore super dumb ideas like hardcoded non-RAM encoded values
+
+like, can we set and sleep for some of these things?
+
+Sooo adjacent tracks are mutually exclusive, we could abuse that with 3 DX300 + sleep
+
+|  #  | VODKA GIN | LEMON LIME | CRAN VERM |
+|-----|-----------|------------|-----------|
+| 001 | 3     0   | 0     0    | 0    0    |
+| 002 | 6     0   | 2     0    | 0    0    |
+| 003 | 4     0   | 0     2    | 2    0    |
+| 004 | 4     0   | 0     0    | 4    0    |
+| 005 | 6     0   | 0     0    | 0    2    |
+| 006 | 0     6   | 0     2    | 0    0    |
+| 007 | 0     6   | 0     0    | 0    2    |
+
+Let's explore it
