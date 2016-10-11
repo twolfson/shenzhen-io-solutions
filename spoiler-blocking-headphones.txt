@@ -1,0 +1,17 @@
+# Input variables
+# P_AUDIO_IN
+# X_KEYWORDS (non-blocking)
+# P_OVERRIDE
+
+# Output variables
+# P_AUDIO_OUT
+
+# First iteration
+Use read only RAM (should be 12 entries)
+
+  TODO: Use gates for blocking?
+
+1 controller for forwarding audio unless X is set
+  then handling override to reset
+
+1 controller to compare NLP and send matching X signal
