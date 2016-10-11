@@ -242,3 +242,17 @@ TODO: We can probably do multiply for index in finder OR do `dgt` in reader
 
 TODO: Maybe 4th controller do our reset? (loop 14 times with 0)
   Will prob need to shift components together more
+
+-----
+
+After shifting `dgt` from Finder to Reader, we were able to do rolling erase in Finder :tada:
+
+New Finder summary:
+
+When signal received
+  Iterate over RAM values
+  If RAM value is higher than last
+    Save value + index in same register via magic
+  After each read
+    Erase value (resets for next LEARN phase)
+  Output value + index to Reader
