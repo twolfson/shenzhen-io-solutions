@@ -238,3 +238,82 @@ teq p1 100
   # Otherwise, flush sector number
 - mov x0 null
 ```
+
+
+TODO: For RAM, maybe always write out to 0th place and fill out with 50s
+
+  Or have a controller that always reads from RAM every second and we reset it's address?
+  Nah, that won't do a good reset...
+
+
+TODO: Need to add -999 check and actually outut audio (3 lines)
+
+--------
+
+Got loop working but it looks like our radar missed a part -- we only update value on ping
+
+But for now, let's record our audio logic...
+
+Radio switch:
+
+```
+# If packet is a badge request
+# DEV: Signal for 1 and -999 other options but we can determine next via LENGTH
+teq x0 2
+  # and badge number matches
++ teq x0 x3
+  # Let badge sender know to send badge for 1 second
++ gen p0 1 0
+  # Jump to sleep (we double sleep but it's fine)
++ jmp HEAD
+
+# If we aren't reading audio, then sleep
+teq x0 -999
++ jmp SLEEP
+
+# Otherwise, overwrite all 14 values in RAM so it loops back to 0
+#   and clears out stale data
+mov 13 acc
+LOOP:
+mov x0 x1
+tgt acc 0
++ sub 1
++ jmp LOOP
+
+# Notify audio reader to read
+mov 100 x2
+
+# Sleep
+SLEEP: slp 1
+```
+
+Audio reader:
+
+```
+# Reset speaker position to 50
+RESET: mov 50 p1
+
+# Wait for signal
+slx x3
+
+# Flush signal
+mov x3 null
+
+LOOP:
+# Read from RAM
+mov x0 acc
+
+# If we hit end of RAM, go to reset (sets speaker back to 50)
+teq acc -999
++ jmp RESET
+
+# Otherwise, send audio to speaker
+mov acc p1
+
+# Wait 1 second
+slp 1
+
+# Continue looping
+# DEV: This is flawed if there's over 14 values of data but seriously, fuck that.
+jmp LOOP
+```
