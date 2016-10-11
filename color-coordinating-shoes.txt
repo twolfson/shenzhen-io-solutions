@@ -62,7 +62,7 @@ TODO: We might not need to X trigger from first controller to second
 TODO: We need to wipe out RAM on LEARN end
   We can prob do that via second controller since we want to read before wipe
 
-Completed color reader, let's document it:
+**Completed color reader, let's document it:**
 
 ```
 # If LEARN is off, then sleep
@@ -114,3 +114,86 @@ Even better, use 10's place as count
 
 TODO: Verify that dst 100 or 999 sets to 9 still
   It uses 1's place so no it won't work if we get more than 10 of same but let's see what happens...
+
+TODO: If we get overflow issues for `dst + add`, then add a `tgt 90`?
+
+Got highest calculator working but can't export due to not enough lines
+  Need to add another MC to wipe RAM but not enough space
+
+**Completed finder**
+
+We had to move to `slx` model due to watching `p0` for changes costs too many lines
+
+As explained before, we will be using `dat` as store for both count and index. This is done via count in 10s place (so comparisons still work) and index in 1s place (so we can restore it on output)
+
+Example: 31 = count 3, index 1
+
+It works since `30` > `20` (count 3 > count 2) \o/
+
+```
+# Wait for signal
+# DEV: This is currently using reader for development
+slx x0
+
+# Reset maximum (x0 sends -1)
+mov x0 dat
+
+# Reset RAM to position 0
+mov 0 x2
+
+LOOP:
+# Overwrite acc and set it to address value
+#   This is 1's place setter
+mov x2 acc
+
+# Set count to 10's place
+dst 1 x3
+
+# If our count is higher
+#   That is, if the 10's place is higher
+#   There is never a tie in counts so we can do this without worry about indicies
+tlt dat acc
+  # Overwrite the data
++ mov acc dat
+
+# If we aren't at the end of the loop, continue
+tlt x2 6
++ jmp LOOP
+
+# Restore winning COUNT + INDEX
+mov dat acc
+
+# Extract INDEX
+dgt 0
+
+# Output INDEX
+mov acc x0
+```
+
+Dev controller
+
+```
+# Notify finder to find most common index
+mov -1 x2
+# Read most common index from pin
+mov x2 null
+# Sleep
+slp 1
+```
+
+TODO: Maybe we do some smarter `teq p0 acc; mov p0 acc;` logic to detect change
+  Nah, it takes up more lines than desired but maybe in reader?
+
+## Data
+Names laid out by wave length
+
+| Index |        Name        | Key pairs |
+|-------|--------------------|-----------|
+|     0 | .blood             | 95, 5     |
+|     1 | Deep Nacho         | 50, 5     |
+|     2 | Chartreuse Abuse   | 5, 5      |
+|     3 | Ballistic Viridian | 5, 60     |
+|     4 | Cool Dad (r)       | 15, 80    |
+|     5 | HyPURPLE           | 75, 85    |
+
+TODO: Don't forget about neutral reset (fuck)
