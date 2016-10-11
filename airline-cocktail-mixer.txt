@@ -1,0 +1,26 @@
+# Input variables
+# X_KEYPAD
+
+# Output variables
+# P_VODKA
+# P_GIN
+# P_LEMON
+# P_LIME
+# P_CRANBERRY
+# P_VERMOUTH
+
+# First thoughts
+Seems like meat printer v2
+
+Considering if we can only write to vodka and gin mutually exclusively
+
+Prob going to need DX300 and some clever RAM storage
+
+Maybe duplexer for keypad info to 2 controller
+  1 for top 3 items
+  1 for bottom 3 items
+
+Maybe something like
+
+311 to indicate 3 units vodka, 1 unit gin, 1 unit lemon (0.5oz = unit)
+  (although vodka + gin are mutually exclusive, we have scenario in bottom 3)
