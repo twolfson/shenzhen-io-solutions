@@ -58,3 +58,46 @@ Need to verify: Moving RAM address to -1 moves to 0
 
 TODO: We might not need to X trigger from first controller to second
   We could have second watch button too
+
+TODO: We need to wipe out RAM on LEARN end
+  We can prob do that via second controller since we want to read before wipe
+
+Completed color reader, let's document it:
+
+```
+# If LEARN is off, then sleep
+teq p1 100
+- jmp SLEEP
+
+# Read in current sensor
+mov p0 acc
+
+# Convert to 0-5 index via our mapping
+dgt 1
+sub 3
+tlt acc 0
++ mov 0 acc
+
+# Save value to be saved to DAT
+# DEV: We need to back it up since we lose position due to auto increment
+#  Maybe there's some way to walk (14 - 6) spaces efficiently
+mov acc dat
+
+# Jump to our index
+mov dat x3
+
+# Read our input (auto-increments index)
+mov x2 acc
+
+# Update our count
+add 1
+
+# Jump to our index again
+mov dat x3
+
+# Output our updated count
+mov acc x2
+
+# Sleep
+SLEEP: slp 1
+```
