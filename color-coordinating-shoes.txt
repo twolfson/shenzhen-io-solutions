@@ -197,3 +197,48 @@ Names laid out by wave length
 |     5 | HyPURPLE           | 75, 85    |
 
 TODO: Don't forget about neutral reset (fuck)
+
+-----------------
+
+Super close to solution, only missing reset for RAM after output
+
+4 controllers (ugh, frustrating)
+
+- Sensor writer to RAM
+- Button change detection + value reader from read only RAM
+- Most common input finder
+- X to P outputter
+- 1 RAM
+- 1 read only RAM
+
+It goes....
+
+Sensor writer:
+
+When LEARN is on
+  Reads in sensor
+  Map sensor value to a 0-5 index
+  Increment the count at said index in RAM
+
+Reader:
+
+When LEARN changes from on to off
+  Request most common index from Finder controller
+  Jump to corresponding read only index
+  Output (k, n) values to X to P outputter
+    We ran out of P pins ourselves and couldn't rearrange to use DX300
+
+Finder:
+
+When signal received
+  ... see explanation from before
+
+X to P:
+
+On init, set (k, n) to (50, 50)
+Forward 2 (k, n) values to corresponding pins
+
+TODO: We can probably do multiply for index in finder OR do `dgt` in reader
+
+TODO: Maybe 4th controller do our reset? (loop 14 times with 0)
+  Will prob need to shift components together more
