@@ -98,7 +98,8 @@ mov p1 acc
 
 # Subtract 20 (as part of logic)
 sub 20
-  # TODO: We can free up `sub 20` by adding `221` instead of `200` later one
+  # TODO: We can free up `sub 20` by adding `199` instead of `200` later one
+     This is due to 21 offsets
 
 # Forwrad adjusted SYNC
 mov acc x2
