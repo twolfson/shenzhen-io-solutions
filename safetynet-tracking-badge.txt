@@ -62,3 +62,70 @@ We explored/verified that DX300 normalizes 50 to 100 and 49 to 0 so we won't nee
 Nvm, we need it... fuck...
 
 Oh, and we needed to output on X due to >= 100 anyway so nvm =P
+
+---------
+
+Cool, we got tracker working except for persisting ping signal
+  We will likely need another controller for that since we are out of space
+
+Logic is same as above
+
+- 1 MC6000 for non-LOOP part
+- 1 MC6000 for LOOP part
+
+Both write to same X channel
+
+**Non-LOOP:**
+
+```
+# If PING >= 80, send 100 and stop
+tgt p0 79
++ mov 100 x3
++ jmp SLEEP
+
+# If SYNC === 0, send 600 and stop
+teq p1 0
++ mov 600 x3
++ jmp SLEEP
+
+# If PING <= 50, send 700 and stop
+tlt p0 51
++ mov 700 x3
++ jmp SLEEP
+
+# Load SYNC into memory
+mov p1 acc
+
+# Subtract 20 (as part of logic)
+sub 20
+  # TODO: We can free up `sub 20` by adding `221` instead of `200` later one
+
+# Forwrad adjusted SYNC
+mov acc x2
+SLEEP: slp 1
+```
+
+**LOOP:**
+
+```
+# Wait for signal
+slx x2
+
+# Load adjusted SYNC
+mov x2 acc
+
+LOOP:
+# Remove -21 until going below 0
+tgt acc 0
++ sub 21
++ jmp LOOP
+
+# Recover -1 overflows as offset
+mul -1
+
+# Add to 200
+add 200
+
+# Export value
+mov acc x3
+```
