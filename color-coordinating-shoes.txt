@@ -113,3 +113,4 @@ Even better, use 10's place as count
 31 = count 3, index 1
 
 TODO: Verify that dst 100 or 999 sets to 9 still
+  It uses 1's place so no it won't work if we get more than 10 of same but let's see what happens...
