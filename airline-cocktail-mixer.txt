@@ -183,3 +183,120 @@ Sooo adjacent tracks are mutually exclusive, we could abuse that with 3 DX300 + 
 | 007 | 0     6   | 0     0    | 0    2    |
 
 Let's explore it
+
+omfg, it works... waaaat =D
+
+Okay, code:
+
+- 1 keypad duplicator (MC4000X)
+- 3 on/off controllers (MC6000, need for 2 registes and lines of code)
+- 3 DX300 (1 for vodka/gin, 1 for lemon/lime, 1 for cran/verm)
+
+Duplicator:
+
+Take 1 keypad signal, resend it 3 times
+
+```
+# Wait for keypad signal
+slx x0
+
+# Store it
+mov x0 acc
+
+# Resend it 3 times
+# DEV: We could use different pins but it's same info
+mov acc x3
+mov acc x3
+mov acc x3
+```
+
+Vodka/gin controller:
+
+Determine DX300 settings and sleep duration via hardcoded data
+  Then sleep and reset DX300
+
+```
+# Wait for signal
+slx x0
+
+# Save signal for later
+mov x0 dat
+
+# By default, sleep for 6 seconds (most common, makes less logic later)
+mov 6 acc
+
+# Turn on vodka/gin pins
+tlt dat 6
++ mov 100 x3
+- mov 010 x3
+
+# If we are pouring vodka shot, only pour for 3 seconds (okay "time units")
+teq dat 1
++ mov 3 acc
+
+# If we are handling type 3 and 4, then restrict to 4 seconds
+tgt dat 2
++ tlt dat 5
++ mov 4 acc
+
+# Sleep for duration
+slp acc
+
+# Reset switch
+mov 000 x3
+```
+
+Lemon/lime controller:
+
+```
+# Wait for signal and save data
+slx x1
+mov x1 dat
+
+# By default, sleep for 0 seconds before reset
+mov 0 acc
+
+# Handle one-off cases directly
+teq dat 2
++ mov 2 acc
++ mov 100 x3
+teq dat 3
++ mov 2 acc
++ mov 001 x3
+teq dat 6
++ mov 2 acc
++ mov 001 x3
+
+# Sleep for duration and reset pins
+slp acc
+mov 000 x3
+```
+
+Cranberry/vermouth controller:
+
+```
+# Wait for signal and save data
+slx x0
+mov x0 dat
+
+# By default, sleep for 2 seconds before reset
+mov 2 acc
+
+# Toggle between cranberry and vermouth pins
+# DEV: In "0" duration case, we sleep for 0 seconds so it's reset immediately
+tlt dat 5
++ mov 010 x3
+- mov 001 x3
+
+# Handle one-off durations
+tlt dat 3
++ mov 0 acc
+teq dat 4
++ mov 4 acc
+teq dat 6
++ mov 0 acc
+
+# Sleep for duration and reset pins
+slp acc
+mov 000 x3
+```
