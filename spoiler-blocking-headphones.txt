@@ -15,3 +15,52 @@ Use read only RAM (should be 12 entries)
   then handling override to reset
 
 1 controller to compare NLP and send matching X signal
+
+## Exploration
+
+- 1 DX300 for override button (not enough pins on final)
+- NLP compare (MC6000 for dev)
+- Audio proxy (MC6000 for dev)
+
+NLP compare
+
+```
+# Read from non-blocking NLP
+mov x1 dat
+
+# If we have nothing new, treat it as dummy keyword
+# TODO: We can prob ditch these lines and always double read
+teq dat -999
++ mov 0 x2
++ jmp SLEEP
+
+# Trigger switch (assume keywords were spoilers)
+# TODO: Read from RAM
+mov 100 x2
+
+# Sleep
+SLEEP: slp 1
+```
+
+Audio proxy
+
+```
+# Wait for signal (blocks until NLP check completes)
+SLEEP: slx x1
+
+# If override button is pressed (using DX300)
+teq x0 100
+  # Reset spoiler flag
++ mov 0 acc
+
+# If spoiler trigger was fired
+teq x1 100
+  # Set + hold audio at 50
++ mov 50 p1
+  # Set spoiler flag to prevent further actions
++ mov 100 acc
+
+# If spoiler flag is off, then forward audio (unsets 50 too)
+teq acc 100
+- mov p0 p1
+```
