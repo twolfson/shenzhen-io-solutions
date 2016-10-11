@@ -21,3 +21,21 @@ Ping and sector are in donut for some reason, let's unroll that...
 | 80 <= PING <= 100 |    100 | 100 | 100 | 100 | 100 | 100 |
 | 50 <  PING <   80 |    600 | 200 | 201 | 202 | 203 | 204 |
 | 0  <= PING <= 50  |    600 | 700 | 700 | 700 | 700 | 700 |
+
+Logic which should work for ping/sync calc
+
+if PING >= 80 (i.e. ! < 80)
+  set 100
+  jmp SLEEP
+if SYNC === 0
+  set 600
+  jmp SLEEP
+if PING <= 50 (i.e ! > 50)
+  set 700
+  jmp SLEEP
+
+# Derive offset of 0, 1, ..., 4 for 200 from SYNC
+acc = sync (e.g. 20, 40, ..., 100)
+acc -= 20 (e.g. 0, 20, ..., 80)
+dgt 1 acc (e.g. 0, 2, ..., 8)
+  Ugh, how do we divide...
