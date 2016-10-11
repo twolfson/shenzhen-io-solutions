@@ -79,5 +79,5 @@ Maybe duplexer takes care of values to load from memory
 | 3 | Cosmo         | 2 vodka, 1 lime, 1 cran | 4 vodka, 2 lime, 2 cran | 400 220         |
 | 4 | Cape Cod      | 2 vodka, 2 cran         | 4 vodka, 4 cran         | 400 040         |
 | 5 | Vodka martini | 3 vodka, 1 verm         | 6 vodka, 2 verm         | 600 002         |
-| 6 | Gimlet        | 3 gin, 1 lime           | 6 gin, 2 lime           | 600 200         |
-| 7 | Gin martini   | 3 gin, 1 verm           | 6 gin, 2 verm           | 600 002         |
+| 6 | Gimlet        | 3 gin, 1 lime           | 6 gin, 2 lime           | 060 200         |
+| 7 | Gin martini   | 3 gin, 1 verm           | 6 gin, 2 verm           | 060 002         |
