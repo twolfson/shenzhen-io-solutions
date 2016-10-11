@@ -37,3 +37,23 @@ TODO: Need to start at neutral
     - Flush next 2 values as N and K
     - Maybe swap order so its (K, N) like diagram
 
+TODO: Use DX300 + MC4000X for last controller to save cost and pins?
+
+TODO: We can also convert P_BUTTON to X_BUTTON via DX300
+  but space seems limited
+
+### Mapping logic
+20-39 -> 2 or 3 -> -1 or 0
+40-49 -> 4 -> 1
+50-59 -> 5 -> 2
+60-69 -> 6 -> 3
+70-79 -> 7 -> 4
+80-89 -> 8 -> 5
+
+Need to verify: Moving RAM address to -1 moves to 0
+  Nope, it jumps to -1 index (in fact, -100 is -2 === -100 modulo 14)
+  Thankfully, we should be fine to only use this logic on save
+  So either use a `< -1` check or `< 40` check...
+
+TODO: We might not need to X trigger from first controller to second
+  We could have second watch button too
