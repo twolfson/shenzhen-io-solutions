@@ -39,3 +39,14 @@ acc = sync (e.g. 20, 40, ..., 100)
 acc -= 20 (e.g. 0, 20, ..., 80)
 dgt 1 acc (e.g. 0, 2, ..., 8)
   Ugh, how do we divide...
+  Oh, simpler... loop and subtract until data is 0
+
+acc = sync (e.g. 20, 40, ... 100)
+acc -= 20 (initial offset) -- (e.g. 0, 20, ..., 80)
+LOOP:
+  if acc > 0:
+    acc -= 21 (e.g. 0, -1, -2, ..., -4)
+    LOOP
+acc *= -1 (e.g. 0, 1, 2, ..., 4)
+acc += 200 (e.g. 200, 201, 202, ..., 204)
+set acc
