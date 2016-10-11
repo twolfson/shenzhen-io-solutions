@@ -314,6 +314,170 @@ mov acc p1
 slp 1
 
 # Continue looping
-# DEV: This is flawed if there's over 14 values of data but seriously, fuck that.
+# DEV: This is flawed if there's over 14 values of data but seriously, fuck that.g
 jmp LOOP
+```
+
+------
+
+Level completed!
+
+Final result:
+
+- Non-LOOP tracker, MC6000 (needed for lines of logic)
+    - Handles non-iterative portion of calculating location
+- LOOP tracker, MC4000X
+    - Handles iterative portion of calculating location
+- Badge sender, MC6000 (needed for `dat` register)
+    - Saves location and sends to radio when appropriate
+- 1 RAM
+- Radio reader, MC6000 (needed for lines and pins)
+    - Reads radio packet, decides where to send them, and triggers other controllers (badge sender and audio reader)
+- Audio reader, MC6000 (needed for lines)
+    - Reads to audio from RAM, sends to speaker
+
+
+Radio switch:
+
+No changes from above
+
+```
+# If packet is a badge request
+# DEV: Signal for 1 and -999 other options but we can determine next via LENGTH
+teq x0 2
+  # and badge number matches
++ teq x0 x3
+  # Let badge sender know to send badge for 1 second
++ gen p0 1 0
+  # Jump to sleep (we double sleep but it's fine)
++ jmp HEAD
+
+# If we aren't reading audio, then sleep
+teq x0 -999
++ jmp SLEEP
+
+# Otherwise, overwrite all 14 values in RAM so it loops back to 0
+#   and clears out stale data
+mov 13 acc
+LOOP:
+mov x0 x1
+tgt acc 0
++ sub 1
++ jmp LOOP
+
+# Notify audio reader to read
+mov 100 x2
+
+# Sleep
+SLEEP: slp 1
+```
+
+Audio reader:
+
+No changes from above
+
+```
+# Reset speaker position to 50
+RESET: mov 50 p1
+
+# Wait for signal
+slx x3
+
+# Flush signal
+mov x3 null
+
+LOOP:
+# Read from RAM
+mov x0 acc
+
+# If we hit end of RAM, go to reset (sets speaker back to 50)
+teq acc -999
++ jmp RESET
+
+# Otherwise, send audio to speaker
+mov acc p1
+
+# Wait 1 second
+slp 1
+
+# Continue looping
+# DEV: This is flawed if there's over 14 values of data but seriously, fuck that.g
+jmp LOOP
+```
+
+Non-LOOP tracker
+
+```
+# If ping isn't set, then don't update
+#   and send "no update" signal to badge sender
+# DEV: We need this to guarantee badge sender always runs every second
+teq p0 0
++ mov -1 x3
++ jmp SLEEP
+
+# If PING >= 80, send 100 and stop
+tgt p0 79
++ mov 100 x3
++ jmp SLEEP
+
+# If SYNC === 0, send 600 and stop
+teq p1 0
++ mov 600 x3
++ jmp SLEEP
+
+# If PING <= 50, send 700 and stop
+tlt p0 51
++ mov 700 x3
++ jmp SLEEP
+
+# Forward SYNC directly to non-LOOP controller (saves a pin)
+mov p1 x2
+
+# Sleep
+SLEEP: slp 1
+```
+
+LOOP tracker:
+
+```
+# Wait for signal
+slx x3
+
+# Load SYNC
+mov x3 acc
+
+LOOP:
+# Remove -21 until going below 0
+tgt acc 0
++ sub 21
++ jmp LOOP
+
+# Recover -1 overflows as offset
+mul -1
+
+# Add to 199 to account for too much subtraction (instead of 200)
+add 199
+
+# Export value
+mov acc x2
+```
+
+Badge sender:
+
+```
+# When we get a badge signal from tracker
+# DEV: Happens every second so we don't miss `p` requests
+#   Even when there isn't a change to tracker value
+slx x0
+
+# Save our tracker value
+mov x0 acc
+
+# If the tracker value wasn't a placeholder, save it
+teq acc -1
+- mov acc dat
+
+# If there is a request for badge number, send it to RADIO_TX
+teq p1 100
++ mov dat x3
 ```
