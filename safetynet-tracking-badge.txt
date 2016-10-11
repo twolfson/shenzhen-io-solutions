@@ -24,16 +24,22 @@ Ping and sector are in donut for some reason, let's unroll that...
 
 Logic which should work for ping/sync calc
 
-if PING >= 80 (i.e. ! < 80)
+# Complete row 80 <= PING <= 100
+if PING >= 80 (i.e. > 79)
   set 100
   jmp SLEEP
+
+# Complete column SYNC_0 (excluding first row)
 if SYNC === 0
   set 600
   jmp SLEEP
-if PING <= 50 (i.e ! > 50)
+
+# Complete row 0 <= PING <= 50 (excluding first column)
+if PING <= 50 (i.e < 51)
   set 700
   jmp SLEEP
 
+# Complete remaining 200 - 204 values
 # Derive offset of 0, 1, ..., 4 for 200 from SYNC
 acc = sync (e.g. 20, 40, ..., 100)
 acc -= 20 (e.g. 0, 20, ..., 80)
@@ -50,3 +56,9 @@ LOOP:
 acc *= -1 (e.g. 0, 1, 2, ..., 4)
 acc += 200 (e.g. 200, 201, 202, ..., 204)
 set acc
+
+We explored/verified that DX300 normalizes 50 to 100 and 49 to 0 so we won't need to worry about extra P pins
+
+Nvm, we need it... fuck...
+
+Oh, and we needed to output on X due to >= 100 anyway so nvm =P
