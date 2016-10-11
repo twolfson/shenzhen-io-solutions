@@ -81,3 +81,74 @@ Maybe duplexer takes care of values to load from memory
 | 5 | Vodka martini | 3 vodka, 1 verm         | 6 vodka, 2 verm         | 600 002         |
 | 6 | Gimlet        | 3 gin, 1 lime           | 6 gin, 2 lime           | 060 200         |
 | 7 | Gin martini   | 3 gin, 1 verm           | 6 gin, 2 verm           | 060 002         |
+
+## Back to code
+
+TODO: Might need to flip memory order depending on which value is read first
+
+Made some progress but not much
+
+TODO: Maybe we can do `-111` trick?
+
+Duplexer:
+
+Read from keypad
+Look at corresponding TOP + BOTTOM durations in read only memory (ROM - head desk)
+  Stored as 600 for 6 x 0.5oz, 0 x 0.5oz, 0 x 0.5oz
+Send both signals to TOP + BOTTOM chains
+
+```
+# Wait for signal
+slx x1
+
+# Read in keypad offset
+mov x1 acc
+
+# Correct 1-7 range to 0-6 index
+sub 1
+
+# Expand offset to include both values (not only 1)
+mul 2
+
+# Jump to offset in ROM
+mov acc x2
+
+# Output TOP and BOTTOM values to TOP and BOTTOM controllers
+mov x3 x0
+mov x3 x0
+```
+
+Countdown on 100's place
+
+```
+# Wait for signal
+slx x0
+
+# Read in durations
+mov x0 dat
+
+LOOP:
+# Load remaining durations
+mov dat acc
+
+# Load 100's place
+dgt 2
+
+# If we have at least 1 set in 100's place
+tgt acc 0
+  # Notify DX300 setter about 1 in 100's place
++ mov 1 x3
+  # Decrement 100's place in stored memory
++ mov dat acc
++ sub 100
++ mov acc dat
+  # Notify DX300 setter about 0 in 100's place
+- mov 0 x3
+
+# If we still have remaining durations, wait for time and LOOP
+tgt dat 0
++ slp 1
++ jmp LOOP
+```
+
+A whole other strategy: Use RAM and reset RAM after `000` or before looking at it
