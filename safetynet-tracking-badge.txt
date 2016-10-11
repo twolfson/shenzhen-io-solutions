@@ -1,0 +1,23 @@
+# Input variables
+# P_RADAR_SYNC
+# P_RADAR_PING
+# X_RADIO_RX (non-blocking)
+
+# Output variables
+# X_RADIO_TX
+# P_SPEAKER
+
+# First iteration
+## Notes
+Packet =
+  [1, length, audio for $length units...]
+  OR
+  [2, badge id] -> Send back sector
+
+Ping and sector are in donut for some reason, let's unroll that...
+
+|                   | SYNC_0 |  20 |  40 |  60 |  80 | 100 |
+|-------------------|--------|-----|-----|-----|-----|-----|
+| 80 <= PING <= 100 |    100 | 100 | 100 | 100 | 100 | 100 |
+| 50 <  PING <   80 |    600 | 200 | 201 | 202 | 203 | 204 |
+| 0  <= PING <= 50  |    600 | 700 | 700 | 700 | 700 | 700 |
