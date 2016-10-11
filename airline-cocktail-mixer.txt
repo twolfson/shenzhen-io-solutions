@@ -132,13 +132,17 @@ LOOP:
 mov dat acc
 
 # Load 100's place
+# TODO: Need to make this dynamic, maybe via DX300 setter
 dgt 2
 
 # If we have at least 1 set in 100's place
 tgt acc 0
   # Notify DX300 setter about 1 in 100's place
+  # TODO: How does DX300 setter know this is 100's place?
+      Maybe DX300 setter should have modular counter?
 + mov 1 x3
   # Decrement 100's place in stored memory
+  # TODO: Need to make this dynamic, maybe via DX300 setter
 + mov dat acc
 + sub 100
 + mov acc dat
@@ -150,5 +154,7 @@ tgt dat 0
 + slp 1
 + jmp LOOP
 ```
+
+TODO: Maybe we can ditch `jmp` and `label` by moving around `tgt dat` to `slx`?
 
 A whole other strategy: Use RAM and reset RAM after `000` or before looking at it
