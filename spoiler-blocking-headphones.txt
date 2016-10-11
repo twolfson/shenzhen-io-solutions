@@ -126,3 +126,43 @@ TODO: Clever solution by ADD and SUB packets
   Nah, won't work as we lose track of ACC
 
 TODO: Power optimiation by sleeping on -999
+
+-----
+
+Optimized
+
+```
+# Save first packet
+mov x3 acc
+
+# If it's -999, treat it as no match (jump to loop end)
+teq acc -999
++ jmp END_LOOP
+
+# Save second packet
+mov x3 dat
+
+# If we match these keywords
+teq acc x0
++ teq dat x0
+  # Send a trigger
++ mov 100 x2
+  # Stop looping
++ jmp SLEEP
+
+  # Send 0 signal
++ mov 0 x2
+
+# If aren't at the end, loop
+teq x1 12
+- jmp LOOP
+
+# Signal that we made no matches
+END_LOOP: mov 0 x2
+SLEEP: slp 1
+```
+
+Audio proxy is same as before
+
+TODO: Maybe there's something where we only store/compare differences
+  but I really don't want to explore that...
