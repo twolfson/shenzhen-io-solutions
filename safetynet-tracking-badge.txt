@@ -130,3 +130,49 @@ add 200
 # Export value
 mov acc x3
 ```
+
+----
+
+Yep, as expected we could move `sub 20` into `add 200` by making it `add 199`
+  which freed up more lines
+
+We now have a straightforward PING tracker
+
+```
+# NEW: Save PING for future reference
+tgt p0 0
++ mov p0 dat
+
+# NEW: Load from saved PING instead of PING pin
+tgt dat 79
++ mov 100 x3
++ jmp SLEEP
+teq p1 0
++ mov 600 x3
++ jmp SLEEP
+
+# NEW: Load from saved PING instead of PING pin
+tlt dat 51
++ mov 700 x3
++ jmp SLEEP
+
+# NEW: Write SYNC directly to `x2`
+# DEV: This saves 1 pin for LOOP controller and let's it know when to start
+mov p1 x2
+SLEEP: slp 1
+```
+
+```
+
+slx x2
+mov x2 acc
+LOOP:
+tgt acc 0
++ sub 21
++ jmp LOOP
+mul -1
+# NEW: Use `add 199` to account for `20` being set to `-1` then `1`
+#   and we want `200`
+add 199
+mov acc x3
+```
