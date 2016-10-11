@@ -1,0 +1,39 @@
+# Input variables
+# P_BUTTON
+# P_SENSOR
+
+# Output variables
+# P_INK_K
+# P_INK_N
+
+# First iterations
+## Thoughts
+Need to figure out how to get most common color
+
+Once we have it, convert it to an index (7 indicies)
+
+Read N/K from read only RAM [N_0, K_0, N_1, K_1, ...]
+
+Maybe we convert to index and set RAM value at index
+
+Then on release we perform reads
+  But how do we know which one won...
+  I guess >= and overwrite `dat` or something
+    Also no ties so `>` only
+
+TODO: Need to start at neutral
+
+## Concept
+3 controllers:
+
+- Button press detector + RAM writer
+    - When button off, send X trigger with NULL to next controller
+- Common color calculator
+    - On NULL signal from button press detector
+    - Read from RAM, use >= to find best index
+    - Send X trigger with index to next controller
+- Color outputer
+    - Jump to read only RAM at specified index
+    - Flush next 2 values as N and K
+    - Maybe swap order so its (K, N) like diagram
+
