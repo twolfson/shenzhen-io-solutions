@@ -24,3 +24,45 @@ Maybe something like
 
 311 to indicate 3 units vodka, 1 unit gin, 1 unit lemon (0.5oz = unit)
   (although vodka + gin are mutually exclusive, we have scenario in bottom 3)
+
+For 3 top, we can prob do
+  If 311 over 100, then 200 (i.e. -111)
+  What's DST of negative values again? It wraps...
+
+Simplest form is:
+
+Load data into `dat`
+Calculate 1's for DX300
+  Load data into `acc`
+  Retrieve 1's place
+  If over 0
+    Load data into `acc`
+    Decrement by 1 (would need to figure out how to get 10)
+      Maybe another controller...
+    Save `acc` to data
+    Set 1's place to 1 somehow for DX300
+  Else:
+    Set 0's place to 1 somehow for DX300
+Loop for 10's and 100's place
+If data > 0, sleep + loop
+
+Okay, let's do that again -- this time where we know there's a second controller which track DX300 value
+
+First controller:
+
+Load data into `dat`
+(acc = 0 by default, maybe need to reset)
+LOOP:
+  Load data into `acc`
+  Send position to NEXT CONTROLLER
+  Retrieve 1's place (acc)
+  Send 1's place to NEXT CONTROLLER
+  Load data into `acc`
+  Subtract amount specified by NEXT CONTROLLER
+    This will be index * 1/0
+      How will NEXT CONTROLLER calculate this without losing their `acc`
+      Maybe they need a `dat` value (MC6000)
+
+How the hell do we loop this if we are using `acc`?
+
+Enough thought... let's try this...
