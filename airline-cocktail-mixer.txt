@@ -386,3 +386,113 @@ Offset indirect values: (done via Sublime Text magic)
 | 007 | 722       |
 | 008 | X00       |
 | 009 | XX2       |
+
+It looks like order of received signals is:
+
+1. CRAN/VERM
+2. LEMON/LIME
+3. VODKA/GIN
+
+This new indirect offset reflects the digits to use:
+
+Inlined direct values:
+
+|  #  | ROM value (100's = CRAN/VERM, 10's = LEMON/LIME, 1's = VODKA/GIN) |
+|-----|-------------------------------------------------------------------|
+| 001 | 003                                                               |
+| 002 | 036                                                               |
+| 003 | 324                                                               |
+| 004 | 404                                                               |
+| 005 | 206                                                               |
+| 006 | 027                                                               |
+| 007 | 207                                                               |
+
+Offset indirect values:
+
+|  #  | ROM value |
+|-----|-----------|
+| 000 | XXX       |
+| 001 | 0XX       |
+| 002 | 00X       |
+| 003 | 333       |
+| 004 | 426       |
+| 005 | 204       |
+| 006 | 004       |
+| 007 | 226       |
+| 008 | X07       |
+| 009 | XX7       |
+
+Got a working variant but cost is same due to us being unable to downsize a controller due to timing issues (i.e. 0 sleep actions are double requesting packets)
+
+To work around that, we are moving to a `tcp` scheme so we never shift open pins
+
+VODKA/GIN mapping
+
+3 -> 3/0
+4 -> 4/0
+6 -> 6/0 (given priority due to being vodka like those below it)
+7 -> 0/6
+
+LEMON/LIME mapping
+
+2 -> 0/2 (given priority due to being most common)
+3 -> 0/0 (moved so we never open pins)
+4 -> 2/0
+
+CRAN/VERM mapping
+
+2 -> 0/2 (given priority due to being most common)
+3 -> 0/0 (moved so we never open pins)
+4 -> 4/0
+5 -> 2/0
+
+Directly mapped values (not shifted for ROM):
+
+|  #  | VODKA/GIN | LEMON/LIME | CRAN/VERM |
+|-----|-----------|------------|-----------|
+| 001 | 3 (3/0)   | 3 (0/0)    | 3 (0/0)   |
+| 002 | 6 (6/0)   | 2 (0/2)    | 3 (0/0)   |
+| 003 | 4 (4/0)   | 4 (2/0)    | 5 (2/0)   |
+| 004 | 4 (4/0)   | 3 (0/0)    | 4 (4/0)   |
+| 005 | 6 (6/0)   | 3 (0/0)    | 2 (0/2)   |
+| 006 | 7 (6/0)   | 4 (2/0)    | 4 (0/0)   |
+| 007 | 7 (6/0)   | 3 (0/0)    | 2 (0/2)   |
+
+Inlined direct values:
+
+|  #  | ROM value |
+|-----|-----------|
+| 001 | 333       |
+| 002 | 623       |
+| 003 | 445       |
+| 004 | 434       |
+| 005 | 632       |
+| 006 | 744       |
+| 007 | 732       |
+
+Shuffled direct values:
+
+|  #  | ROM value |
+|-----|-----------|
+| 001 | 333       |
+| 002 | 326       |
+| 003 | 544       |
+| 004 | 434       |
+| 005 | 236       |
+| 006 | 447       |
+| 007 | 237       |
+
+Shuffled + offset indirect values:
+
+|  #  | ROM value |
+|-----|-----------|
+| 000 | XXX       |
+| 001 | 3XX       |
+| 002 | 33X       |
+| 003 | 523       |
+| 004 | 446       |
+| 005 | 234       |
+| 006 | 434       |
+| 007 | 246       |
+| 008 | X37       |
+| 009 | XX7       |
