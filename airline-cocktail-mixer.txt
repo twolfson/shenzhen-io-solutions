@@ -354,12 +354,12 @@ Directly mapped values (not shifted for ROM):
 |  #  | VODKA/GIN | LEMON/LIME | CRAN/VERM |
 |-----|-----------|------------|-----------|
 | 001 | 3 (3/0)   | 0 (0/0)    | 0 (0/0)   |
-| 002 | 6 (6/0)   | 3 (0/2)    | 0 (0/0)   |
-| 003 | 4 (4/0)   | 2 (2/0)    | 3 (2/0)   |
+| 002 | 6 (6/0)   | 3 (2/0)    | 0 (0/0)   |
+| 003 | 4 (4/0)   | 2 (0/2)    | 3 (2/0)   |
 | 004 | 4 (4/0)   | 0 (0/0)    | 4 (4/0)   |
 | 005 | 6 (6/0)   | 0 (0/0)    | 2 (0/2)   |
-| 006 | 7 (6/0)   | 2 (2/0)    | 0 (0/0)   |
-| 007 | 7 (6/0)   | 0 (0/0)    | 2 (0/2)   |
+| 006 | 7 (0/6)   | 2 (0/2)    | 0 (0/0)   |
+| 007 | 7 (0/6)   | 0 (0/0)    | 2 (0/2)   |
 
 Inlined direct values:
 
@@ -451,23 +451,23 @@ Directly mapped values (not shifted for ROM):
 |  #  | VODKA/GIN | LEMON/LIME | CRAN/VERM |
 |-----|-----------|------------|-----------|
 | 001 | 3 (3/0)   | 3 (0/0)    | 3 (0/0)   |
-| 002 | 6 (6/0)   | 2 (0/2)    | 3 (0/0)   |
-| 003 | 4 (4/0)   | 4 (2/0)    | 5 (2/0)   |
+| 002 | 6 (6/0)   | 4 (2/0)    | 3 (0/0)   |
+| 003 | 4 (4/0)   | 2 (0/2)    | 5 (2/0)   |
 | 004 | 4 (4/0)   | 3 (0/0)    | 4 (4/0)   |
 | 005 | 6 (6/0)   | 3 (0/0)    | 2 (0/2)   |
-| 006 | 7 (6/0)   | 4 (2/0)    | 4 (0/0)   |
-| 007 | 7 (6/0)   | 3 (0/0)    | 2 (0/2)   |
+| 006 | 7 (0/6)   | 2 (0/2)    | 3 (0/0)   |
+| 007 | 7 (0/6)   | 3 (0/0)    | 2 (0/2)   |
 
 Inlined direct values:
 
 |  #  | ROM value |
 |-----|-----------|
 | 001 | 333       |
-| 002 | 623       |
-| 003 | 445       |
+| 002 | 643       |
+| 003 | 425       |
 | 004 | 434       |
 | 005 | 632       |
-| 006 | 744       |
+| 006 | 723       |
 | 007 | 732       |
 
 Shuffled direct values:
@@ -475,11 +475,11 @@ Shuffled direct values:
 |  #  | ROM value |
 |-----|-----------|
 | 001 | 333       |
-| 002 | 326       |
-| 003 | 544       |
+| 002 | 346       |
+| 003 | 524       |
 | 004 | 434       |
 | 005 | 236       |
-| 006 | 447       |
+| 006 | 327       |
 | 007 | 237       |
 
 Shuffled + offset indirect values:
@@ -489,10 +489,115 @@ Shuffled + offset indirect values:
 | 000 | XXX       |
 | 001 | 3XX       |
 | 002 | 33X       |
-| 003 | 523       |
-| 004 | 446       |
+| 003 | 543       |
+| 004 | 426       |
 | 005 | 234       |
-| 006 | 434       |
-| 007 | 246       |
+| 006 | 334       |
+| 007 | 226       |
 | 008 | X37       |
 | 009 | XX7       |
+
+After enough drunken one-off mistakes (e.g. shifting numbers is hard), we solved the problem at a lower cost :tada:
+
+Solution:
+
+Keypad reader:
+
+```
+# Wait for keypad input
+slx x1
+
+# Jump to keypad offset in ROM
+mov x1 x2
+
+# Load value from ROM, extract 100's place, and send
+mov x3 acc
+dgt 2
+mov acc x0
+
+# Same but for 10's place
+mov x3 acc
+dgt 1
+mov acc x0
+
+# Same but for 1's place
+mov x3 acc
+dgt 0
+mov acc x0
+```
+
+Vodka/Gin controller:
+
+```
+# Wait for signal
+slx x0
+
+# Use value as sleep duration
+mov x0 acc
+
+# If we received case for gin, then fix duration and open pin
+teq acc 7
++ mov 6 acc
++ mov 010 x3
+
+# Otherwise, open vodka pin
+- mov 100 x3
+
+# Sleep + leave pin open
+slp acc
+
+# Close valves
+mov 000 x3
+```
+
+Lemon/Lime controller
+
+```
+# Wait for signal
+slx x0
+
+# Use value as sleep duration
+mov x0 acc
+
+# If we received 3, open no valves (i.e. 0/0 value)
+tcp acc 3
+  # Otherwise, open lemon value and correct our duration
++ mov 100 x3
++ mov 2 acc
+  # Otherwise, open lime value with set duration
+- mov 001 x3
+
+# Sleep for our duration
+# DEV: 000 has a duration to prevent stealing other packets
+slp acc
+
+# Reset our valves
+mov 000 x3
+```
+
+Cranberry/Vermouth controller
+
+```
+# Wait for signal
+slx x0
+
+# Use value as sleep duration
+mov x0 acc
+
+# If we received 3, open no valves (i.e. 0/0 value)
+tcp acc 3
+  # Otherwise open cranberry or vermouth valves
++ mov 010 x3
+- mov 001 x3
+
+# If we received uncommon duration, correct it
+teq acc 5
++ mov 2 acc
+
+# Sleep for our duration
+# DEV: 000 has a duration to prevent stealing other packets
+slp acc
+
+# Reset our valves
+mov 000 x3
+```
