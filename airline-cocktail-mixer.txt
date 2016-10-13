@@ -300,3 +300,47 @@ teq dat 6
 slp acc
 mov 000 x3
 ```
+
+---------
+
+We had an idea about another solution which might save us instructions for each of the controllers (and hence reduce their size)
+
+Map the tracks to a special key and store that value in ROM
+
+For example: 000 000 -> 1, 400 000 -> 3
+
+This key could be the most common number to save even more lines
+
+We are going to explore that idea (while a little drunk)
+
+Original graph:
+
+|  #  | VODKA GIN | LEMON LIME | CRAN VERM |
+|-----|-----------|------------|-----------|
+| 001 | 3     0   | 0     0    | 0    0    |
+| 002 | 6     0   | 2     0    | 0    0    |
+| 003 | 4     0   | 0     2    | 2    0    |
+| 004 | 4     0   | 0     0    | 4    0    |
+| 005 | 6     0   | 0     0    | 0    2    |
+| 006 | 0     6   | 0     2    | 0    0    |
+| 007 | 0     6   | 0     0    | 0    2    |
+
+VODKA/GIN mapping
+
+3 -> 3     0
+4 -> 4     0
+6 -> 6     0 (given priority due to being vodka like those below it)
+7 -> 0     6
+
+LEMON/LIME mapping
+
+0 -> 0     0
+2 -> 0     2 (given priority due to being most common)
+3 -> 2     0
+
+CRAN/VERM mapping
+
+0 -> 0    0
+2 -> 0    2 (given priority due to being most common)
+3 -> 2    0
+4 -> 4    0
