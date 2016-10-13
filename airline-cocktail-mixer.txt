@@ -327,20 +327,62 @@ Original graph:
 
 VODKA/GIN mapping
 
-3 -> 3     0
-4 -> 4     0
-6 -> 6     0 (given priority due to being vodka like those below it)
-7 -> 0     6
+3 -> 3/0
+4 -> 4/0
+6 -> 6/0 (given priority due to being vodka like those below it)
+7 -> 0/6
 
 LEMON/LIME mapping
 
-0 -> 0     0
-2 -> 0     2 (given priority due to being most common)
-3 -> 2     0
+0 -> 0/0
+2 -> 0/2 (given priority due to being most common)
+3 -> 2/0
 
 CRAN/VERM mapping
 
-0 -> 0    0
-2 -> 0    2 (given priority due to being most common)
-3 -> 2    0
-4 -> 4    0
+0 -> 0/0
+2 -> 0/2 (given priority due to being most common)
+3 -> 2/0
+4 -> 4/0
+
+Due to ROM being auto-incrementing, we will need to store these LEMON/LIME and CRAN/VERMOUTH values at `n + 1` and `n + 2`
+
+We will store the values at the 100's, 10's, and 1's place so we can store other values in the same row. Limiting ourselves to 1 ROM
+
+Directly mapped values (not shifted for ROM):
+
+|  #  | VODKA/GIN | LEMON/LIME | CRAN/VERM |
+|-----|-----------|------------|-----------|
+| 001 | 3 (3/0)   | 0 (0/0)    | 0 (0/0)   |
+| 002 | 6 (6/0)   | 3 (0/2)    | 0 (0/0)   |
+| 003 | 4 (4/0)   | 2 (2/0)    | 3 (2/0)   |
+| 004 | 4 (4/0)   | 0 (0/0)    | 4 (4/0)   |
+| 005 | 6 (6/0)   | 0 (0/0)    | 2 (0/2)   |
+| 006 | 7 (6/0)   | 2 (2/0)    | 0 (0/0)   |
+| 007 | 7 (6/0)   | 0 (0/0)    | 2 (0/2)   |
+
+Inlined direct values:
+
+|  #  | ROM value |
+|-----|-----------|
+| 001 | 300       |
+| 002 | 630       |
+| 003 | 423       |
+| 004 | 404       |
+| 005 | 602       |
+| 006 | 720       |
+| 007 | 702       |
+
+Offset indirect values: (done via Sublime Text magic)
+
+|  #  | ROM value |
+|-----|-----------|
+| 001 | 3XX       |
+| 002 | 60X       |
+| 003 | 430       |
+| 004 | 420       |
+| 005 | 603       |
+| 006 | 704       |
+| 007 | 722       |
+| 008 | X00       |
+| 009 | XX2       |
