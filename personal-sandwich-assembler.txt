@@ -50,3 +50,72 @@ gen p0 1 0
 gen p1 1 0
 mov 001 x3
 slp 3
+
+# Second attempt
+2 MX6000
+1 DX300
+
+## DX300
+Connected to both controllers and bread/meat/cheese outputs
+
+## Bread/meat
+# Wait for signal from keypad
+slx x0
+
+# Save signal for later (otherwise it's lost on sleep)
+# DEV: We could prob do a `mov` to the second controller so it sleep instead
+#   but it's still 1 line each
+mov x0 acc
+
+# Place bread
+mov 100 x3
+slp 1
+
+# Place meat and unset bread
+mov 010 x3
+slp 1
+
+# Trigger cheese controller
+mov acc x2
+
+# Wait for cheese controller to complete
+slx x2
+
+# Place bread
+mov x2 x3
+slp 1
+
+# Reset bread placement
+mov 0 x3
+
+## Cheese/mustard/flag
+# Wait for signal from meat controller
+slx x1
+
+# Save signal for later (otherwise lost on sleep)
+mov x1 acc
+
+# If we are placing cheese, then place it
+# DEV: This unset bread/meat/cheese DX300
+teq acc 2
+- mov 001 x2
+- slp 1
+
+# Reset bread/meat/cheese DX300
+mov 0 x2
+
+# If we are placing extra mustard
+teq acc 3
+  # Place extra mustard
++ gen p1 2 0
+  # Place normal mustard
+- gen p1 1 0
+
+# Notify bread controller to place bread
+mov 100 x1
+
+# Wait for bread to be placed
+slp 1
+
+# Place flag
+gen p0 3 0
