@@ -1,0 +1,29 @@
+# Input variables
+# X_KEYPAD = {
+#   1: Meat + cheese + mustard,
+#   2: No cheese,
+#   3: Extra mustard
+# }
+
+# Output variables
+# P_BREAD
+# P_MEAT
+# P_CHEESE
+# P_MUSTARD
+# P_FLAG
+
+# Gist
+Wait for signal
+Place bread
+Place meat
+Compare signal to 2
+  If < 2 (i.e. 1)
+    Place cheese
+    Place mustard
+  If = 2 (i.e. 2)
+    Place mustard
+  If > 2 (i.e. 3)
+    Place cheese
+    Place mustard for 2s
+Place bread
+Place flag
