@@ -1,0 +1,16 @@
+# Input variables
+# P_HIT
+# P_RESPAWN
+# P_TRIGGER
+# P_RELOAD
+# X_AMMO
+
+# Output variables
+# P_ALIVE
+# P_FIRE
+
+# Overview
+On P_HIT, set P_ALIVE=0
+On P_RESPAWN, set P_ALIVE=100
+On P_RELOAD, set AMMO to X_AMMO
+On P_ALIVE + P_TRIGGER, if AMMO > 0, AMMO -= 1 and P_FIRE=100
