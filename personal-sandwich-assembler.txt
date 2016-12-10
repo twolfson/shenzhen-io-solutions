@@ -19,11 +19,34 @@ Place meat
 Compare signal to 2
   If < 2 (i.e. 1)
     Place cheese
-    Place mustard
   If = 2 (i.e. 2)
-    Place mustard
+    Do nothing
   If > 2 (i.e. 3)
     Place cheese
-    Place mustard for 2s
+    Place mustard (acts as extra)
+Place mustard
 Place bread
 Place flag
+
+# First attempt
+1 MX6000
+1 DX300
+
+Didn't work out due to DX300 not being the right tool
+  We need to reset signals and that costs lines
+
+# More or less what the gist said
+slx x1
+gen p1 1 0
+mov 100 x3
+slp 1
+tcp x1 2
++ mov 010 x3
++ slp 1
+- mov 010 x3
+- slp 1
+- gen p0 1 0
+gen p0 1 0
+gen p1 1 0
+mov 001 x3
+slp 3
