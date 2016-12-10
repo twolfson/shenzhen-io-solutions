@@ -14,3 +14,47 @@ On P_HIT, set P_ALIVE=0
 On P_RESPAWN, set P_ALIVE=100
 On P_RELOAD, set AMMO to X_AMMO
 On P_ALIVE + P_TRIGGER, if AMMO > 0, AMMO -= 1 and P_FIRE=100
+
+# Approach
+1 controller for alive/dead
+1 controller for ammo
+
+It's been a while since doing this so going to jump into code...
+
+# Initial solution
+1 MX6000 for alive/dead
+1 MX6000 for ammo
+2 DX300
+
+## Alive/dead
+# If we are respawning
+teq x0 010
+  # Update alive state and write out to a pin
++ mov 100 acc
++ mov 100 p1
+
+# If we are hit
+teq x0 001
+  # Update alive state and write out to a pin
++ mov 0 acc
++ mov 0 p1
+
+# Sleep
+slp 1
+
+## Ammo
+# If we are reloading, then reset our ammo count
+# DEV: This comes before `reload` so we don't unwrite out `mov x3`
+teq x3 010
++ mov x0 acc
+
+# If we are firing, have ammo, and are alive, then fire (decrement + output fire)
+teq x3 100
++ tgt acc 0
++ teq p0 100
+  # DEV: Our `mov` is automatically reset the next second due to a read
++ mov 001 x3
++ sub 1
+
+# Sleep
+slp 1
