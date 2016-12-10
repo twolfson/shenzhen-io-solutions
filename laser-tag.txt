@@ -58,3 +58,6 @@ teq x3 100
 
 # Sleep
 slp 1
+
+## Second iteration
+Same as before but with MX3000's. We need the DX300 for pins =/
