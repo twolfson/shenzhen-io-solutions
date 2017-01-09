@@ -422,3 +422,16 @@ tlt dat 100
 ```
 
 TODO: Consider adding a controller which looks at detect and toggles between 0 and 1 every 4 counts
+
+We have to output both scores every frame as game is running
+
+We tried some new code to accomodate this but no luck
+
+We should prob have:
+
+- 1 game state controller
+- 1 distance calculator (hit on request)
+- 1 score calculator (hit on request)
+- Something for score tracking/flashing
+
+We need to figure out flashing mechanics... Let's to a proof of concept
