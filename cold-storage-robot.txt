@@ -201,3 +201,49 @@ Motor should be another system
 - Move back to 0
 
 Main or 2 controller to save/lookup indicies?
+
+Extend/grab looks promising:
+
+# Mock data controller
+```
+slp 1
+mov 1 x3 # 1,468
+slp 4 # Extd/grab
+slp 3 # Next sig
+slp 1
+mov 1 x3 # 2,468
+slp 4 # Extd/grab
+slp 2 # Next sig
+mov 1 x3 # 1,304
+slp 4 # Extd/grabb
+slp 3 # Next sig
+mov 2 x3 # 1,591
+slp 999
+```
+
+# Extend/grab controller
+```
+# Wait for signal
+slx x0
+# Save duration
+mov x0 acc
+
+# Extend arm
+mov 100 x2
+slp 1
+
+# Retract arm + grab object
+# DEV: We could use `add 1` but they take same lines of code
+mov 010 x2
+slp 1
+
+# Sleep for motor movements
+slp acc
+
+# Extend arm
+mov 110 x2
+slp 1
+
+# Retract arm + release
+mov 000 x2
+```
