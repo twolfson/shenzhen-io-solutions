@@ -190,3 +190,14 @@ teq acc 0
 
 # And this doesn't even cover READ process...
 ```
+
+Extend/grab should be 1 system
+- Receive count
+- Extend/grab for count
+
+Motor should be another system
+- Receive count
+- Move to position, wait for 1s
+- Move back to 0
+
+Main or 2 controller to save/lookup indicies?
