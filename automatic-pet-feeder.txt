@@ -19,3 +19,12 @@ P_FOOD_B
 3 controllers for each type
 
 Need to figure out how to handle concurrent outputs...
+
+# Exploration
+After some exploring, it looks like 1 DX300 works well for type switches and we can barely fit 1 + 3 controllers
+
+So the router will also need to control A/B
+
+Maybe we can leverage a DX300 with the lookup controllers too?
+
+Nah, that won't be possible as we need exact values
