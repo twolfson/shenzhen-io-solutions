@@ -28,3 +28,11 @@ Numbers they have:
 We should probably look at numbers in a spreadsheet for better visualization/clarity
 
 We probably don't need to use P_DETECT... but you can if you want
+  Never mind, we do -- it's required in a first test case
+
+# Gist
+Use 2 controllers for scores and a controller for calculating shot value
+  Score 1 counts for 4 detects, then waits for 4 detects, then flashes
+      Might be too much code but that's for prototyping
+  Score 2 waits for 4 detects, counts for 4 detects, then flashes
+  Shot value waits for X signal, looks at x/y, determines value, replies with value over X signal
