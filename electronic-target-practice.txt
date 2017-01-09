@@ -155,3 +155,30 @@ dgt...
 2X -> 2 -> 2 -  1 ->  1
 1X -> 1 -> 1 = -2 -> -2
 0X -> 0 -> 1 = -2 -> -2
+
+Or in linear form
+
+4X -> 4 -> 4
+3X -> 3 -> 3 - 1 ->  2
+2X -> 2 -> 2 - 1 ->  1
+1X -> 1 -> 1 - 1 ->  0 -> = -2 -> -2
+0X -> 0 -> 1 - 1 -> -1 -> = -2 -> -2
+
+Original:
+
+```
+slp: slx x0
+mov x0 null
+mov 50 acc
+tgt p1 p0
++ sub p1
+- sub p0
+tgt acc 50
++ sub 50
+mov acc dat
+mov -2 acc
+tlt dat 30
++ add 3
+tlt dat 20
++ add 1
+```
