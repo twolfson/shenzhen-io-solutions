@@ -61,3 +61,46 @@ Move `a0` to `acc`
 Sub 1
 Mov `acc` to `a0`
 Save `id`
+
+## Partial progress
+Signal handler:
+Same as gist content
+```
+tcp x0 1
+- jmp slp
++ jmp slp
+gen p0 1 0
+mov x0 x3
+slp: slp 1
+```
+
+Read only from RAM:
+
+```
+# Wait for signal
+slx x0
+
+# Save id for later
+mov x0 dat
+
+# Find empty spot in RAM
+loop:
+teq x2 0
+- jmp loop
+
+# Back up 1 space in RAM
+mov x3 acc
+sub 1
+mov acc x3
+
+# Save `id` to RAM
+mov dat x2
+
+# We can send `acc` anywhere as it's the RAM index
+```
+
+After this, 3 controllers:
+
+- 1 to handle signal from X_RADIO_RX and extend arm now/later
+- 1 to handle RAM position
+- 1 to move motor/grab
