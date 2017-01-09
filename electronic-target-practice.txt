@@ -182,3 +182,31 @@ tlt dat 30
 tlt dat 20
 + add 1
 ```
+
+New:
+
+```
+slp: slx x0
+mov x0 null
+mov 50 acc
+tgt p1 p0
++ sub p1
+- sub p0
+tgt acc 50
++ sub 50
+dgt 1
+tlt acc 3
++ sub 1
+tlt acc 1
++ mov -2 acc
+mov acc dat
+```
+
+But it's all in vain...
+
+x = 29; y = 27; math.sqrt((50 - x) ** 2 + (50 - y) ** 2)
+31.144823004794873
+
+whereas 50 - 29 = 21
+
+Disqualifies our logic fast =/
