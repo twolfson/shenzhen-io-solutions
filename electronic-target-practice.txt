@@ -635,3 +635,133 @@ In summary for options:
 - Need game reset state
 - TODO: We can cut `null` setter by passing game state via X also
 - TODO: We could save lines with `mov -999` if distance calc sees detect change
+
+Nope, neither seems to work =(
+
+Ah, we can pass along detect to score tracker
+
+Aaaaand we solved it with some magic :tada:
+
+- 1 DX300 for P_DETECT
+- 1 MX6000, state tracker
+- 1 MX6000, score tracker
+- 1 MX6000, distance calculator
+- 1 MX6000, distance to score converter
+
+State tracker:
+
+**Note: DX300 is configured so it's value is 1 (i.e. 001) when detect is on**
+
+```
+# Increment game state by detect
+#   i.e. if detect is on, += 1. else += 0
+add x0
+
+# Output game state to P pin
+mov acc p1
+
+# If the game is on, output game state to score tracker
+#   i.e. tell it to draw a frame
+tgt acc 0
++ mov x0 x2
+
+# If we completed a game
+teq acc 8
+  # Run flashing logic
++ slp 2
++ mov 000 x2
++ slp 2
++ mov 000 x2
++ slp 2
+  # Output end of game state to P pin
++ mov 9 p1
+  # Run final draw
++ mov 000 x2
+  # Reset game to off
++ mov 0 acc
+
+# Sleep
+slp: slp 1
+```
+
+Score tracker:
+
+```
+# When we receive a request to draw a frame
+slx x0
+
+# If detect isn't on (i.e. no new score)
+teq x0 001
+  # Jump to draw
+- jmp draw
+
+# If we are switching players, swap their values
+teq p1 5
++ mov acc dat
++ mov 0 acc
+
+# Add new score to player
+# DEV: We don't request this as distance calculator watched detect by itself
+add x1
+
+# Draw player scores
+draw: tlt p1 5
++ mov acc x2
++ mov 0 x3
+- mov acc x3
+- mov dat x2
+
+# If the game is over, reset player 1 score
+# DEV: We always output 0 as player 2's score initially so we're fine
+teq 9 p1
++ mov 0 acc
+```
+
+Distance calculator:
+
+```
+# If a new arrow isn't detected, go to sleep
+teq x2 001
+- jmp slp
+
+# Calculate distances and output their values
+# See past explanations for more details
+mov 50 acc
+sub p0
+mul acc
+mov acc x3
+mov 50 acc
+sub p1
+mul acc
+mov acc x3
+
+# Sleep
+slp: slp 1
+```
+
+Distance to score converter:
+
+```
+# Wait for distance from distance calculator
+slp: slx x1
+
+# Add together and save distances
+mov x1 acc
+add x1
+mov acc dat
+
+# Additively convert distance to score
+mov -2 acc
+tlt dat 900
++ add 3
+tlt dat 400
++ add 1
+tlt dat 100
++ add 2
+
+# Output score
+mov acc x3
+```
+
+TODO: Optimize by moving addition logic into distance calculator
+  Unfortunately, it'll only save lines of code as score converted needs to constantly reference distance
