@@ -28,3 +28,19 @@ So the router will also need to control A/B
 Maybe we can leverage a DX300 with the lookup controllers too?
 
 Nah, that won't be possible as we need exact values
+
+We got a layout working but realizing that the logic for router will be hard since it's not a single source response
+
+```
+mov x0 acc
+teq acc -999
++ jmp slp
+teq acc 2
++ mov
++ jmp slp
+tcp acc 2
+-
+slp: slp 1
+```
+
+Maybe write all config to RAM, then let main controller jump to index and read RAM info
