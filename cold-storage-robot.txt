@@ -74,7 +74,7 @@ mov x0 x3
 slp: slp 1
 ```
 
-Read only from RAM:
+Write only from RAM:
 
 ```
 # Wait for signal
@@ -104,3 +104,67 @@ After this, 3 controllers:
 - 1 to handle signal from X_RADIO_RX and extend arm now/later
 - 1 to handle RAM position
 - 1 to move motor/grab
+
+TODO: Potential optimization is signal handler/motor/grab can all be 1 controller
+
+This isn't going to work as grab can happen on head or tail end of action...
+
+```
+# Reset motor to 50
+@mov 50 p1
+
+# Wait for index from RAM controller
+slx x1
+
+# Save index in ACC and DAT for moving there/back
+mov x1 acc
+mov acc dat
+
+# Enable grab
+mov 100 p0
+
+# Move our motor in a loop
+loop:
+slp 1
+mov 100 p1
+teq acc 0
+- sub 1
+- jmp loop
+
+# Wait for 1 second...
+slp 1
+
+# Reset motor and release grab (fails due to arm not being extended)
+mov 50 p1
+mov 0 p0
+```
+
+Maybe we have 1 controller for motor and 1 for grab?
+
+I think the `if` logic is going to make all controllers much larger...
+
+Maybe:
+
+1 controller for choosing READ/WRITE controller
+1 controller for READ
+1 controller for WRITE
+1 controller for RAM (need to see if RAM handle read/write in 1)
+
+
+Verified that an all-in-one motor/extend/grab won't work due to sheer lines:
+
+```
+@mov 50 p1
+slp 1
+mov 100 x2
+slp 1
+mov 010 x2
+slp 1
+mov 1 acc
+loop:
+mov 100 p1
+teq acc 0
+- sub 1
+- slp 1
+- jmp loop
+```
