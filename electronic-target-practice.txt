@@ -420,3 +420,5 @@ tlt dat 400
 tlt dat 100
 + add 2
 ```
+
+TODO: Consider adding a controller which looks at detect and toggles between 0 and 1 every 4 counts
