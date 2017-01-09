@@ -67,15 +67,24 @@ Well it's radially based so all you need is the greater of x and y
   Then map that to the point value
 
 ```
-# TODO: We can sleep/loop always and use a P pin for simplicity
+# Wait for and flush signal
+# TODO: We can sleep/loop always and use a P pin to save 1 line
 slx output
 mov output null
+
+# Find out which is farther x or y
 tgt x y
 + mov x acc
 - mov y acc
+
+# If we are over 50, move to 0 - 50 range
 tgt acc 50
 + sub 50
+
+# Relocate x/y distance so we can cumulatively add points without lots of jumps
 mov acc dat
+
+# Reset points to -2 and add difference as it gets closer
 mov -2 acc
 tlt dat 30
 + add 3
@@ -83,5 +92,48 @@ tlt dat 20
 + add 1
 tlt dat 10
 + add 2
+
+# Output value
 mov acc output
 ```
+
+Damn, that's 16 lines of code, need to figure out something better...
+
+# Implementation
+So those `tlt` lines are wrong and actually won't work due to bad subtraction
+
+We need `50 - x` for radial distance
+
+```
+# Wait for and flush signal
+# TODO: We can sleep/loop always and use a P pin to save 1 line
+slx output
+mov output null
+
+# Reset accumulator to 50
+mov 50 acc
+
+# Find out which is farther x or y
+# acc = 50 - x (e.g. 50 - 100 -> -50, 50 - 0 -> 50)
+tgt x y
++ sub x
+- sub y
+
+# If we are negative, flip our value
+# acc = -1 * acc (e.g. -50 -> 50, 50 -> 50)
+tlt acc 0
++ mul -1
+
+# ...
+```
+
+Can we optimize for `dgt` with values?
+
+ 0 <= distance < 10; 40 < x <  60;  4
+10 <= distance < 20; 30 < x <  70;  2
+20 <= distance < 30; 20 < x <  80;  1
+30 <= distance     ;  0 < x < 100; -2
+
+I don't think we can...
+
+Maybe we can save lines by doing 1 controller to calculate radial distance and another to add the damn points
