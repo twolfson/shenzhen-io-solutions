@@ -291,3 +291,201 @@ slp 2
 mov 0 p1
 slp acc
 ```
+
+RAM read/write controller looking good:
+
+# Radio controller
+```
+# Compare radio signal
+tcp x0 1
+  # If it's < 1 (-999), do nothing
+- jmp slp
+  # If it's > 1 (2), set signal type pin
+  # DEV: We wanted to reuse X pin but we were getting conflicting reads
++ mov 2 p0
++ jmp req
+
+# Otherwise (it's 1), set signal type pin
+mov 1 p0
+
+# Ask for index from RAM
+req: mov x0 x1
+
+# Receive index from RAM
+mov x1 acc
+
+# Wait for next go around
+slp: slp 1
+```
+
+# RAM controller
+```
+# Wait for signal
+slp: slx x0
+
+# If we are saving, save 0 as value to find
+teq p1 1
++ mov 0 acc
+# Otherwise, save id as value to find
+- mov x0 acc
+
+# Reset our RAM position to 0
+mov 0 x3
+
+# If we found our value, then stop
+# DEV: RAM auto-increments index as we loop
+loop: teq x2 acc
+- jmp loop
+
+# Move back 1 position in RAM
+mov x3 acc
+sub 1
+mov acc x3
+
+# If we are saving, save id to index
+teq p1 1
++ mov x0 x2
+# Otherwise, save 0 to index (i.e. unset value)
+- mov 0 x2
+
+# Output index found
+mov acc x0
+```
+
+**It works :tada:**
+
+- 1 MC6000, signal controller
+- 1 MC6000 + 1 RAM, RAM controller
+- 1 MC6000, motor controller
+- 1 MC6000 + 1 DX300, extend/grab controller
+
+Signal controller:
+
+```
+# Compare our signal
+# If it's < 1 (-999), skip it
+tcp x0 1
+- jmp slp
+# If it's > 1 (2), output 2 as our ACTION
++ mov 2 p0
++ jmp req
+# Otherwise (it's 1), output 1 as our ACTION
+mov 1 p0
+
+# Ask RAM for index based on ACTION and ID
+req: mov x0 x1
+# Receive index for motor/extend controllers
+mov x1 acc
+
+# Add 1 to index for easier sleeping
+add 1
+
+# Tell motor/extend controllers about index to use
+mov acc x2
+mov acc x3
+
+# Sleep
+slp: slp 1
+```
+
+RAM controller:
+
+```
+# Wait for request from signal controller
+slp: slx x0
+
+# If our ACTION is STORE, set lookup value as 0
+teq p1 1
++ mov 0 acc
+# Otherwise (ACTION is RETRIEVE), set lookup value as ID
+- mov x0 acc
+
+# Reset RAM index to 0 (prevents storing to non-first 0)
+mov 0 x3
+
+# Find our first matching lookup value
+# DEV: RAM will auto-increment index on each read
+loop: teq x2 acc
+- jmp loop
+
+# Move RAM back 1 position and save index
+mov x3 acc
+sub 1
+mov acc x3
+
+# If our ACTION is STORE, save id
+teq p1 1
++ mov x0 x2
+# Otherwise (ACTION is RETRIEVE), unset id (i.e. set to 0)
+- mov 0 x2
+
+# Output index
+mov acc x0
+```
+
+Motor controller:
+
+```
+# Reset motor position
+mov 50 p1
+
+# Wait for signal
+slx x0
+
+# Save index for later
+mov x0 acc
+
+# If our ACTION is STORE, then wait for extend/grab
+teq p0 1
++ slp 2
+
+# Move our motor forward to `index`
+mov 100 p1
+slp acc
+
+# Stop motor and wait for extend/grab
+# DEV: This could be STORE or RETRIEVE action but it doesn't affect us
+mov 50 p1
+slp 2
+
+# Move our motor backward to 0
+mov 0 p1
+slp acc
+
+# Go to top of instructions: Reset motor and wait for signal
+```
+
+Extend/grab controller:
+
+```
+# Wait for signal
+slx x0
+
+# Save index for later
+mov x0 acc
+
+# If our ACTION is not STORE (i.e. RETRIEVE), then wait for motor to be over our item
+teq p0 1
+- slp acc
+
+# Extend our arm
+mov 100 x3
+slp 1
+
+# Retract arm and grab item
+# DEV: `slp 1` is to wait for motor to turn on I guess
+mov 010 x3
+slp 1
+
+# Hold onto item while motor moves
+# DEV: This could be moving from 0 -> index for STORE
+#   or index -> 0 for RETRIEVE
+slp acc
+
+# Extend arm and keep grabbing item
+mov 110 x3
+slp 1
+
+# Retract arm and release item
+mov 000 x3
+```
