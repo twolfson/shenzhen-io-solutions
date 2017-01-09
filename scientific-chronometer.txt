@@ -22,3 +22,7 @@ Various thoughts:
 - Could have an always running counter with a reset signal (due to 2 time units being weird)
 - Will likely need to maintain running state in 1 controller
     - It should read current count from another controller via `P_` flag if possible
+
+First proof of concept:
+
+- Get on/off working
