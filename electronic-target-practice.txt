@@ -1,0 +1,30 @@
+# Input variables
+P_DETECT
+P_TARGET_X
+P_TARGET_Y
+
+# Output variables
+X_SCORE_1
+X_SCORE_2
+
+# Overview
+ 0 <= distance < 10;  4
+10 <= distance < 20;  2
+20 <= distance < 30;  1
+30 <= distance     ; -2
+
+Pythagorean distance = sqrt(|50 - x| ^ 2 + |50 - y| ^ 2)
+  Definitely going to need to approximate that...
+
+  0 < x < 100
+  so...
+  0 < |50 - x| < 50
+
+Numbers they have:
+
+29, 27 -> -2
+67, 72 ->  1
+
+We should probably look at numbers in a spreadsheet for better visualization/clarity
+
+We probably don't need to use P_DETECT... but you can if you want
