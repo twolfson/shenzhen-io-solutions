@@ -103,3 +103,29 @@ teq dat 0
 # Output our current count
 ret: mov acc p0
 ```
+
+Logic to sort out:
+
+if start/stop
+  if off
+    on
+  else (on)
+    if counting
+      not counting
+    else
+      counting
+
+This means `counting/not counting` must be `acc` (and on/off is `dat`) so we can use `not` and we can analyse `else` first as it doesn't affect `dat`
+
+
+```
+# If start/stop pressed and we are enabled, toggle counting/not counting state
+teq x0 010
+teq dat 100
++ not
+# If start/stop pressed and we are disabled, enable us
+# TODO: Do we need to reset `acc` for safe measures? (i.e. make sure not counting) -- prob not since we can only turn off when not counting
+teq x0 010
+teq dat 0
++ mov 100 dat
+```
