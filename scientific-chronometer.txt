@@ -42,3 +42,64 @@ mov 0 x3
 # Sleep
 slp: slp 1
 ```
+
+Was attempting state exploration controller but had another idea
+
+- 1 controller to determine manage state
+- 1 controller to increment (pinged by state)
+- 1 controller to manage display (pinged by incrementer)
+
+Without pinging each other via X pins, we will have timing issues with P pins
+
+Incomplete logic, need to handle stop case -- need to figure out how to get `if` branching right
+
+```
+# If start/stop is pressed
+teq x0 010
+  # and state is "on but stopped"
++ teq acc 2
+  # Change state to "on and started"
++ mov 1 acc
+
+# If start/stop is pressed
+teq x0 010
+  # and state is "off"
++ teq acc 0
+  # Change state to "on but stopped"
++ mov 2 acc
+
+# If reset/off is pressed
+teq x0 100
+  # and state is "on but stopped"
++ teq acc 2
+  # and count is 0
+  # TODO: Need to handle counter reset
++ teq p0 0
+  # Change state to "off"
++ mov 0 acc
+
+# Tell incrementer of current state
+mov acc x1
+
+# Sleep
+slp: slp 1
+```
+
+```
+# Wait for signal
+slp: slx x1
+
+# If state is NOT "on and started", then output current count
+# TODO: Do we need to output current count
+teq x1 1
+- jmp ret
+
+# Increment our counter (modular counting via `dat`)
+teq dat 0
++ mov 1 dat
+- add 1
+- mov 0 dat
+
+# Output our current count
+ret: mov acc p0
+```
