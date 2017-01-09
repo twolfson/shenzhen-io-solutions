@@ -26,3 +26,38 @@ tcp
 # Otherwise, (1), do SAVE motion
 
 - Logic should be same for load/save except for extend at start/end
+
+Initial thought is to store ids in RAM by looping which should work but we were worried about address
+
+```
+slx x0
+mov x0 dat
+loop:
+teq x2 0
+- jmp loop
+mov 14 acc
+loop2:
+sub 1
+mov
+teq acc 0
+- jmp loop2
+```
+
+Now we realize that's not an issue:
+
+[id] [index] [id] [index]
+
+Loop until [id] = [0]
+
+....
+
+Actually no `[index]` needed, `a0` is index
+
+[id] [id]
+
+Loop until [id] = [0]
+
+Move `a0` to `acc`
+Sub 1
+Mov `acc` to `a0`
+Save `id`
