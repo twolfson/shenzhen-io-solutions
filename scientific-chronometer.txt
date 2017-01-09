@@ -1,0 +1,13 @@
+# Input variables
+P_START_STOP
+P_RESET_OFF
+
+# Output variables
+X_DISPLAY
+
+# Gist
+
+
+
+
+TODO: If we need to save input PINs we can use a DX300
