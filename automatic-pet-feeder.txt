@@ -67,3 +67,211 @@ slp: slp 1
 ```
 
 Ran out of lines of code, going to try 2 controllers...
+
+Nope, no luck there...
+
+Maybe we use sleepers, multicast, but DX300 the types to multicaster. Then use `dgt` for magic retrieval
+
+Attempted 1 multicast again, but too much code:
+
+```
+mov x0 dat
+teq dat -999
++ jmp slp
+mov 2 acc
+loop: mov dat x1
+teq x1 1
++ jmp out
+sub 1
+teq acc 0
+- jmp loop
+out: nop
+slp: slp 1
+```
+
+Going for 1 multicaster, 3 sleepers, 1 feeder
+
+Getting close to a solution here:
+
+```
+# Read in signal
+mov x0 acc
+
+# If the signal is -999, ignore it
+teq acc -999
++ jmp slp
+
+# Multicast signal
+mov acc x2
+mov acc x2
+mov acc x2
+
+# Sleep
+slp: slp 1
+```
+
+3x of same code more/less
+
+```
+# Wait for multicast signal
+slx x3
+
+# If the multicast signal is for us
+teq x3 2
+  # Output our id for DGT
++ mov 2 x2
+  # Output feed size
++ mov x0 x2
+  # Sleep until next interval
++ slp x1
+```
+
+```
+slx x3
+teq x3 3
++ mov 3 x2
++ mov x0 x2
++ slp x1
+```
+
+```
+slx x0
+teq x0 1
++ mov 1 x1
++ mov x3 x1
++ slp x2
+```
+
+```
+# Wait for someone to respond positively to inbound signal
+slx x0
+
+# Load in type data to acc from DX300
+mov x3 acc
+
+# Retrieve corresponding type based on digit from acc
+dgt x0
+
+# If we are feeding type A
+teq acc 1
+  # Enable type A with given size
++ mov x0 p1
+  # Enable type B with given size
+- mov x0 p0
+
+# Wait for feeder to finish
+slp 1
+
+# Reset our feeders
+mov 0 p0
+mov 0 p1
+```
+
+TODO: Going to need to not multicast a signal if one of the controllers is sleeping...
+  Solve this via `acc + slp` counter
+
+Fixed first problem by adding a `slp 1` to prevent signal theft
+
+Aaaand it's solved :tada:
+
+- 1 MC4000X, multicaster
+- 3 MC4000X, sleeper controllers
+- 1 MC6000 + 1 DX300, feeder
+
+Multicaster:
+
+```
+# Save incoming signal
+mov x0 acc
+
+# Multicast signal to controllers
+mov acc x2
+mov acc x2
+mov acc x2
+
+# Sleep
+slp: slp 1
+```
+
+Sleeper controller:
+
+```
+# If we are "sleeping"
+tgt acc 0
+  # Flush incoming multicast signal
++ mov x3 null
+  # Jump to subtraction logic and sleep
++ jmp sub
+
+# If the signal is for us
+teq x3 2
+  # Notify feeder to use our digit (1 = 2nd digit, Y in XYZ)
++ mov 1 x2
+  # Notify feeder how much size is
++ mov x0 x2
+  # Set "sleeping" timer
++ mov x1 acc
+
+# Subtract from our loop
+# DEV: We subtract early as that's what the spec expects
+sub: sub 1
+
+# Sleep
+# DEV: This prevents us from stealing someone else's signal
+slp 1
+```
+
+```
+# Similar to above
+tgt acc 0
++ mov x3 null
++ jmp sub
+teq x3 3
++ mov 2 x2
++ mov x0 x2
++ mov x1 acc
+sub: sub 1
+slp 1
+```
+
+```
+# Similar to above
+tgt acc 0
++ mov x0 null
++ jmp sub
+teq x0 1
++ mov 0 x1
++ mov x3 x1
++ mov x2 acc
+sub: sub 1
+slp 1
+```
+
+Feeder:
+
+```
+# Wait for signal
+slx x0
+
+# Save type mapping to accumulator and pick out specified digit
+mov x3 acc
+dgt x0
+
+# If we are dispensing type A food, then dispense the requested size
+teq acc 1
++ mov x0 p1
+# Otherwise dispense type B of requested size
+- mov x0 p0
+
+# Wait for dispense to complete
+slp 1
+
+# Shut off dispensers
+mov 0 p0
+mov 0 p1
+```
+
+TODO: Decrease cost further by swapping MX6000 to MX4000
+  Yep, did it. Not worth documenting further
+TODO: Optimize code by replacing `sub` label with `tgt` label
+  Nope, can't do that due to lines of code
