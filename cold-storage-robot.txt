@@ -154,17 +154,39 @@ Maybe:
 Verified that an all-in-one motor/extend/grab won't work due to sheer lines:
 
 ```
+# Reset motor
 @mov 50 p1
+
+# Mock waiting for signal
 slp 1
+
+# Extend arm
 mov 100 x2
 slp 1
+
+# Retract arm/add grab
 mov 010 x2
 slp 1
+
+# Mock saving index
 mov 1 acc
+
+# Move motor to position
 loop:
 mov 100 p1
 teq acc 0
 - sub 1
 - slp 1
 - jmp loop
+
+# Out of lines of code but would need to...
+# Reset motor
+# Wait 1s
+# Extend arm + maintain grab
+# Wait 1s
+# Retract arm + release grab
+# Wait 1s
+# Loop motor in reverse
+
+# And this doesn't even cover READ process...
 ```
