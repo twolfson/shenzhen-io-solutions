@@ -358,3 +358,65 @@ Ahhh, I guess we don't care about distances over 900 anyway (30^2) (they're norm
 400 <= squared distance < 900;  1
 100 <= squared distance < 400;  2
   0 <= squared distance < 100;  4
+
+First test run looking good:
+
+- 1 detect detector (prob can ditch this)
+- 1 distance calculator
+- 1 distance to score converter
+
+```
+# If detect is hit, send a signal
+teq p0 100
++ mov 100 x0
+
+# Sleep
+slp: slp 1
+```
+
+```
+# Wait for a signal
+slp: slx x0
+
+# Flush our signal
+mov x0 null
+
+# Calculate (50 - x)^2
+mov 50 acc
+sub p0
+mul acc
+
+# Output (50 - x)^2
+mov acc x3
+
+# Calculate (50 - y)^2
+mov 50 acc
+sub p1
+mul acc
+
+# Output (50 - y)^2
+mov acc x3
+```
+
+```
+# Wait for signal
+slp: slx x1
+
+# Replace accumulator with (50 - x)^2
+mov x1 acc
+
+# Add (50 - y)^2
+add x1
+
+# Relocate data for comparison
+mov acc dat
+
+# Calculate score additively
+mov -2 acc
+tlt dat 900
++ add 3
+tlt dat 400
++ add 1
+tlt dat 100
++ add 2
+```
