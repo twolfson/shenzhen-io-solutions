@@ -256,3 +256,93 @@ teq x1 0
 + mov x1 acc
 - mov x1 x3
 ```
+
+Okay, due to some convoluted logic about counting, we have something that works:
+
+- 1 MC6000, state manager
+- 1 MC6000, incrementer
+- 1 DX300, 2 P input to 1 X input
+- 1 MX4000, display
+
+State manager:
+
+```
+# If start/stop pressed and we are on, toggle counting/not counting state
+teq x0 010
++ teq dat 100
++ not
+
+# If start/stop pressed and we are off, turn us on
+teq x0 010
++ teq dat 0
++ mov 100 dat
+
+# If reset/off pressed and we are not counting and count is 0, turn us off
+teq x0 100
++ teq acc 0
++ teq p0 0
++ mov 0 dat
+
+# Output on/off state first (proxied to display)
+# DEV: We want to update display with this second's count, not the upcoming one hence state first
+mov dat x1
+
+# Then ask for increment action
+mov acc x1
+
+# Sleep
+slp: slp 1
+```
+
+Incrementer:
+
+```
+# Output current count logic to state manager
+out: mov acc p0
+
+# Wait for signal
+slx x0
+
+# Forward on/off state from state controller to display controller
+mov x0 x3
+
+# If we are counting, jump to increment logic
+teq x0 100
++ jmp incr
+
+# Otherwise (not counting)
+# If the reset/off button is pressed, reset our counter
+teq x1 100
++ mov 0 acc
+
+# Output latest count to display and return
+mov acc x3
+jmp out
+
+# Output current count to display
+# DEV: This seems backwards logic wise but it's what the tests want...
+#   We are probably counting early somehow or something...
+incr: mov acc x3
+
+# Perform increment logic
+teq dat 0
++ mov 1 dat
+- add 1
+- mov 0 dat
+```
+
+Display:
+
+```
+# Wait for signal
+slp: slx x1
+
+# If our on/off state is off
+teq x1 0
+  # Turn off display
++ mov -999 x3
+  # Swallow count signal
++ mov x1 acc
+# Otherwise, output count signal to display
+- mov x1 x3
+```
