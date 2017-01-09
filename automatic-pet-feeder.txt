@@ -44,3 +44,26 @@ slp: slp 1
 ```
 
 Maybe write all config to RAM, then let main controller jump to index and read RAM info
+
+RAM won't work great as we don't have sleeper intervals...
+
+Maybe instead of doing routing, we do multicasting and listen to a single X pin?
+
+```
+mov x0 dat
+teq dat -999
++ jmp slp
+mov 2 acc
+loop: mov dat x1
+teq x1 1
+- jmp sub
+teq x1 1
++
+-
+sub: sub 1
+teq acc 0
+- jmp loop
+slp: slp 1
+```
+
+Ran out of lines of code, going to try 2 controllers...
