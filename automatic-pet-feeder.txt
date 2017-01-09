@@ -1,0 +1,21 @@
+# Input variables
+X_TAG_READER
+X_TIME_1
+X_SIZE_1
+P_TYPE_1
+X_TIME_2
+X_SIZE_2
+P_TYPE_2
+X_TIME_3
+X_SIZE_3
+P_TYPE_3
+
+# Output variables
+P_FOOD_A
+P_FOOD_B
+
+# Gist
+1 router controller
+3 controllers for each type
+
+Need to figure out how to handle concurrent outputs...
