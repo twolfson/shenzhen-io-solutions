@@ -247,3 +247,47 @@ slp 1
 # Retract arm + release
 mov 000 x2
 ```
+
+Motor looking good too:
+
+# Mock data controller
+```
+slp 1
+slp 2 # 1,468
+mov 1 x3
+slp 4 # Motor
+slp 1
+mov 1 x3 # 2,468
+slp 4 # Motor
+slp 3
+slp 2 # 1,304
+mov 1 x3
+slp 4 # Motor
+slp 3 # 1 + 2
+mov 2 x3
+slp 999
+```
+
+# Motor controller
+```
+# Reset motor position
+mov 50 p1
+
+# Wait for signal
+slx x0
+
+# Save index
+mov x0 acc
+
+# Move motor to index
+mov 100 p1
+slp acc
+
+# Stop motor, wait for extend/grab
+mov 50 p1
+slp 2
+
+# Move motor back to position 0
+mov 0 p1
+slp acc
+```
