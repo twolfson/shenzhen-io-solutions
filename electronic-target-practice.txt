@@ -210,3 +210,5 @@ x = 29; y = 27; math.sqrt((50 - x) ** 2 + (50 - y) ** 2)
 whereas 50 - 29 = 21
 
 Disqualifies our logic fast =/
+
+So yea, need a radial calculator and then something to convert distance to score
