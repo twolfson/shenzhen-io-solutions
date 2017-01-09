@@ -14,3 +14,15 @@ If signal is 1
 If signal is 2
   Walk through RAM until ID found
   Write 0 to RAM slot
+
+# First attempt
+## MC6000
+# Wait for signal
+slx x0
+
+# If signal is < 1 (-999), jump to sleep
+tcp
+# If signal is > 1 (2), do LOAD motion
+# Otherwise, (1), do SAVE motion
+
+- Logic should be same for load/save except for extend at start/end
