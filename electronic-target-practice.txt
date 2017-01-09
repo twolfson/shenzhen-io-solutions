@@ -348,3 +348,13 @@ Okay... so square-root less works but is kind of gnarly with large values... ugh
 Fwiw a -1 wouldn't work because we need it to be a directional `-1` x_x
 
 Ahhh, I guess we don't care about distances over 900 anyway (30^2) (they're normalized to -2) so we can ignore 999 limit issue. Woot
+
+30 <= distance     ; -2
+20 <= distance < 30;  1
+10 <= distance < 20;  2
+ 0 <= distance < 10;  4
+
+900 <= squared distance      ; -2
+400 <= squared distance < 900;  1
+100 <= squared distance < 400;  2
+  0 <= squared distance < 100;  4
