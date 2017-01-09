@@ -26,3 +26,19 @@ Various thoughts:
 First proof of concept:
 
 - Get on/off working
+
+```
+# Compare start/stop button via DX300
+tcp x1 010
+# If no buttons, then sleep
+- jmp slp
+# If P_RESET_OFF, then turn off display
++ mov -999 x3
++ jmp slp
+
+# Otherwise (P_START_STOP was pressed), turn on display
+mov 0 x3
+
+# Sleep
+slp: slp 1
+```
