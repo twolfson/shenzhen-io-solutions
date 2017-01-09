@@ -129,3 +129,130 @@ teq x0 010
 teq dat 0
 + mov 100 dat
 ```
+
+Start/stop logic looking good:
+
+```
+# If start/stop pressed and we are on, toggle counting/not counting state
+teq x0 010
++ teq dat 100
++ not
+
+# If start/stop pressed and we are off, turn us on
+teq x0 010
++ teq dat 0
++ mov 100 dat
+
+# If reset/off pressed and we are not counting and count is 0, turn us off
+# TODO: Need to handle reset of count...
+teq x0 100
++ teq acc 0
++ teq p0 0
++ mov 0 dat
+
+# Output counting/not counting state to incrementer
+mov acc x1
+
+# Sleep
+slp: slp 1
+```
+
+Counter reset logic complete too but can't figure out how to hook in display on/off logic...
+
+Prob need to use X pin from state controller or reduce lines or something...
+
+```
+# If start/stop pressed and we are on, toggle counting/not counting state
+teq x0 010
++ teq dat 100
++ not
+
+# If start/stop pressed and we are off, turn us on
+teq x0 010
++ teq dat 0
++ mov 100 dat
+
+# Output counting/not counting state to incrementer
+# DEV: Incrementer will look at reset/off and determine wheter to turn on/off itself due to us passing counting/not counting state
+mov acc x1
+
+# If reset/off pressed and we are not counting and count is 0, turn us off
+teq x0 100
++ teq acc 0
++ teq p0 0
++ mov 0 dat
+
+# Sleep
+slp: slp 1
+```
+
+```
+# Wait for signal
+slp: slx x0
+
+# If we are counting, jump to increment logic
+#   This lines up with ignoring reset/off switch
+# TODO: Can we clean up these jumps at all? I don't think so due to nested if's otherwise
+teq x0 100
++ jmp incr
+
+# If reset/off pressed, reset counter
+teq x1 100
++ mov 0 acc
+
+# Jump over increment logic
+jmp ret
+
+# Perform incrementing...
+incr: teq dat 0
++ mov 1 dat
+- add 1
+- mov 0 dat
+
+# Output new count
+ret: mov acc p0
+```
+
+TODO: Pass through on/off state from state to incrementer to display controller
+
+Almost solved but counting too early...
+
+```
+teq x0 010
++ teq dat 100
++ not
+teq x0 010
++ teq dat 0
++ mov 100 dat
+mov acc x1
+teq x0 100
++ teq acc 0
++ teq p0 0
++ mov 0 dat
+mov dat x1
+slp: slp 1
+```
+
+```
+slp: slx x0
+teq x0 100
++ jmp incr
+teq x1 100
++ mov 0 acc
+jmp ret
+incr: teq dat 0
++ mov 1 dat
+- add 1
+- mov 0 dat
+ret: mov acc p0
+mov x0 x3
+mov acc x3
+```
+
+```
+slp: slx x1
+teq x1 0
++ mov -999 x3
++ mov x1 acc
+- mov x1 x3
+```
