@@ -1,0 +1,16 @@
+# Input variables
+X_RADIO_RX
+
+# Output variables
+P_MOTOR
+P_EXTEND
+P_GRAB
+
+# Gist
+Check signal
+If signal is 1
+  Walk through RAM until 0 slot found (subcontroller)
+  Write ID to RAM slot
+If signal is 2
+  Walk through RAM until ID found
+  Write 0 to RAM slot
