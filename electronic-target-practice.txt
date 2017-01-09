@@ -455,3 +455,183 @@ tlt x0 5
 + add 1
 mov acc x1
 ```
+
+This seems promising:
+
+- Using P to communicate game state
+- Using X to tell score trackers to draw display
+
+```
+# If detect is set
+teq p0 100
+  # Increment game counter and output it
++ add 1
++ mov acc p1
+
+# If our game is active
+tgt acc 0
+  # Tell us to draw a frame
++ mov 1 x3
+
+# If the same is over
+teq acc 8
+  # Perform flashing drawing
++ slp 2
++ mov 1 x3
++ slp 2
++ mov 1 x3
++ slp 2
++ mov 1 x3
+
+  # Reset game state
++ mov 0 acc
+
+# Sleep
+slp: slp 1
+```
+
+```
+# Wait for signal
+slx x0
+
+# Flush signal (second controller doesn't need this)
+mov x0 null
+
+# If the game state is for player 1 (this controller), add to count
+tlt p0 5
++ add 1
+
+# Output score
+mov acc x1
+```
+
+Super close now... mostly missing a game reset
+
+TODO: Should be able to cut a line via `mov x0 null`
+
+TODO: We could save lines with `mov -999` if distance calc sees detect change
+  I don't think we can if we cut `mov x0 null`
+  Never mind we can't cut `x0 null` so maybe we can
+
+- 1 state tracker
+- 1 score tracker
+- 1 distance calculator
+- 1 distance to score converter
+
+State tracker:
+
+```
+# If detect is pressed, increase game state
+teq p0 100
++ add 1
+
+# Output game state
+# DEV: We use P pin due to score tracker querying this multiple times
+mov acc p1
+
+# If the game is on, tell score tracker to draw a frame
+tgt acc 0
++ mov 1 x3
+
+# If the game is over
+teq acc 8
+  # Run flashing behavior
+  # TODO: We might save lines by moving to a loop here
++ slp 2
++ mov 1 x3
++ slp 2
++ mov 1 x3
++ slp 2
++ mov 1 x3
+
+  # Reset game state
++ mov 0 acc
+
+# Sleep
+slp: slp 1
+```
+
+TODO: We can cut `null` setter by passing game state via X also
+
+Score tracker:
+
+```
+# Wait for frame draw request
+slx x0
+
+# Flush signal
+mov x0 null
+
+# If detect isn't set, jump to draw
+teq p0 100
+- jmp draw
+
+# Otherwise, if we are swapping players, then swap state
+teq p1 5
++ mov acc dat
++ mov 0 acc
+
+# Ask for new score and add it
+mov -999 x1
+add x1
+
+# Draw scores
+draw: tlt p1 5
++ mov acc x2
++ mov 0 x3
+- mov acc x3
+- mov dat x2
+```
+
+Distance to score converter:
+
+```
+# Wait for request from score
+slp: slx x3
+
+# Pass request to distance converter
+mov x3 x1
+
+# Same calculations as before
+mov x1 acc
+add x1
+mov acc dat
+mov -2 acc
+tlt dat 900
++ add 3
+tlt dat 400
++ add 1
+tlt dat 100
++ add 2
+
+# Output score to score tracker
+mov acc x3
+```
+
+Distance calculator:
+
+```
+# Wait for request
+slp: slx x3
+
+# Flush signal
+mov x3 null
+
+# Same calculations as before
+mov 50 acc
+sub p0
+mul acc
+mov acc x3
+mov 50 acc
+sub p1
+mul acc
+
+# Output distance
+mov acc x3
+```
+
+In summary for options:
+
+- Need game reset state
+- TODO: We can cut `null` setter by passing game state via X also
+- TODO: We could save lines with `mov -999` if distance calc sees detect change
