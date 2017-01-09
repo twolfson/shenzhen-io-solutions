@@ -435,3 +435,23 @@ We should prob have:
 - Something for score tracking/flashing
 
 We need to figure out flashing mechanics... Let's to a proof of concept
+
+Attempt to count state but it fails due to needing to constantly send signal but then child controller will need double signal or something. Can we use P instead?
+
+```
+teq acc 8
+# 9 + slp flash?
++ mov 0 acc
+teq p0 100
++ add 1
++ mov acc x3
+- mov -1 x3
+slp: slp 1
+```
+
+```
+slx x0
+tlt x0 5
++ add 1
+mov acc x1
+```
