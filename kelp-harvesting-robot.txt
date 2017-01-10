@@ -1,0 +1,18 @@
+# Input variables
+X_RADIO_RX
+
+# Output variables
+P_MOTOR_X
+P_MOTOR_Y
+P_HARVEST
+
+# Gist
+Harvester location = `0, 0`
+On radio signal
+  Move to `x, y` (from signal)
+  Need to look at verification for explanation on "at least one location" wording...
+
+Diagonal moves should be possible
+
+Helper: Will never get packet for `0, 0`
+Helper: Will never have more than 6 locations
