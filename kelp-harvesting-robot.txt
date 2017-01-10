@@ -272,3 +272,120 @@ reset: mov acc x3
 # Sleep
 slp 1
 ```
+
+"No -999" has 1 less line of code but I think "-999 reuse" saves power due to `jmp` instead of writing 0's
+
+TODO: Instead of decreasing and keeping track via loop
+  Do a `slp` instead...
+
+Initially did poor sleep logic via `add/sub` + `slp 1`
+
+```
+# Reset motor position
+mov 50 p1
+
+# Wait for signal
+slx x1
+
+# Save incoming target position
+mov x1 dat
+
+# If we are at target position, jump to done
+loop: teq acc dat
++ jmp done
+
+# Move motor in desired direction
+tcp dat acc
+- sub 1
+- mov 0 p1
++ add 1
++ mov 100 p1
+
+# Sleep for value
+slp 1
+
+# Continue looping
+jmp loop
+
+# Notify harvester of completion
+done: mov 100 x2
+```
+
+Other one is similar...
+
+```
+# Wait for response from x and y motor controllers and flush their signals
+slx x0
+mov x0 null
+slx x0
+mov x0 null
+
+# Perform harvest
+gen p1 1 0
+```
+
+Soo things that are wrong:
+
+- Should improve sleep logic by using `mul -1` instead of looping
+- Queue shouldn't consume next slots until harvest is done so it should either own harvest logic or get signal from harvester
+    - Based on our slots and layout, we can prob only have it be the harvester
+
+We are honing in on solution
+
+Latest iteration has harvest logic in RAM reader BUT it does `slx` which leads to 1 controller finishing before other one
+
+We need to use something like P pin watcher to prevent this
+  i.e. wait for motors to reset to 50, then harvest
+
+Then resume queue (either via `slx` or logic in controller)
+
+```
+# Save current position in memory
+mov x1 acc
+
+# If we have 0, 0 or -999, -999, then reset position and wait for new data
+tlt x0 1
++ tlt x0 1
++ mov acc x1
++ jmp slp
+
+# Otherwise, reset position and output data
+mov acc x1
+mov x0 x3
+mov x0 x2
+
+# Wait for X motor to finish
+slx x3
+mov x3 null
+
+# Wait for Y motor to finish
+# DEV: We reuse its data for setting harvester to on so we can reuse `slp`
+slx x2
+mov x2 p0
+
+# Let harvester run and reset it
+slp: slp 1
+mov 0 p0
+```
+
+```
+# Reset motor position
+mov 50 p1
+
+# Wait for new position
+slx x0
+
+# Perform (target position - current position)
+#   i.e. current position -> -1 * current positon -> -1 * current position + target position)
+mul -1
+add x0
+
+# Update our motor position and sleep until it's done
+tcp acc 0
+- mov 0 p1
++ mov 100 p1
+slp acc
+
+# Notify harvester of completion
+mov 100 x0
+```
