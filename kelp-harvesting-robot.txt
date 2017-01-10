@@ -389,3 +389,24 @@ slp acc
 # Notify harvester of completion
 mov 100 x0
 ```
+
+We tried a P watcher setup, it's close but we run out of lines to loop and no space for more controllers
+
+We moved to using 1 X pin for both X/Y motors. Maybe we can do same for response but on a different pin to avoid waking other controller
+
+```
+mov x1 acc
+tlt x0 1
++ tlt x0 1
++ mov acc x1
++ jmp slp
+mov acc x1
+mov x0 x3
+mov x0 x3
+loop: teq p0 50
++ teq p0 50
++ mov 100 x2
++ slp 1
++ mov 0 x2
+slp: slp 1
+```
