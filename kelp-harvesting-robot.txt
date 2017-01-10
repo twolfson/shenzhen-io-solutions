@@ -29,3 +29,46 @@ Helper: Will never have more than 6 pending locations
 We thought about having signals queue back/forth with reader but we will likely miss out on `slx` signals due to sleeps or something
 
 TODO: Probably going to run into trouble with keeping track of position but let's see how this goes...
+TODO: Will probably hit queue flush states so need to reset to `0, 0` at some point or skip over `13 + 14` in RAM
+
+First attempt (only signal to RAM and read from RAM):
+
+```
+# Save incoming signal
+mov x0 acc
+
+# If the signal isn't -999
+teq acc -999
+  # Save it to RAM (autoincrements)
+- mov acc x2
+- mov x0 x2
+
+# Sleep
+slp: slp 1
+```
+
+TODO: Improve this by writing directly to memory and using `tlt 0` instead of `teq 0`
+
+```
+# Save current position (originally use a `sub 2` variant but this is easier)
+mov x1 acc
+
+# If the next 2 positions are 0, 0, then reset position and sleep
+teq x0 0
+teq x0 0
++ mov acc x1
++ jmp slp
+
+# Otherwise, reset index and "output" the 2 positions
+mov acc x1
+mov x0 dat
+mov x0 dat
+
+# Erase output positions to prevent looping
+mov acc x1
+mov 0 x0
+mov 0 x0
+
+# Sleep
+slp: slp 1
+```
