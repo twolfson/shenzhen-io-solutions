@@ -564,3 +564,59 @@ slp acc
 # Perform harvest
 gen p1 1 0
 ```
+
+Look at "Almost done, off by one"
+
+What if we loop until P !=0 for pin sniffer?
+  Is that even the problem?
+
+Nope, that didn't solve it
+
+```
+next: mov x1 acc
+tlt x0 1
++ tlt x0 1
++ mov acc x1
++ jmp slp
+mov acc x1
+mov x0 x3
+mov x0 x2
+
+# New code, wait for 100 to be unset
+loop: teq p0 100
++ jmp loop
+slp p0
+
+# Sleep for 1 anyway due to waiting for harvest completion o_O
+slp 1
+jmp next
+slp: slp 1
+```
+
+```
+# New code, set 100 as flag
+mov 100 p0
+
+slx x0
+mov x0 acc
+mov x0 dat
+tgt dat acc
++ mov dat acc
+sub 1
+mov acc p0
+slp acc
+gen p1 1 0
+```
+
+Oh fuck... we missed a case...
+
+The off by one is going to a kelp location but passing over a square further down the queue
+
+We need to restructure the code to support that
+
+Probably have the motors request target location from reader or something
+
+And have harvest controller constantly ask queue if we are over any squares
+  Maybe expose current position via P on motors
+
+Last touch "Almost done, while true"
