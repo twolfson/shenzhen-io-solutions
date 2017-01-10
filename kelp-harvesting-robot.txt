@@ -447,3 +447,120 @@ Maybe don't wait for `slx` at all and do that greatest value thing?
 - Go to next
 
 Need to trigger harvester still... but let's cross that bridge later
+
+Can't do calculation in reader (too many lines of code)
+
+```
+next: mov x1 acc
+tlt x0 1
++ tlt x0 1
++ mov acc x1
++ jmp slp
+mov acc x1
+mov x0 x3
+mov x0 x2
+mov x3 acc
+mov x2 dat
+tcp dat acc
++ slp dat
+jmp next
+slp: slp 1
+```
+
+But can do it in harvester and tell controller value via P
+
+Closing in now, we have an off by one timing in second test suite
+
+Probably due to a `slp 1` due to P annoyances =/
+  Might be able to solve it by reusing `x2` with a preceding `999` packet or something
+
+Reader:
+
+```
+# Same output logic as before
+next: mov x1 acc
+tlt x0 1
++ tlt x0 1
++ mov acc x1
++ jmp slp
+mov acc x1
+mov x0 x3
+mov x0 x2
+
+# After outputting signals, wait for P pin to be filled
+slp 1
+
+# Sleep for allotted time until next harvest
+slp p0
+
+# Look at queue again
+jmp next
+
+Sleep
+slp: slp 1
+```
+
+Motor logic. Fixed up from before :+1:
+
+```
+# Reset motor position
+mov 50 p1
+
+# Wait for signal from reader
+slx x0
+
+# Load current position into acc as (-1 * position)
+mov dat acc
+mul -1
+
+# Save target position to dat
+mov x0 dat
+
+# Calculate distance to position (target - current)
+add dat
+
+# Compare against distance
+#   If 0, don't touch motor (although not needed)
+tcp acc 0
+  # If < 0, move motor in reverse and adjust acc to be absolute value
+- mov 0 p1
+- mul -1
+  # If > 0, move motor in forward
++ mov 100 p1
+
+# Output sleep duration (absolute value of distance)
+mov acc x3
+
+# Sleep for duration
+slp acc
+```
+
+Harvester:
+
+```
+# Wait for signal
+slx x0
+
+# Save the 2 values
+mov x0 acc
+mov x0 dat
+
+# Determine which value is greater and store it in `acc`
+#   i.e. we want to sleep for longest period
+tgt dat acc
++ mov dat acc
+
+# Subtract 1 for off-by-one errors
+# TODO: We thought this would be for `slp 1` on reader but no idea why for our own sleep
+#   Maybe that's the off by one and we need an `add 1`
+sub 1
+
+# Output next harvest time to P
+mov acc p0
+
+# Sleep until next harvest time
+slp acc
+
+# Perform harvest
+gen p1 1 0
+```
