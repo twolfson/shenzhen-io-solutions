@@ -238,3 +238,37 @@ mov x0 dat
 # Sleep
 slp: slp 1
 ```
+
+And here's the reuse of `-999`:
+
+```
+# Output incoming signals to RAM
+mov x0 x2
+mov x0 x2
+
+# Move to freshly written position
+# DEV: We use `mov + sub` instead of `sub` at head get data ready for reader ASAP
+mov x3 acc
+sub 2
+mov acc x3
+
+# If we received -999, reset our position immediately
+teq x2 -999
++ jmp reset
+
+# Otherwise, ignore next value (other non -999)
+mov x2 null
+
+# Save our new position to reset to
+mov x3 acc
+
+# Erase upcoming data's position
+mov 0 x2
+mov 0 x2
+
+# Reset position to allow write into "upcoming data" slots
+reset: mov acc x3
+
+# Sleep
+slp 1
+```
