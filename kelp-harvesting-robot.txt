@@ -47,7 +47,7 @@ teq acc -999
 slp: slp 1
 ```
 
-TODO: Improve this by writing directly to memory and using `tlt 0` instead of `teq 0`
+TODO: Improve this by writing directly to memory and using `tlt 1` instead of `teq 0`
 
 ```
 # Save current position (originally use a `sub 2` variant but this is easier)
@@ -55,7 +55,7 @@ mov x1 acc
 
 # If the next 2 positions are 0, 0, then reset position and sleep
 teq x0 0
-teq x0 0
++ teq x0 0
 + mov acc x1
 + jmp slp
 
@@ -72,3 +72,48 @@ mov 0 x0
 # Sleep
 slp: slp 1
 ```
+
+Tried out `-999` but it feels like we're pushing the buck. Going to use `nop` to fix the solution with less cost
+
+```
+mov x0 x2
+mov x0 x2
+slp: slp 1
+```
+
+```
+mov x1 acc
+tcp x0 0
+- jmp slp
++ mov acc x1
++ mov x0 dat
++ mov x0 dat
++ mov acc x1
++ mov 0 x0
++ mov 0 x0
+mov acc x1
+slp: slp 1
+```
+
+Never mind, we get 2 nops at most but run out of time =(
+
+Tried out this logic but it fails due to (1) not being fast enough and (2) not handling [x, 0]
+
+```
+mov x1 acc
+teq x0 -999
++ mov x0 null
++ jmp slp
+teq x0 0
++ mov acc x1
++ jmp slp
+mov acc x1
+mov x0 dat
+mov x0 dat
+mov acc x1
+mov 0 x0
+mov 0 x0
+slp: slp 1
+```
+
+TODO: What if we handle resetting values via writer so we can free up space for `nop`
