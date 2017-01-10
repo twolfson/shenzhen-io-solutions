@@ -117,3 +117,62 @@ slp: slp 1
 ```
 
 TODO: What if we handle resetting values via writer so we can free up space for `nop`
+
+Alright, this works. Yey.
+
+We will need to write/read `-999` to/from RAM due to speed issues
+
+```
+# Save incoming signals to RAM (autoincrements)
+mov x0 x2
+mov x0 x2
+
+# Save current position
+mov x3 acc
+
+# Erase next 2 slots (should be cleared as it's the 7th pending location)
+mov 0 x2
+mov 0 x2
+
+# Reset to "current position"
+mov acc x3
+
+# Sleep
+slp: slp 1
+```
+
+```
+# Back up current position to `acc`
+# DEV: This also delays us so incoming signal can be written to RAM
+mov x1 acc
+
+# If next location is `-999`, then ignore following `-999` and sleep
+# DEV: We could have an implementation which resets `-999` to `0` but this is less code
+teq x0 -999
++ mov x0 null
++ jmp slp
+
+# Reset our position
+mov acc x1
+
+# If the next values are 0, 0 (i.e. no new values in queue), then reset our position and sleep
+teq x0 0
++ teq x0 0
++ mov acc x1
++ jmp slp
+
+# Reset our position and output x, y coordinates
+mov acc x1
+mov x0 dat
+mov x0 dat
+
+# Sleep
+slp: slp 1
+```
+
+TODO: Explore a `tcp` branch with `-999`, `0`, and non-zeroes
+  I think negatives with double ifs are broken though...
+
+TODO: I wonder if we'll overwrite valid data with `-999` at some point...
+   If we do run into it, the `mov x0 null` will become `mov acc x1` (position reset)
+   and we'll need to update writer to detect/wipe `-999`
