@@ -176,3 +176,65 @@ TODO: Explore a `tcp` branch with `-999`, `0`, and non-zeroes
 TODO: I wonder if we'll overwrite valid data with `-999` at some point...
    If we do run into it, the `mov x0 null` will become `mov acc x1` (position reset)
    and we'll need to update writer to detect/wipe `-999`
+
+Motor positions need to tell harvest when they're done
+
+So they should use 1 X pin to tell a harvestor controller via `slx`
+
+Then harvester tells RAM reader to resume queue via `slx` itself too
+
+Should prob explore that `tcp` branch so maybe we can remove need for harvester standalone...
+
+So... `tcp` won't work but dual `tlt 1` will =D
+
+Here's a revamp with support for no `-999` persisted in RAM
+
+```
+# Output incoming signals to RAM
+mov x0 x2
+mov x0 x2
+
+# Move to freshly written position
+# DEV: We use `mov + sub` instead of `sub` at head get data ready for reader ASAP
+mov x3 acc
+sub 2
+mov acc x3
+
+# If didn't write -999, then prepare to erase upcoming memory
+teq x2 -999
+- add 2
+
+# Move to position (fresh position for -999, upcoming position for non -999)
+mov acc x3
+
+# Erase memory
+mov 0 x2
+mov 0 x2
+
+# Reset position for new data
+mov acc x3
+
+# Wait
+slp: slp 1
+```
+
+# TODO: We can probably skip overwriting `-999` with 0's and overwrite it on next iteration...
+
+```
+# Save current position in memory
+mov x1 acc
+
+# If we have 0, 0 or -999, -999, then reset position and wait for new data
+tlt x0 1
++ tlt x0 1
++ mov acc x1
++ jmp slp
+
+# Otherwise, reset position and output data
+mov acc x1
+mov x0 dat
+mov x0 dat
+
+# Sleep
+slp: slp 1
+```
