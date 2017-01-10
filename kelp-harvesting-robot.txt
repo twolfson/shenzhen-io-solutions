@@ -410,3 +410,40 @@ loop: teq p0 50
 + mov 0 x2
 slp: slp 1
 ```
+
+So we have something that works but it doesn't align with expectations
+
+The expectations want an eager/running motor/harvest
+  so we keep on moving and harvest as we sweep by
+
+Ours stops and harvests then goes
+
+The logic is oddly the same as dual `slx` on harvester except now they `slx` on the same pin and the motors share another pin (using Y as top motor and X as bottom since we have no space for distance extending)
+
+Thinking about how to transfer next queued location to motors...
+
+So motors don't keep running, they both need to hit location
+  We mostly need to transmit before saying "harvest" and sleeping
+
+I was thinking about sleeping the reader for the greater of the 2 "sleep" values
+
+We are actually really close:
+
+- We need to re-evaluate queue on both motor finish
+- We also need to kick off harvest action for 1s
+
+Due to lines of code, I think it should be a separate controller for harvester
+
+We are out of pins though on RAM reader due to inconsistent timings for motor getting values in what order
+
+So we need to use P pins or figure out backchannels
+
+Maybe don't wait for `slx` at all and do that greatest value thing?
+
+- Calculate sleep time on controllers
+- Send back
+- Find greater 1 of 2
+- Sleep for that long
+- Go to next
+
+Need to trigger harvester still... but let's cross that bridge later
