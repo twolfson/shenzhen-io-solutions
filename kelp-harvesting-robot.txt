@@ -746,3 +746,16 @@ mov acc p0
 # Sleep
 slp 1
 ```
+
+So maybe we always read out non -999 values to controller
+  and that replies with with 0 or 1 to erase it/not
+
+The controller then forwards first X/Y to motors
+  Respond with X/Y saying that match
+    On match in eraser, notify harvester?
+    We can't do it in here as we have to accept incoming signals
+      whereas harvester can reset RAM position and emit
+Then it compares remaining ones to current X/Y position
+  Reponse with X/Y match/not
+
+This should solve pin problem, unsure we have layout for it though...
