@@ -801,3 +801,62 @@ jmp loop
 # Sleep
 slp: slp 1
 ```
+
+Tried out sending position to motor parser but it's so much code:
+
+```
+mov x1 dat
+mov 0 acc
+loop: tlt x0 1
++ tlt x0 1
++ jmp check
+mov acc x1
+mov acc x3
+mov dat x3
+mov x0 x3
+mov x0 x3
+check: teq x1 dat
+- add 2
+- jmp loop
+slp: slp 1
+```
+
+Maybe we let parser read from pin directly and give it a special signal to tell it to read from the signal?
+
+Went forward with address tracking but realizing it's quite silly
+
+We should always send `-999` and `0` so we don't have silly back tracking logic and send a `-1` flag at the start of the request
+
+Then the parser can see the `-1` and act accordingly
+
+`-1` will require too many lines of code...
+  If we go to more controllers, we get bad layout
+
+Maybe 1 controller to update motors and another to check motor positions?
+
+Code updates for `-1`
+
+```
+mov x1 dat
+mov -1 x3
+loop: mov x0 x3
+mov x0 x3
+check: teq x1 dat
+- jmp loop
+slp: slp 1
+```
+
+```
+slp: slx x1
+mov x1 dat
+teq dat -1
++ mov dat acc
++ jmp slp
+teq acc -1
++ mov dat x3
++ mov x3 acc
++ mov x1 x2
++ mov x2 dat
+- mov dat null
+- mov x1 null
+```
