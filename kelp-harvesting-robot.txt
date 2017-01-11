@@ -1024,3 +1024,10 @@ slp: slp 1
 ```
 
 Maybe we could keep track of position via `add 2` counting in harvest detector or another controller (e.g. `slx` to P pin)
+  Never mind it's not possible due to X/P position being flipped in my head
+
+Ah, harvester will know our target location's position in RAM
+  Never mind, it won't due to out of order harvests
+
+Uhhh, X pin reuse with controller that only keeps track of signals sent
+  Still requires extra lines to flush signal...
