@@ -632,3 +632,117 @@ Although, we really could use X for return always...
   and always output on 1 s but would need to handle -999 in motors
 
 Getting a late start reading though. Somehow it's getting -999 early while writer should be 1 OP ahead
+
+Okay, we have progress but are missing a few things:
+
+- Not unsetting completed entries (this means one we complete in transit or on arrival)
+  - Should be reset to `-999` for sane skipping
+  - But that doesn't really work with current code...
+  - Needs more thought...
+- Harvester isn't wired up, need to explore reusing an X pin me thinks
+  But then we don't want to steal the motor's signal
+  It feels like we need yet another controller...
+  and somehow a third set of pins for RAM
+
+Maybe we can offload harvest checking
+  Like loop over RAM, ask harvester if it's a match, and then it replies with 0 or 1
+    But we still have pin issue amirite?
+
+Okay, code docs first...
+
+Writer:
+
+```
+# Output data first
+mov x2 x0
+mov x2 x0
+
+# Look at freshly written data
+mov x1 acc
+sub 2
+mov acc x1
+
+# If it was -999, move back to position so we overwrite it on next read
+teq x0 -999
++ jmp reset
+
+# Continue to next position
+mov x0 null
+
+# Store new position to move back to for next writes
+mov x1 acc
+
+# Clear out old data with `-999` to prevent accidental reads
+mov -999 x0
+mov -999 x0
+
+# Move to new position for next writes
+reset: mov acc x1
+
+# Sleep
+slp 1
+```
+
+Reader:
+
+```
+# Store original position read from
+mov x1 acc
+
+# If the data we are reading is -999, ignore it
+teq x0 -999
++ jmp pre
+
+# Otherwise, go back to original position
+mov acc x1
+
+# Tell motors where to move to
+mov x0 x3
+mov x0 x2
+
+# Go back to original position
+# DEV: This is to handle reading only 1 slot for -999
+#   We would be fine with the 2 slots ahead for `mov`
+pre: mov acc x1
+
+# If our X coordinate matches motor coordinates,
+#   Set up half of boolean for harvester
+# TODO: `mov 100 dat` is never reset
+loop: teq x0 p1
++ mov 100 dat
+
+# If our Y coordinate matches, then tell harvester about our matching X coordinate (signal itself tells them Y matched)
+teq x0 p0
++ mov dat null
+
+# If we aren't at our original position, keep looping
+teq x1 acc
+- jmp loop
+
+# Sleep
+slp: slp 1
+```
+
+Motor:
+
+```
+# Reset motor position
+mov 50 p1
+
+# Wait for location to move to
+slx x0
+
+# Comapre current location to target location
+#   Adjust current location and motor accordingly
+tcp acc x0
+- add 1
+- mov 100 p1
++ sub 1
++ mov 0 p1
+
+# Expose new location via P
+mov acc p0
+
+# Sleep
+slp 1
+```
