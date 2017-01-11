@@ -625,3 +625,10 @@ Notes from this morning:
 
 - Writer probably can't access P due to distance
 - Update reader to loop full cycles and compare values (P from motors? or maybe they always output X), notify harvester on match, and tell notors to move to X, Y every 1 second (only moves by 1 closer to that unit to always get fresh location)
+
+P output from motor feels promising
+
+Although, we really could use X for return always...
+  and always output on 1 s but would need to handle -999 in motors
+
+Getting a late start reading though. Somehow it's getting -999 early while writer should be 1 OP ahead
