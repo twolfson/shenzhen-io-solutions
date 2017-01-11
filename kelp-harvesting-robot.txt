@@ -759,3 +759,45 @@ Then it compares remaining ones to current X/Y position
   Reponse with X/Y match/not
 
 This should solve pin problem, unsure we have layout for it though...
+
+Need to handle -999 skipping in current RAM reader
+  Need to somehow signal end of loop?
+
+Code is looking good but we have no way of distinguishing target location from comparison locations
+  So maybe 2 controllers?
+
+  1 to update motors
+  1 to check harvest OK
+
+I feel like outputting that to controllers won't save us much
+  We wanted to do special signals but we have no space for unsetting matched locations
+
+Current loop logic:
+
+```
+# Save original position
+mov x1 acc
+
+# If we are reading a -999, -999 or 0, 0 pair
+#  then jump to original position check
+loop: tlt x0 1
++ tlt x0 1
++ jmp check
+
+# Otherwise, move back to original position
+#   and output data
+mov acc x1
+mov x0 x3
+mov x0 x3
+
+# If we are done walking over the entirety of the RAM, go to sleep
+# TODO: We can combine those jumps into a `- jmp loop`
+check: teq x1 acc
++ jmp slp
+
+# Otherwise, loop
+jmp loop
+
+# Sleep
+slp: slp 1
+```
