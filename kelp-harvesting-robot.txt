@@ -860,3 +860,131 @@ teq acc -1
 - mov dat null
 - mov x1 null
 ```
+
+Okay, solution is looking better. We somehow squeezed a lot of controllers in. Main thing missing is unsetting harvested entries and updating position 0
+
+But the harvesting as we move should work:
+
+- 1 writer (not going to copy/paste)
+- 1 reader
+- 1 motor parser
+- 2 motor controllers
+- 1 harvest detector
+- 1 harvester
+    - At the moment, this (1) converts an X pin to a P pin and (2) allows a sleep while the harvest detector continues comparisons (even though we could exit early)
+
+```
+# Save current position
+mov x1 dat
+
+# Output target positions to motor parser
+mov x0 x3
+mov x0 x3
+
+# Reset to current position for looping to prevent them being unused
+mov dat x1
+
+# Output pair to harvest controller
+loop: mov x0 x2
+mov x0 x2
+
+# If the harvest controller found a match
+teq x2 1
+  # Hackishly replace first pair (doesn't work well)
++ mov dat x1
++ mov 0 x0
++ mov 0 x0
+
+# If we aren't back at the original position, continue looping
+check: teq x1 dat
+- jmp loop
+
+# Sleep
+slp: slp 1
+```
+
+Motor parser:
+
+```
+# Wait for signal
+slp: slx x0
+
+# Save x, y pair
+mov x0 acc
+mov x0 dat
+
+# If they are -999, -999 or 0, 0, then ignore it
+tlt acc 1
++ tlt dat 1
++ jmp slp
+
+# Otherwise, pass along info to motors
+mov acc x3
+mov dat x2
+
+# Expose x motor position via our P pin for convenience
+mov x3 p0
+```
+
+X and Y motor controllers:
+
+Same as past iterations except we send back data via X pin on 1 and P pin on another
+
+```
+mov 50 p1
+slx x0
+tcp acc x0
+- add 1
+- mov 100 p1
++ sub 1
++ mov 0 p1
+mov acc x0
+slp 1
+```
+
+```
+mov 50 p1
+slx x0
+tcp acc x0
+- add 1
+- mov 100 p1
++ sub 1
++ mov 0 p1
+mov acc p0
+slp 1
+```
+
+Harvest detector:
+
+Due to `slx` complications, we cannot `slx` both motors and requests from reader. As a result, we stick to P for sanity
+
+```
+# Wait for request from reader
+slp: slx x0
+
+# Save x, y pair to registers
+mov x0 acc
+mov x0 dat
+
+# If they are -999, -999 or 0, 0, then say it wasn't a match
+tlt acc 1
++ tlt dat 1
++ jmp no
+
+# If x and y both match current position
+teq p0 acc
++ teq p1 dat
+  # Say it was a match
++ mov 1 x0 # yes
+  # Notify harvester to harvest
++ mov 1 x3
+  # Don't run `else` scenario
++ jmp slp
+
+# Otherwise (x and y don't match OR we got a jump), say no match
+no: mov 0 x0
+```
+
+TODO: Maybe we don't use `dat` at all for storing position. What if we compare to `x1 === 14` for looping?
+
+  That would work nicely if we use `acc`. Then it becomes `add 2`. So clean...
