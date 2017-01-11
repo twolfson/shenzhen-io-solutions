@@ -620,3 +620,8 @@ And have harvest controller constantly ask queue if we are over any squares
   Maybe expose current position via P on motors
 
 Last touch "Almost done, while true"
+
+Notes from this morning:
+
+- Writer probably can't access P due to distance
+- Update reader to loop full cycles and compare values (P from motors? or maybe they always output X), notify harvester on match, and tell notors to move to X, Y every 1 second (only moves by 1 closer to that unit to always get fresh location)
