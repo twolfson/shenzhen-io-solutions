@@ -1031,3 +1031,5 @@ Ah, harvester will know our target location's position in RAM
 
 Uhhh, X pin reuse with controller that only keeps track of signals sent
   Still requires extra lines to flush signal...
+
+Last working on "0 based loop copy"
