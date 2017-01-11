@@ -988,3 +988,39 @@ no: mov 0 x0
 TODO: Maybe we don't use `dat` at all for storing position. What if we compare to `x1 === 14` for looping?
 
   That would work nicely if we use `acc`. Then it becomes `add 2`. So clean...
+
+Moved to 0 based loop reader with hack on `acc` working pretty well but running into issues due to hack
+
+```
+# Reset RAM to current target location
+mov acc x1
+
+# Output target location pair
+mov x0 x3
+mov x0 x3
+
+# Move to 0 position in RAM
+mov 0 x1
+
+# Output check location to harvest detector
+loop: mov x0 x2
+mov x0 x2
+
+# If harvest detector had a match
+teq x2 1
+  # HACK: Move to current target location
+  #   This should be 2 rows back
++ mov acc x1
+  # Erase its contents
++ mov 0 x0
++ mov 0 x0
+  # HACK: Bump target location to next pair
+  #   This should only happen when matched position is target location
+  #   It could be a position on the way to our target
++ add 2
+check: teq x1 0
+- jmp loop
+slp: slp 1
+```
+
+Maybe we could keep track of position via `add 2` counting in harvest detector or another controller (e.g. `slx` to P pin)
