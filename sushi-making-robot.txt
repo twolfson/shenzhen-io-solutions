@@ -336,3 +336,85 @@ slp: slp 1
 Now the only thing left is updating the counts for the tables
 
 Let's proof of concept that too
+
+Tried a writer that writes to multiple slots via another controller but we are out of space with the address mover:
+
+```
+mov x3 dat
+mov x2 acc
+mov 0 x1
+mov dat x1
+add 3
+mov acc x2
+mov 1 x1
+mov dat x1
+add 3 # Missing ac
+mov 2 x1
+mov dat x1
+sub 6
+mov acc x2
+slp: slp 1
+```
+
+Going to offload address moving piece to writer
+
+Here's some code with some address storage working but we are missing writing to every 3rd slot properly:
+
+```
+mov x3 dat
+mov x2 acc
+mov dat x1
+mov 0 x1
+mov acc x2
+mov dat x1
+mov 1 x1
+mov acc x2
+mov dat x1
+mov 2 x1
+mov acc x2
+slp: slp 1
+```
+
+```
+slx x3
+mov x2 acc
+mov x3 dat
+dst x3 dat
+mov acc x2
+```
+
+I think we need address management in the writer itself. Maybe leverage `mul` or something
+
+We tried a multiplier based setter but it can't keep track of past positions but maybe we don't need multiplication at all. Move along normally, add 2 for next location, then reset when done?
+
+```
+mov x3 dat
+mov x2 acc
+mov 0 x1 # dgt:0
+mov dat x1
+mov 0 x1
+mov 1 x1 # dgt:1
+mov dat x1
+mov 1 x1
+mov 2 x1 # dgt:2
+mov dat x1
+mov 2 x1
+slp: slp 1
+```
+
+```
+slx x3
+mov x3 acc
+mul 3
+add x2
+mov acc x2
+mov x1 acc
+mov x3 dat
+dst x3 dat
+mov acc dat
+mov x2 acc
+sub 1
+mov acc x2
+mov dat x1
+mov acc x2
+```
