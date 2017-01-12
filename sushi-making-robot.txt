@@ -314,3 +314,25 @@ dgt 1
 # Missing 5 lines for `teq 0` ... `mov 0/100`
 slp: slp 1
 ```
+
+We were able to use an MC6000 for RAM reader though which saves some space:
+
+Now it's 1 MC6000 (RAM reader + gate B controller), 2 MC4000 (gate A + gate C controller)
+
+```
+mov 50 p1
+mov x0 acc
+mov acc x1
+mov acc x3
+dgt 1
+teq acc 0
++ jmp slp
+tgt acc 2
+- mov 0 p1
++ mov 100 p1
+slp: slp 1
+```
+
+Now the only thing left is updating the counts for the tables
+
+Let's proof of concept that too
