@@ -114,3 +114,53 @@ We are thinking output table value every 1s in RAM
   I think we have to though...
 
   Let's explore
+
+We have some code for writing first digit but realizing that either writer needs to set up all 3 positions OR reader needs to read then write adjusted value 3 ahead
+  Maybe we get a third controller on a double `slx` to write next ones?
+
+```
+mov x0 acc
+teq acc -999
+  # NEW: Tell writer about no table
++ mov 0 x1
++ jmp slp
+mov x0 dat
+
+# NEW: Tell writer about no table
+mov 0 x1
+gen p1 1 0
+mov acc x3
+mov 30 p1
+
+# NEW: Tell writer about no table
+mov 0 x1
+slp 1
+mov 0 p1
+mov dat x1
+slp: slp 1
+```
+
+```
+# Move ourselves to 3rd position in RAM
+@mov 3 x3
+
+# Save current RAM position
+mov x3 dat
+
+# Save RAM value to acc
+mov x2 acc
+
+# Add table to 0th digit (autoincrements RAM)
+# 20 + 8 -> 28
+dst 0 x0
+
+# Overwrite position with new data
+mov dat x3
+mov acc x2
+
+# Tell reader it's free to read now
+mov 100 x1
+
+# Sleep
+slp: slp 1
+```
