@@ -551,3 +551,74 @@ We started on this but need a register for the address to write back to =/
   Maybe we can leverage the other writer...
 
 Nope, that's not working either
+
+Undocumented snippet:
+
+```
+mov x3 acc
+mov x3 dat
+tgt dat 0
++ sub 4
+tgt dat 1
++ sub 2
+```
+
+Subtraction needs extra registers to work with `dst` and I'm too tired to think more...
+
+Simplified replicator with digit. Lacks address reset as we think something else can take care of it...
+
+```
+mov x3 acc
+mov acc x0 # dgt:0
+mov 0 x0
+mov acc x0 # dgt:1
+mov 1 x0
+mov acc x0 # dgt:2
+mov 2 x0
+add 1
+slp: slp 1
+```
+
+Index mover (jumps 3 spaces ahead)
+
+```
+slx x3
+mov x2 acc
+add 3
+mov acc x2
+
+# Tell writer to start reading values
+mov 100 x1
+
+# When writer requests, reset index
+mov x1 null
+mov acc x2
+```
+
+```
+# Wait for signal from space jumper
+slx x0
+
+# Save table and digit
+mov x3 acc
+mov x3 dat
+
+# Adjust table based on digit
+# TODO: This is missing `tgt` for `acc` itself
+tgt dat 0
++ sub 4
+tgt dat 1
++ sub 2
+
+# Back up data
+mov acc dat
+
+# Load in RAM
+mov x2 acc
+
+# Can't do `dst` as we overwrote our digit data
+dst # Want to use DST on RAM value but can't due to not enough registers
+
+# Tell space jumper to reset index
+mov 100 x0
+```
