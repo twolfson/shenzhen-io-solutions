@@ -418,3 +418,5 @@ mov acc x2
 mov dat x1
 mov acc x2
 ```
+
+TODO: We will need to subtract 0/40 and 0/200/400/600 for accurate comparison somehow...
