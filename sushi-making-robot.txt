@@ -191,3 +191,106 @@ Also the gates are motors so we can't use a DX300. We'll need 3 controllers or s
 Layout kind of sucks without knowing what we're building
 
 Let's proof of concept a reader with values input by a controller
+
+Maybe don't store raw table values in memory? Store bits instead?
+  No, we can't. The bits are independent
+  But how many tables stack up? Can we flush first 3 bits?
+    I don't think that'll work due to running `dgt` logic on each one
+    14 / 3 = ~4.66. Only 4 time units isn't enough
+
+We tried a single controller but it didn't work out:
+
+```
+mov 000 x3
+mov 000 x3
+mov 000 x3
+mov 000 x3
+mov 000 x3
+mov 000 x3
+mov 006 x3
+mov 000 x3
+mov 000 x3
+mov 020 x3
+mov 000 x3
+mov 000 x3
+mov 200 x3
+slp 999
+```
+
+```
+mov 50 p1
+mov x0 dat
+mov dat acc
+dgt 0
+teq acc 0
++ jmp next
+tgt acc 4
+- mov 0 p1
++ mov 100 p1
+next: mov dat x3
+mov dat x3
+slp 1
+```
+
+So, we have a working proof of concept for 3 MC4000. 1 for each pin. But it's quite bulky layout wise. We should explore other options:
+
+```
+# Multicast RAM entry
+mov x0 dat
+mov dat x3
+mov dat x3
+mov dat x3
+slp 1
+```
+
+Gate controller:
+
+```
+# Reset motor position
+mov 50 p1
+
+# Load compressed data (table C, table B, table A)
+mov x0 acc
+
+# Load table A info
+dgt 0
+
+# If there is no table, exit
+teq acc 0
++ jmp slp
+
+# Adjust motor to move towards table
+tgt acc 4
+- mov 0 p1
++ mov 100 p1
+slp: slp 1
+```
+
+Similar logic for table B and C (data is subtracted for proper comparisons)
+
+```
+mov 50 p1
+mov x0 acc
+dgt 1
+teq acc 0
++ jmp slp
+# DIFF: Compares against 2
+tgt acc 2
+- mov 0 p1
++ mov 100 p1
+slp: slp 1
+```
+
+```
+mov 50 p1
+mov x0 acc
+dgt 2
+teq acc 0
++ jmp slp
+# DIFF: Compares against 1
+tgt acc 1
+  # 0/100 are flipped
++ mov 0 p1
+- mov 100 p1
+slp: slp 1
+```
