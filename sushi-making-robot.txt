@@ -294,3 +294,23 @@ tgt acc 1
 - mov 100 p1
 slp: slp 1
 ```
+
+Explored consolidating 2 controllers but looks like not likely unless they receive preparsed data (e.g. 4,2,1) but then we have a multicasting issue to worry about
+
+```
+mov 50 p0
+mov 50 p1
+mov x0 dat
+mov dat x3
+mov dat acc
+dgt 0
+teq acc 0
++ jmp next
+tgt acc 4
+- mov 0 p1
++ mov 100 p1
+next: mov dat acc
+dgt 1
+# Missing 5 lines for `teq 0` ... `mov 0/100`
+slp: slp 1
+```
