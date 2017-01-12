@@ -622,3 +622,10 @@ dst # Want to use DST on RAM value but can't due to not enough registers
 # Tell space jumper to reset index
 mov 100 x0
 ```
+
+Lots of things to consider...
+  - Can we store without doing 3 jumps?
+  - Can we multiply content without controller?
+  - Is there a better way to subtract data or compare in other controllers?
+
+We have subtraction working but no RAM position reset on end...
