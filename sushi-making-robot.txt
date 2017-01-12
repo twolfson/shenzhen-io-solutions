@@ -164,3 +164,22 @@ mov 100 x1
 # Sleep
 slp: slp 1
 ```
+
+Tried to add updater controller but the sub logic get complex fast so we are attempting to us a calculator
+
+```
+slx x0
+mov x2 dat
+mov x3 acc
+sub 4
+mul 10
+mov dat x2
+mov acc x3
+mov x2 dat
+mov x3 acc
+sub 20
+mul 10
+mov dat x2
+mov acc x3
+mov 0 x3
+```
