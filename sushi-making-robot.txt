@@ -545,3 +545,9 @@ teq -1 x0
 # Move back to previous position for easier moving
 mov acc x2
 ```
+
+We started on this but need a register for the address to write back to =/
+  and layout won't budge
+  Maybe we can leverage the other writer...
+
+Nope, that's not working either
