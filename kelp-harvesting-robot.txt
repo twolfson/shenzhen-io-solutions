@@ -1116,3 +1116,146 @@ teq x0 acc
 mov x1 x3
 mov x1 x3
 ```
+
+We should swap `acc` and `dat` so we can reuse `acc`
+
+Maybe have 1 of readers only do data unwriting for past 2 cells
+
+TODO: We can't ditch motor parser as it's 1 to 2 pins but we can relocate it's ignore logic
+
+So we tried out double reading but it fails due to harvester sleeping
+
+```
+# Wait for signal
+slp: slx x2
+
+# Tell harvester about requested position
+mov x1 x3
+mov x1 x3
+
+# Reset RAM position to 0
+mov x2 x0
+
+# Tell target reader about result
+mov x3 x2
+
+# Tell harvester about looping position
+loop: mov x1 x3
+mov x1 x3
+
+# If it was a match
+teq x3 2
+  # Move to previous position
++ mov acc x0
+  # Unset data
++ mov 0 x1
++ mov 0 x1
+
+# Update starting position
+# TODO: We can read into `acc` at start of `loop` instead of risking overflow
+add 2
+
+# If we didn't complete looping, then keep on looping
+teq x0 0
+- jmp loop
+```
+
+TODO: Maybe motor parser absorbs reading responsibility? as we prob need to move unset logic somewhere
+
+Or maybe harvester ignores motor stuff entirely so initial reader compares to positions it gets back from motor parser and bumps its own damn acc
+
+Okay, we are suuuuuper close. We got halted by a test case on one of the last screens.
+
+Target reader:
+
+```
+# If we have already harvested these cells, then add 2 to our count
+# TODO: It's possible there are multiple already harvested cells in a row
+#   We should probably keep on jumping here. We'll hit 0,0 or -999,-999 eventually
+# DEV: We are using `-1` to avoid conflicts with 0,0/-999,-999 and our incrementer
+next: teq x0 -1
++ teq x0 -1
++ add 2
+
+# Reset our position to current target
+mov acc x1
+
+# Output target to motor parser
+mov x0 x3
+mov x0 x3
+
+# Reset to our current target
+mov acc x1
+
+# If motor's X doesn't line up
+# TODO: It's probably double counting...
+#   Try cutting this out
+teq x3 x0
+  # Flush Y coordinate and if/else
+- mov x3 null
+- jmp out
+
+# If motor's Y lines up, then count it
+teq x3 x0
++ add 2
+
+# Tell loop reader where to reset to on completion
+out: mov acc x2
+
+# Sleep
+slp: slp 1
+```
+
+Motor parser:
+
+```
+slp: slx x0
+mov x0 acc
+mov x0 dat
+tlt acc 1
++ tlt dat 1
++ mov 0 x0
++ mov 0 x0
++ jmp slp
+mov acc x3
+mov dat x2
+# New code:
+# Back up and re-broadcast existing signals to pins and target reader
+mov x3 dat
+mov dat p0
+mov dat x0
+mov p1 x0
+```
+
+Loop reader:
+
+```
+# Wait for signal from target reader
+slp: slx x2
+
+# Back up position to restore to
+mov x2 dat
+
+# Go to start of RAM
+mov 0 x0
+
+# Save starting position
+loop: mov x0 acc
+
+# Ask harvester if we have a match
+mov x1 x3
+mov x1 x3
+
+# If we matched, then reset position and set matched values to -1
+teq x3 100
++ mov acc x0
++ mov -1 x1
++ mov -1 x1
+
+# If we haven't finished looping, then continue looping
+teq x0 0
+- jmp loop
+
+# Reset starting position for target reader
+mov dat x0
+```
