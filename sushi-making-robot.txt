@@ -100,3 +100,17 @@ mov dat x1
 # TODO: If we do oversleep, maybe jump to `mov x0 acc` for even faster resolution?
 slp: slp 1
 ```
+
+# Queue system
+We are thinking 3 controllers are ideal but maybe maybe not
+  We could use 1 controller as long as it has a DX300
+
+We are thinking output table value every 1s in RAM
+  so basically `add 3` to figure out where reader will be
+  Not sure how that works in reality though...
+
+  Also what about multiple tables. We could do `dgt` stacking but that is going to be save position, read, reset position, write
+
+  I think we have to though...
+
+  Let's explore
