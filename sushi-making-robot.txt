@@ -1,0 +1,62 @@
+# Input variables
+X_RADIO_RX
+
+# Output variables
+X_FISH
+P_RICE
+P_GATE_A
+P_GATE_B
+P_GATE_C
+
+# Gist
+Receive order
+  Assemble sushi
+    100 rice
+    Fish signal
+    30 rice
+  Assume sushi is moving on conveyor belt
+  Arrives at gate A in 3 units
+  Arrives at gate B in 3 units
+  Arrives at gate C in 3 units
+
+Need to handle gates opening/closing concurrently.
+  Probably via a queue system and each of the gate controllers sleep?
+  Can't use the same controller and sleep for all of them due to potential lagged timings
+  Maybe something with decrementing
+
+Tables feel like a tree but we can also consider bitmasked values in binary
+
+1 = 100, 100, 100
+2 = 100, 100,   0
+3 = 100,   0, 100
+4 = 100,   0,   0
+5 =   0, 100, 100
+6 =   0, 100,   0
+7 =   0,   0, 100
+8 =   0,   0,   0
+
+Sooo for gate A:
+
+If > 4:
+  # 1,2,3,4 -> 1,2,3,4
+  - Move 100
+  # 5,6,7,8 -> 1,2,3,4
+  + Subtract 4
+  + Move 0
+
+Gate B:
+
+If > 2
+  # 1,2 -> 1,2
+  - Move 100
+  # 3,4 -> 1,2
+  + Subtract 2
+  + Move 0
+
+Gate C:
+
+If > 1
+  # 1
+  - Move 100
+  # 2
+  + Move 0
