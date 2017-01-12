@@ -60,3 +60,43 @@ If > 1
   - Move 100
   # 2
   + Move 0
+
+# Proof of concept stages
+
+- Rice maker
+- Queue layout
+
+# Proof of concept rice maker
+I'm a little worried that we will be sleeping for a order packet but it looks like we should be fine...
+
+Logic (MC6000):
+
+```
+# Save incoming packet for inspection
+mov x0 acc
+
+# If the packet was junk, ignore it
+teq acc -999
++ jmp slp
+
+# Otherwise, save remainder of request
+mov x0 dat
+
+# Output 100 rice for 1s
+gen p1 1 0
+
+# Output fish type
+mov acc x3
+
+# Output 30 rice for 1s
+mov 30 p1
+slp 1
+mov 0 p1
+
+# Output table for order
+mov dat x1
+
+# Sleep
+# TODO: If we do oversleep, maybe jump to `mov x0 acc` for even faster resolution?
+slp: slp 1
+```
