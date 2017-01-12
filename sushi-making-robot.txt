@@ -500,3 +500,48 @@ mov acc x2
 # Notify instruction writer we are done
 mov 100 x3
 ```
+
+We have writing down but we are missing numeric offsets. New code:
+
+TODO: Instead of having a read proxy, how about we pass it a DST adjusted value and it reads/adds/writes
+
+```
+# Wait for signal
+slx x3
+
+# Move forward 3 spaces
+mov x2 acc
+add 3
+mov acc x2
+
+# Send a read request and read current value
+mov -1 x1
+mov x1 acc
+
+# Perform DST for digit for table
+mov x3 dat
+dst x3 dat
+
+# Perform write request
+mov 1 x1
+mov acc x1
+
+# Notify completion
+mov 100 x3
+```
+
+```
+# Wait for signal
+slx x0
+
+# Save current position (we always go back)
+mov x2 acc
+
+# Perform read or write
+teq -1 x0
++ mov x3 x0
+- mov x0 x3
+
+# Move back to previous position for easier moving
+mov acc x2
+```
