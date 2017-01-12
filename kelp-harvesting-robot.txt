@@ -1050,3 +1050,69 @@ Reader pushes to looper to start looping
   Looper loops and erases memory on match in harvester
 
 Unsure about lines for looper but let's try it out
+
+Okay, we are close again but need a line for saving harvester result:
+
+Target position reader:
+
+```
+# Move to current target position
+mov acc x1
+
+# Output coordinates to motor parser
+# TODO: We can probably lose motor parser now
+mov x0 x3
+mov x0 x3
+
+# Reset our position so loop reader can read directly
+# DEV: It's using the same pins
+mov acc x1
+
+# Output our address to loop reader so it can know when to stop
+mov x1 x2
+
+# Add back harvester result
+# DEV: This is now returning 2 on a match and 0 on no match
+#   Same code otherwise
+add x2
+
+# Sleep
+slp: slp 1
+```
+
+Loop reader:
+
+```
+# Wait for signal from target reader
+slp: slx x2
+
+# Save loop stop position
+mov x2 acc
+
+# Tell harvester target coordinate position
+mov x1 x3
+mov x1 x3
+
+# Save result to data
+# DEV: The goal here is to reuse erase logic in loop
+mov x3 dat
+
+# Proxy back harvester result to target reader
+mov dat x2
+
+# If we had a match
+loop: teq dat 2
+  # Move back to position? Nah this is borked
++ mov dat x0
+  # Unset data
++ mov 0 x1
++ mov 0 x1
+
+# If we are at the stop position, break out of loop
+teq x0 acc
++ jmp slp
+
+# Feed next data to harvester
+mov x1 x3
+mov x1 x3
+```
