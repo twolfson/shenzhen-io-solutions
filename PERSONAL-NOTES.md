@@ -73,3 +73,32 @@ tcp acc 2
 SLEEP: # EXTRA
 slp 1
 ```
+
+# Wiring under components
+Sometimes we ge stuck in layout constrained spaces. After glancing at the subreddit, we found how to save a good chunk of space. To view the wires under components, use `<Tab>`
+
+**Normal long wiring setup:**
+
+```
+    +------+
+/---|      |
+| /-|      |
+| | +------+
+| | +------+
+| \-|      |
+\---|      |
+    +------+
+```
+
+**Under components wiring:**
+
+```
+    +------+
+   -|-\    |
+  /-| |    |
+  | +-|----+
+  | +-|----+
+  \-| |    |
+   ---/    |
+    +------+
+```
