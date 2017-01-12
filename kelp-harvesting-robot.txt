@@ -1033,3 +1033,20 @@ Uhhh, X pin reuse with controller that only keeps track of signals sent
   Still requires extra lines to flush signal...
 
 Last working on "0 based loop copy"
+
+We looked at the subreddit for help because we're stuck. Found out about under circuit wiring. Now we can squeeze in another controller that can touch RAM pins
+
+Going to try out a separate controller to clean up memory
+  trying to figure out how to get motor target position working...
+
+How about 1 reader to push location to motors and request harvester for match Y/N
+  If it matches, then bump our count... but how do we get unset timing right?
+  I keep on thinking about 1 more pin...
+
+Reader pushes to motor position
+Reader pushes to looper to start looping
+  If initial pair matches, send back 2 (add that)
+  Otherwise, send back 0
+  Looper loops and erases memory on match in harvester
+
+Unsure about lines for looper but let's try it out
