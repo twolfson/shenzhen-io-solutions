@@ -1259,3 +1259,218 @@ teq x0 0
 # Reset starting position for target reader
 mov dat x0
 ```
+
+OMFG WE SOLVED IT!!! YESSSSSSS!!! FUCKKK YESSSS!!!
+
+- 1 MC6000, signal writer
+- 1 RAM
+- 1 MC6000, target reader
+    - We can move to MC4000X to save cost
+- 1 MC6000, motor parser
+- 1 MC4000, X motor controller
+- 1 MC4000, Y motor controller
+- 1 MC6000, loop reader
+- 1 MC6000, harvest matcher
+- 1 MC4000, harvester
+    - We can move from MC4000 for generator to something that stops looping early and DX300
+
+Signal writer:
+
+```
+# Same code as past iterations for a while...
+# Write incoming signal directly to RAM for speed
+mov x1 x0
+mov x1 x0
+
+# Move to position we just wrote to
+mov x3 acc
+sub 2
+mov acc x3
+
+# If they were `-999`, then move back to their position so we overwrite on next read
+teq x0 -999
++ jmp reset
+
+# Otherwise, continue to next position
+mov x0 null
+
+# Clear out 7th position to zeroes
+# TODO: Do we need to clear out zeros? I don't think we do now that harvester works...
+mov x3 acc
+mov 0 x0
+mov 0 x0
+
+# Reset position to get it written over
+reset: mov acc x3
+
+# Sleep
+slp 1
+```
+
+Target reader:
+
+```
+# If the current target has been harvested
+next: teq x0 -1
++ teq x0 -1
+  # Increment our current target count
++ add 2
+  # Check if this position has been harvested already
+  # DEV: We eventually stop due to hitting 0, 0 or -999, -999
++ jmp next
+
+# Move to our current target position
+mov acc x1
+
+# Tell motor parser of current position
+mov x0 x3
+mov x0 x3
+
+# Tell looper where to reset to on completion
+# DEV: This isn't fully necessary but it saves us a `null` flush in looper
+mov acc x2
+
+# Sleep
+slp: slp 1
+```
+
+Motor parser:
+
+```
+# Wait for signal from target reader
+slp: slx x0
+
+# Save X/Y into registers for comparison
+mov x0 acc
+mov x0 dat
+
+# If the pair is -999, -999 or 0, 0, then exit early
+tlt acc 1
++ tlt dat 1
++ jmp slp
+
+# Otherwise, tell motors to move to X and Y positions
+mov acc x3
+mov dat x2
+
+# Proxy motor X's position to accessible P pin
+# TODO: We can reroute wires under components to avoid this line
+mov x3 p0
+```
+
+X motor controller:
+
+```
+# Reset motor position
+mov 50 p1
+
+# Wait for signal
+slx x0
+
+# Compare against our new position
+tcp acc x0
+  # If we are below it, then move forward
+- add 1
+- mov 100 p1
+  # Otherwise, move back
++ sub 1
++ mov 0 p1
+
+# Output latest position to X pin (preferably P pin but bad access)
+mov acc x0
+
+# Sleep
+slp 1
+```
+
+Y motor position:
+
+Same as X motor controller except outputs to P pin
+
+```
+mov 50 p1
+slx x0
+tcp acc x0
+- add 1
+- mov 100 p1
++ sub 1
++ mov 0 p1
+mov acc p0
+slp 1
+```
+
+Loop reader:
+
+```
+# Wait for signal from target reader
+slp: slx x2
+
+# Save position to reset RAM to for target reader
+mov x2 dat
+
+# Move to position 0 in RAM
+mov 0 x0
+
+# Save position being checked
+loop: mov x0 acc
+
+# Send position to harvester to find out if we match
+mov x1 x3
+mov x1 x3
+
+# If harvester found a match, set values to `-1` for skipping
+# TODO: We can exit early with a `jmp reset`
+teq x3 100
++ mov acc x0
++ mov -1 x1
++ mov -1 x1
+
+# If we aren't done looping, then continue looping
+teq x0 0
+- jmp loop
+
+# Reset RAM position for target reader
+mov dat x0
+```
+
+Harvest checker:
+
+```
+# Wait for signal from loop reader
+slp: slx x1
+
+# Save values to registers for comparison
+mov x1 acc
+mov x1 dat
+
+# If the pair is -999, -999 or 0, 0. Reply early with no
+tlt acc 1
++ tlt dat 1
++ jmp no
+
+# Otherwise, if the pair matches the current motor positions
+teq p0 acc
++ teq p1 dat
+  # Reply yes
++ mov 100 x1 # yes
+  # Tell harvester to generate
++ mov 100 x3
+  # Don't run "no"
++ jmp slp
+
+# Otherwise, reply no
+no: mov 0 x1
+```
+
+Harvester:
+
+```
+# Wait for signal from harvest checker
+slx x0
+
+# Flush signal from harvest checker
+mov x0 null
+
+# Run harvest
+gen p1 1 0
+```
