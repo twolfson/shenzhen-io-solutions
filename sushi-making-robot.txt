@@ -688,3 +688,241 @@ mov acc x2
 # Signal completion
 mov 100 x1
 ```
+
+Well we have a solution and it's definitely power hungry. Everony else's is muuuch lower
+
+Anyway, here's what we got:
+
+- 1MC6000, radio reader + sushi maker
+- 1MC6000, table/digit repeater
+- 1MC4000X, space jumper
+- 1MC6000, digit subtractor
+- 1MC6000, digit replacer + RAM writer
+- 1 RAM
+- 1 MC6000, RAM reader + gate B controller + gate A/C proxy
+- 1 MC4000, gate A controller
+- 1 MC4000, gate C controller
+
+Gist is...
+  Radio reader gets packet, starts making sushi
+  On sushi finish, tell writing group to serve it to "table"
+  Writing group calculates nice values for reader to handle
+  Writes that to RAM
+  Reading group reads from RAM, looks at their digits/gates, and flips motors
+
+Code:
+
+Radio reader:
+
+```
+# Read incoming signal
+mov x0 acc
+
+# If it's `-999`, then say no table and sleep
+teq acc -999
++ mov 0 x1
++ jmp slp
+
+# Otherwise, save table number
+mov x0 dat
+
+# Tell writing group about no new data (assumes table 0)
+mov 0 x1
+
+# Pump out rice
+gen p1 1 0
+
+# Request fish
+mov acc x3
+
+# Pump out a little more rice
+mov 30 p1
+
+# Tell writing group about no new data (assumes table 0)
+mov 0 x1
+
+# Wait for rice to finish pumping
+slp 1
+
+# Reset rice pump
+mov 0 p1
+
+# Output table number to writing group
+mov dat x1
+
+# Sleep
+slp: slp 1
+```
+
+Table/digit repeater:
+
+```
+# Store our starting RAM position
+mov x1 acc
+
+# Take our table number
+mov x3 dat
+
+# Repeat table number with digit to write to
+#   Space jumper will jump 3 spaces for each of these
+mov dat x0 # dgt:0
+mov 0 x0
+
+# Wait for remainder of work to complete
+# DEV: Only necessary for end piece
+mov x0 null
+
+# Repeat same logic
+mov dat x0 # dgt:1
+mov 1 x0
+mov x0 null
+mov dat x0 # dgt:2
+mov 2 x0
+
+# When all values are done being written
+mov x0 null
+
+# Move RAM back to current index + 1
+add 1
+mov acc x1
+
+# Sleep
+slp: slp 1
+```
+
+Space jumper:
+
+```
+# Wait for incoming signal from table/digit repeater (not for us to read though)
+slx x3
+
+# Save current RAM position and jump 3 spaces ahead
+mov x2 acc
+add 3
+mov acc x2
+
+# Tell calculator it can read table/digit repeater's content
+mov 100 x1
+
+# Proxy back completion callback
+mov x1 x3
+
+# Reset RAM position to modulo 3 (it was unset from writer)
+#   it could calculate but we already know it
+mov acc x2
+```
+
+Digit subtractor:
+
+```
+# Wait for signal from space jumper
+slx x0
+
+# Flush space jumper signal
+# We probably have enough timing lag that we don't need these signals to be wired up
+mov x0 null
+
+# Read incoming table and digit
+mov x3 acc
+mov x3 dat
+
+# Calculate offset table based on digit
+tgt dat 0
++ tgt acc 4
++ sub 4
+tgt dat 1
++ tgt acc 2
++ sub 2
+
+# Output offset table and digit to writer
+mov acc x2
+mov dat x2
+
+# Proxy callback
+mov x2 x0
+```
+
+Digit replacer + RAM writer:
+
+```
+# Wait for signal from digit subtractor
+slx x1
+
+# Load in RAM entry
+mov x2 dat
+
+# Move back to RAM position we just read from due to autoincrement
+mov x3 acc
+sub 1
+mov acc x3
+
+# Move RAM entry to `acc` for editing
+mov dat acc
+
+# Digit replace our offset table
+mov x1 dat
+dst x1 dat
+
+# Save RAM entry
+mov acc x2
+
+# Callback
+mov 100 x1
+```
+
+RAM reader:
+
+```
+# Reset gate B controller
+mov 50 p1
+
+# Save RAM entry to acc
+mov x1 acc
+
+# Re-broadcast RAM entry to gate A and C controllers
+mov acc x0
+mov acc x3
+
+# Pick out gate B's index
+dgt 1
+
+# If it's 0 (i.e. no table), then do nothing
+teq acc 0
++ jmp slp
+
+# Otherwise, move toward table
+tgt acc 2
+- mov 100 p1
++ mov 0 p1
+
+# Sleep
+slp: slp 1
+```
+
+Gate A and C controllers:
+
+Same as second half of RAM reader
+
+```
+mov 50 p1
+mov x0 acc
+dgt 0
+teq acc 0
++ jmp slp
+tgt acc 4
+- mov 100 p1
++ mov 0 p1
+slp: slp 1
+```
+
+```
+mov 50 p1
+mov x0 acc
+dgt 2
+teq acc 0
++ jmp slp
+tgt acc 1
+- mov 100 p1
++ mov 0 p1
+slp: slp 1
+```
