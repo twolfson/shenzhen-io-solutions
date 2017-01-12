@@ -629,3 +629,62 @@ Lots of things to consider...
   - Is there a better way to subtract data or compare in other controllers?
 
 We have subtraction working but no RAM position reset on end...
+
+Subtraction controller:
+
+```
+# Wait for signal
+slx x0
+
+# Flush space jumper signal
+mov x0 null
+
+# Save table number and digit
+mov x3 acc
+mov x3 dat
+
+# Calculate subtraction offsets for digit
+tgt dat 0
++ tgt acc 4
++ sub 4
+tgt dat 1
++ tgt acc 2
++ sub 2
+
+# Tell writer about subtracted table value and digit
+mov acc x2
+mov dat x2
+
+# Listen for completion and pass back to space jumper
+mov x2 x0
+```
+
+Writer controller:
+
+```
+# Wait for signal
+slx x1
+
+# Save RAM value to memory
+mov x2 dat
+
+# Move back to space we read from
+mov x3 acc
+sub 1
+mov acc x3
+
+# Move RAM value into acc for `dst`
+mov dat acc
+
+# Move subtracted table into `dat` for `dst`
+mov x1 dat
+
+# Perform `dst`
+dst x1 dat
+
+# Output our `dst` adjusted value to RAM
+mov acc x2
+
+# Signal completion
+mov 100 x1
+```
