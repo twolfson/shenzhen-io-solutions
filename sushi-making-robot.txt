@@ -183,3 +183,11 @@ mov dat x2
 mov acc x3
 mov 0 x3
 ```
+
+Started exploring reader part but realizing we will need something to read different parts
+
+Also the gates are motors so we can't use a DX300. We'll need 3 controllers or some shared logic
+
+Layout kind of sucks without knowing what we're building
+
+Let's proof of concept a reader with values input by a controller
