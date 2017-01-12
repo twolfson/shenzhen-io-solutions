@@ -420,3 +420,83 @@ mov acc x2
 ```
 
 TODO: We will need to subtract 0/40 and 0/200/400/600 for accurate comparison somehow...
+
+Closing in on solution now. Not sure where to squeeze subtraction. Maybe a controller next to RAM?
+  Like a proxy to data? Won't work for read =( Maybe if we do a special code like -1
+
+Anyway code so far:
+
+2 MC6000 for writing in data
+
+The gist is take table number and write it to n + 3 (00X), n + 6 (0X0), and n + 9 (X00)
+  We iterate over slots n + 3, n + 6, and n + 9 via a controller that moves forward 3 spaces and writes
+
+```
+# Receive table number from rice controller
+mov x3 dat
+
+# Save starting position in `acc`
+mov x2 acc
+
+# Send table and digit to save under
+mov dat x1 # dgt:0
+mov 0 x1
+
+# Flush completion signal
+# DEV: We only need completion signal for resetting RAM position after "dgt:2"
+mov x1 null
+
+# Same logic for digits 1 and 2
+mov dat x1 # dgt:1
+mov 1 x1
+mov x1 null
+mov dat x1 # dgt:2
+mov 2 x1
+mov x1 null
+
+# Move RAM to next position
+# TODO: We can save 1 line of code by getting address for `acc` via `x1` and subtracting 5 (+1 -6)
+add 1
+mov acc x2
+slp: slp 1
+```
+
+```
+# Wait for signal from RAM writer
+slx x3
+
+# Load current position into memory
+mov x2 acc
+
+# Move forward 3 spaces
+add 3
+mov acc x2
+
+# Load currently stored value into `acc`
+mov x1 acc
+
+# Receive table number
+mov x3 dat
+
+# Save table number under given digit (e.g. 0, 1, 2)
+#   4, 2 -> 400
+dst x3 dat
+
+# Back up updated value into `dat`
+mov acc dat
+
+# Move back to space we read from (it was autoincremented on read)
+mov x2 acc
+sub 1
+mov acc x2
+
+# Output data to RAM
+mov dat x1
+
+# Reset RAM position for next iteration
+# TODO: Can we cut this and use `mov x2` `add 2`?
+mov acc x2
+
+# Notify instruction writer we are done
+mov 100 x3
+```
