@@ -1474,3 +1474,117 @@ mov x0 null
 # Run harvest
 gen p1 1 0
 ```
+
+Optimized result:
+
+- All of the TODOs worked except removing motor parser proxying P pin for X motor controller. It was a tradeoff between 1 line of code and using DX300. DX300 makes more sense
+
+New code:
+
+Signal writer:
+
+```
+mov x1 x0
+mov x1 x0
+mov x3 acc
+sub 2
+mov acc x3
+teq x0 -999
++ mov acc x3
+- mov x0 null
+slp 1
+```
+
+Target reader:
+
+```
+next: teq x0 -1
++ teq x0 -1
++ add 2
++ jmp next
+mov acc x1
+mov x0 x3
+mov x0 x3
+mov acc x2
+slp: slp 1
+```
+
+Motor parser:
+
+```
+slp: slx x0
+mov x0 acc
+mov x0 dat
+tlt acc 1
++ tlt dat 1
++ jmp slp
+mov acc x3
+mov dat x2
+mov x3 p0
+```
+
+X motor controller:
+
+```
+mov 50 p1
+slx x0
+tcp acc x0
+- add 1
+- mov 100 p1
++ sub 1
++ mov 0 p1
+mov acc x0
+slp 1
+```
+
+Y motor controller:
+
+```
+mov 50 p1
+slx x0
+tcp acc x0
+- add 1
+- mov 100 p1
++ sub 1
++ mov 0 p1
+mov acc p0
+slp 1
+```
+
+Loop reader:
+
+```
+slp: slx x2
+mov x2 dat
+mov 0 x0
+loop: mov x0 acc
+mov x1 x3
+mov x1 x3
+teq x3 100
++ mov acc x0
++ mov -1 x1
++ mov -1 x1
++ jmp reset
+teq x0 0
+- jmp loop
+reset: mov dat x0
+```
+
+Harvest checker:
+
+```
+slp: slx x1
+mov x1 acc
+mov x1 dat
+tlt acc 1
++ tlt dat 1
++ jmp no
+teq p0 acc
++ teq p1 dat
++ mov 100 x1 # yes
++ mov 100 x3
++ slp 1
++ mov 0 x3
++ jmp slp
+no: mov 0 x1
+```
