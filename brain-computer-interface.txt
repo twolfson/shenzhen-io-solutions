@@ -267,3 +267,61 @@ mov 0 x1
 # Flush looper signal which lets looper run
 mov x2 null
 ```
+
+Not enough lines to do 0's and track dat
+Maybe let outputter do 0's?
+
+Relocated 0's to outputter
+
+Missing 1 line or smarter logic for dat tracking
+  It currently fails due to a clear occurring but not resetting `dat`
+
+```
+# Same logic as before
+slp: slx x1
+mov x1 acc
+loop: add x0
+teq x2 6
+- jmp loop
+
+# If we have no counts and the last loop found nothing as well, then run clear
+# TODO: What if we store last result in `acc`? That's much saner...
+tlt acc 2
++ teq dat 100
++ jmp clear
+
+# If we have a partial match, update `dat`
+teq acc 1
+- mov 0 dat
++ mov 100 dat
+
+# If we had no matches, sleep
+tlt acc 2
++ jmp slp
+
+# Otherwise, output `dat` to outputter
+clear: mov dat x3
+```
+
+```
+slx x2
+# If we are told to clear instead of output, jump to clear
+teq x2 100
++ jmp loop2
+
+# Same logic as before
+loop: mov x1 acc
+teq x0 1
++ mov acc x3
+teq x1 6
+- jmp loop
+mov 0 x1
+
+# Clearing loop
+loop2: mov 0 x0
+teq x1 6
+- jmp loop2
+mov 0 x1
+```
+
+Going to go to another controller though...
