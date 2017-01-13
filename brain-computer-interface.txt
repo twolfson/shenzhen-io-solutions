@@ -14,3 +14,15 @@ Queue up senses in RAM or some other storage mechanism
 Don't send senses until we have 2 or more
 Don't resend a sent sense within 2s
 Send senses in numerical order
+
+I think hardest part is going to be layout due to all of the wires
+  We could use DX300 and `dgt` but I dislike that
+
+First thoughts before layout are:
+
+1 controller reads in values, writes to RAM at sequenced locations
+  Maybe store with an expiry value next to it?
+  Let's not worry about sustained values for now
+Another controller gets signal from initial reader and does same for 3,4,5
+  Sends signal to outputter
+Outputter looks over data, if there's at least 2 values, then it sends them in order. Using RAM index as value to send
