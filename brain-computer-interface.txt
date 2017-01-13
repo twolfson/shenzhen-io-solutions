@@ -276,6 +276,8 @@ Relocated 0's to outputter
 Missing 1 line or smarter logic for dat tracking
   It currently fails due to a clear occurring but not resetting `dat`
 
+Could move to another controller
+
 ```
 # Same logic as before
 slp: slx x1
@@ -324,4 +326,167 @@ teq x1 6
 mov 0 x1
 ```
 
-Going to go to another controller though...
+Well that worked =D
+
+Apparently we are power hungry and not nearly as efficient though...
+
+# Solution
+
+- 2 DX300
+- 1 MC6000, sense 0-3 writer
+- 1 MC6000, sense 4-5 writer
+- 1 MC6000, RAM writer
+- 1 RAM
+- 1 MC6000, RAM counter
+- 1 MC6000, RAM reader + clearer
+
+Sense 0-3 writer:
+
+```
+# Read our sense 0-2 from DX300
+mov x0 acc # s:0
+
+# Pluck first digit
+dgt 0
+
+# Send digit to RAM writer
+mov acc x2
+
+# Perform same for sense 1,2,3
+mov x0 acc # s:1
+dgt 1
+mov acc x2
+mov x0 acc # s:2
+dgt 2
+mov acc x2
+mov x1 acc # s:3
+dgt 0
+mov acc x2
+
+# Forward sense 3-5 from DX300 to 4-5 writer
+mov x1 x3
+
+# Sleep
+slp: slp 1
+```
+
+Sense 4-5 writer:
+
+```
+# Wait for signal from sense 0-3 writer
+slx x0
+
+# Save sense 3-5 to dat
+mov x0 dat
+
+# Perform digit plucking/writing to RAM writer
+mov dat acc # s:4
+dgt 1
+mov acc x1
+mov dat acc # s:5
+dgt 2
+mov acc x1
+
+# Output completion to RAM counter
+mov 0 x3
+```
+
+RAM writer:
+
+This adds RAM entry to current RAM value and loops at modulo 6
+
+```
+# Wait for RAM entry from sense counters
+slx x1
+
+# Save current location to dat
+mov x3 dat
+
+# Read in current value to acc
+mov x2 acc
+
+# Add value to current value
+add x1
+
+# Move back to location
+mov dat x3
+
+# Write data to location
+mov acc x2
+
+# If we have looped to 7th position, loop back
+teq x3 6
++ mov 0 x3
+```
+
+RAM counter:
+
+```
+# Wait for signal
+slp: slx x1
+
+# Reset our count reusing signal from `x1` as a flush
+mov x1 acc
+
+# Add up RAM entries 1-6
+loop: add x0
+teq x2 6
+- jmp loop
+
+# If we have less than 2 entries now
+tlt acc 2
+  # and our last entry was 1 (i.e. something to clear)
++ teq dat 1
+  # Then tell RAM reader/clearer to clear
++ mov 100 dat
+  # Jump to outputting to RAM reader/clearer
++ jmp out
+
+# Save current count to `dat`
+mov acc dat
+
+# If this iteration didn't qualify for sending, go to sleep
+tlt acc 2
++ jmp slp
+
+# Otherwise, output info to RAM reader/clearer
+out: mov dat x3
+
+# Reset past entry
+mov 0 dat
+```
+
+RAM reader/clearer:
+
+```
+# Wait for signal from RAM counter
+slx x2
+
+# If the signal was to clear, then go to clear logic
+teq x2 100
++ jmp loop2
+
+# Save current position to acc
+loop: mov x1 acc
+
+# If our position is non-empty, then output index
+teq x0 1
++ mov acc x3
+
+# If we aren't done looping, continue to loop
+teq x1 6
+- jmp loop
+
+# Jump back to position 0 in RAM
+mov 0 x1
+
+# Clear out data
+loop2: mov 0 x0
+
+# If we aren't done clearing, keep on looping
+teq x1 6
+- jmp loop2
+
+# Reset our position for quicker reads
+mov 0 x1
+```
