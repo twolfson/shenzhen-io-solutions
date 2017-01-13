@@ -26,3 +26,96 @@ First thoughts before layout are:
 Another controller gets signal from initial reader and does same for 3,4,5
   Sends signal to outputter
 Outputter looks over data, if there's at least 2 values, then it sends them in order. Using RAM index as value to send
+
+# Exploration
+Yep, we definitely need a DX300
+  No way to feed in 2 P to controller and feed out (1 X + 1 P) * 2
+
+# First iteration
+Initially we had a naive RAM writer but this overwrites data instantly
+  We need something that either adds to existing values
+  OR
+  writes to next position
+
+```
+mov x0 acc
+dgt 0
+mov acc x2
+mov x0 acc
+dgt 1
+mov acc x2
+mov x0 acc
+dgt 2
+mov acc x2
+mov x1 acc
+dgt 0
+mov acc x3
+mov x1 x3
+slp 1
+```
+
+```
+slx x1
+mov x1 dat
+mov dat acc
+dgt 1
+mov acc x0
+mov dat acc
+dgt 2
+mov acc x0
+mov 0 x3
+mov 0 x2
+```
+
+I don't think adding will work due to not unsetting values
+
+I think we store up to 12th position and then jump to 0
+  Then on read, we need to subtract 6 from index or something...
+
+We have writing to 7th position with 0 looking good so it's sense-6 is always 0
+
+Then we have a looper to see if we can read...
+
+We are thinking about adding a outputter which calls back to looper who erases data
+
+```
+mov x0 acc # s:0
+dgt 0
+mov acc x2
+mov x0 acc # s:1
+dgt 1
+mov acc x2
+mov x0 acc # s:2
+dgt 2
+mov acc x2
+mov x1 acc # s:3
+dgt 0
+mov acc x2
+mov x1 x3
+slp: slp 1
+```
+
+```
+slx x1
+mov x1 dat
+mov dat acc # s:4
+dgt 1
+mov acc x0
+mov dat acc
+dgt 2
+mov acc x0 # s:5
+mov 0 x0 # s:NULL
+mov 0 x3
+```
+
+```
+slp: slx x1
+mov 0 dat
+mov x1 acc
+loop: add x2
+teq x0 0
+- jmp loop
+tgt acc 0
+- jmp slp
+mov 100 dat
+```
