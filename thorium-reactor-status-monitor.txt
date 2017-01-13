@@ -110,3 +110,97 @@ tgt p0 50
 + mov 30 x1
 slp: slp 1
 ```
+
+# Solution
+Well that was easy o_o
+Except for control rod logic, that kind of sucked...
+
+- 1 MC4000X, error controller
+- 1 MC6000, power controller
+- 1 MC6000, temperature controller
+- 1 MC6000, control rod controller
+
+Control rod controller:
+
+```
+# Enable always on blocks
+@mov 10 x3
+@mov 20 x3
+@mov 32 x3
+
+# Wait for error message
+slx x0
+
+# Pass along error message to display
+mov x0 x3
+```
+
+Power controller:
+
+```
+# Reset all output blocks
+# TODO: Can we optimize these by moving them into `tgt` statements?
+mov -11 x3
+mov -12 x3
+mov -13 x3
+mov -14 x3
+
+# If we should show the block, then show it
+tgt p0 19
++ mov 11 x3
+tgt p0 39
++ mov 12 x3
+tgt p0 59
++ mov 13 x3
+tgt p0 79
++ mov 14 x3
+
+# Sleep
+slp: slp 1
+```
+
+Temperature controller:
+
+Same logic as power controller:
+
+```
+mov -21 x3
+mov -22 x3
+mov -23 x3
+mov -24 x3
+tgt p0 19
++ mov 21 x3
+tgt p0 39
++ mov 22 x3
+tgt p0 59
++ mov 23 x3
+tgt p0 79
++ mov 24 x3
+slp: slp 1
+```
+
+Control rod controller:
+
+```
+# Reset output blocks
+mov -30 x2
+mov -31 x2
+mov -33 x2
+mov -34 x2
+
+# Compare against 50
+tcp p0 50
+  # If we are 0, then enable rightmost block
+- mov 34 x2
+  # If we are 100, then enable leftmost block
++ mov 30 x2
+
+# If we are over 49 (i.e. 50 or 100), enable 2nd leftmost block
+tgt p0 49
++ mov 31 x2
+
+# If we are under 51 (i.e. 0 or 5), enable 2nd rightmost block
+tlt p0 51
++ mov 33 x2
+slp: slp 1
+```
