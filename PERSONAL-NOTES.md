@@ -102,3 +102,18 @@ Sometimes we ge stuck in layout constrained spaces. After glancing at the subred
    ---/    |
     +------+
 ```
+
+# X inputs can be slept through
+We can read an entry in an X packet, sleep, and then read the next one still. It's weird but it works:
+
+Attribution to subreddit
+
+```
+|[2]| 1 | 4 |
+mov x0 null
+|[2]|[1]| 4 |
+slp 1
+|[2]|[1]|[4]|
+mov x0 null
+
+```
