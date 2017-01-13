@@ -16,3 +16,97 @@ If there's an error, pass unchanged number directly to display (these will be +n
 This seems really straight forward, I guess we'll get to coding and see what changes
   (e.g. if control rods need magic control logic)
     but they seem like range conversions...
+
+Yep, error is a straight up proxy
+
+For the power/temp should have their own converter where we +10 for temperature
+
+That is 2 controllers:
+
+- 1 to read temp/power and pass them along to converter then add X (if anything) and pass to display
+  I guess we'll need something to reset 1X markers every step
+
+# First iteration
+We are mostly missing control rods not being properly offset (we should drop -33 and -34 too, only 32 is constant)
+
+Error handler (MC4000X):
+
+```
+# Set up constant cells to on
+@mov 10 x3
+@mov 20 x3
+@mov 32 x3
+@mov 33 x3
+@mov 34 x3
+
+# Wait for error handler to give us info
+slx x0
+
+# Forward error info
+mov x0 x3
+```
+
+Power top half:
+
+```
+# Unset top 2 power cells
+mov -13 x1
+mov -14 x1
+
+# If they should be filled in, fill them in
+tgt p0 59
++ mov 13 x1
+tgt p0 79
++ mov 14 x1
+
+# Sleep
+slp: slp 1
+```
+
+Power bottom half:
+
+Similar logic as top half
+
+```
+mov -11 x1
+mov -12 x1
+tgt p0 19
++ mov 11 x1
+tgt p0 39
++ mov 12 x1
+slp: slp 1
+```
+
+Temperature:
+
+Similar logic as top/bottom power controllers:
+
+```
+mov -21 x3
+mov -22 x3
+mov -23 x3
+mov -24 x3
+tgt p0 19
++ mov 21 x3
+tgt p0 39
++ mov 22 x3
+tgt p0 59
++ mov 23 x3
+tgt p0 79
++ mov 24 x3
+slp: slp 1
+```
+
+Control rods:
+
+Flawed setup but similar logic to top/bottom power controllers:
+
+```
+mov -31 x1
+mov -30 x1
+tgt p0 0
++ mov 31 x1
+tgt p0 50
++ mov 30 x1
+slp: slp 1
+```
