@@ -1,0 +1,18 @@
+# Input variables
+X_ERROR
+P_POWER
+P_TEMP
+P_CONTROL
+
+# Output variables
+X_DISPLAY
+
+# Gist
+Turn on parts of a display via number (e.g. 1 for compressor)
+Turn off parts of a display via negative of number (e.g. -1 for compressor)
+Turn off all parts via -999
+If there's an error, pass unchanged number directly to display (these will be +n and -n when appropriate)
+
+This seems really straight forward, I guess we'll get to coding and see what changes
+  (e.g. if control rods need magic control logic)
+    but they seem like range conversions...
