@@ -143,3 +143,48 @@ We can use another ROM for columns 0, 3, 5. These are all vertically same except
 | 6 | c        | c | c   |
 | 7 | -        | - | -   |
 | 8 | -        | - | -   |
+
+If we ignore `0` in both cases and combine them, then we get:
+
+1, 2, 4 ROM:
+
+|        | Base (2) | 1   | 4   |
+|--------|----------|-----|-----|
+| 0 -> X | -        | -   | -   |
+| 1 -> 0 | a        | a   | a   |
+| 2 -> 1 | b        | b   | b   |
+| 3 -> 2 | a        | b * | a   |
+| 4 -> 3 | a        | a   | a   |
+| 5 -> 4 | a        | a   | a   |
+| 6 -> X | -        | -   | -   |
+| 7 -> X | -        | a * | -   |
+| 8 -> X | -        | -   | b * |
+
+0, 3, 5 ROM:
+
+|        | Base (3) | 5 | 0   |
+|--------|----------|---|-----|
+| 1 -> 5 | a        | a | a   |
+| 2 -> 6 | b        | b | b   |
+| 3 -> 7 | b        | b | a * |
+| 4 -> 8 | c        | c | c   |
+| 5 -> X | -        | - | -   |
+| 6 -> 9 | c        | c | c   |
+| 7 -> X | -        | - | -   |
+| 8 -> X | -        | - | -   |
+
+Cleaned up:
+
+
+| 1 -> 0 | a |
+| 2 -> 1 | b |
+| 3 -> 2 | a |
+| 4 -> 3 | a |
+| 5 -> 4 | a |
+| 1 -> 5 | a |
+| 2 -> 6 | b |
+| 3 -> 7 | b |
+| 4 -> 8 | c |
+| 6 -> 9 | c |
+
+But now we have to think of code... but my sleep schedule has gotten wrecked recently so I'm going to stop here
