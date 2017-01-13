@@ -115,5 +115,4 @@ mov x0 null
 slp 1
 |[2]|[1]|[4]|
 mov x0 null
-
 ```

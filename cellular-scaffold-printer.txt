@@ -1,0 +1,20 @@
+# Input variables
+X_DATA
+
+# Output variables
+P_MOTOR_X
+P_MOTOR_Y
+P_VALVE_ALPHA
+P_VALVE_BETA
+P_VALVE_PSI
+
+# Gist
+8 different pattern types
+Get a 6 value packet that outputs different rows
+Get -1 to reset printer position
+
+This feels a lot like sandwich assembler...
+
+Reset packet never arrives while print job is in progress
+
+From past Reddit browsings, they said X inputs can be slept and not flushed. It looks like they are right o_o
