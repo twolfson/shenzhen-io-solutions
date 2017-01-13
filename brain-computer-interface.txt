@@ -119,3 +119,38 @@ tgt acc 0
 - jmp slp
 mov 100 dat
 ```
+
+So we were thinking about jumping back/forth 6 spaces. to output a digit. That seems sloppy. Maybe loop checker can add n+6 to nth slots?
+  Uhh, maybe... maybe not... Worried about never expiring data
+
+Could we use an OR gate with lagged reads/writes?
+  Prob lack space for that =/
+
+Backup of a reader iteration:
+
+```
+slx x3
+mov x3 acc
+loop: add 6
+mov x0 dat
+sub 6
+mov acc x1
+mov 0 x3
+```
+
+We tried out outputting loop index and content but we lose out on registers to concatenate numbers
+
+I think we need to add them in RAM, let's proof of concept that...
+
+Simple 1s outputter (need 2s):
+
+```
+slx x3
+loop: mov x1 acc
+teq x0 1
++ mov acc x2
+teq x1 7
+- jmp loop
+mov 0 x1
+mov x3 null
+```
