@@ -154,3 +154,116 @@ teq x1 7
 mov 0 x1
 mov x3 null
 ```
+
+Couldn't get a sane layout for RAM concatenator
+  Maybe we get a MX4000X to proxy RAM writes?
+
+Got a compact writer working but missing a piece
+  Need to expire signals that weren't sent
+  Maybe via a flag on eraser?
+
+Code so far:
+
+```
+mov x0 acc # s:0
+dgt 0
+mov acc x2
+mov x0 acc # s:1
+dgt 1
+mov acc x2
+mov x0 acc # s:2
+dgt 2
+mov acc x2
+mov x1 acc # s:3
+dgt 0
+mov acc x2
+mov x1 x3
+slp: slp 1
+```
+
+```
+slx x0
+mov x0 dat
+mov dat acc # s:4
+dgt 1
+mov acc x1
+mov dat acc
+dgt 2
+mov acc x1 # s:5
+mov 0 x3
+```
+
+```
+# Wait for signal from DGT writers
+slx x1
+
+# Save current positon to dat
+mov x3 dat
+
+# Read in current value into acc
+mov x2 acc
+
+# Add DGT value to acc
+add x1
+
+# Move back to position we read from
+mov dat x3
+
+# Save new value to position
+mov acc x2
+
+# If we have written to all 6 spaces, jump back to 0
+teq x3 6
++ mov 0 x3
+```
+
+```
+# Wait for signal from DGT writer
+slp: slx x1
+
+# Reset counter
+mov x1 acc
+
+# Add count to total
+loop: add x0
+
+# TODO: We can stop after 6 now...
+teq x2 0
+- jmp loop
+
+# If we didn't encounter 2 values, then sleep
+tgt acc 1
+- jmp slp
+
+# Tell outputter to go
+mov 100 x3
+
+# When outputter has read our signal, wipe data
+loop2: mov 0 x0
+# TODO: We can stop after 6 now...
+teq x2 0
+- jmp loop2
+```
+
+```
+# Wait for signal from looper
+slx x2
+
+# Save current position to acc
+loop: mov x1 acc
+
+# If the value was good to send, then send our position
+teq x0 1
++ mov acc x3
+# TODO: This can be 6 now
+
+# If we aren't done looping, continue to loop
+teq x1 7
+- jmp loop
+
+# Reset RAM position for next looper write (resets 0s)
+mov 0 x1
+
+# Flush looper signal which lets looper run
+mov x2 null
+```
