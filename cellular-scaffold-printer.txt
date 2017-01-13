@@ -18,3 +18,23 @@ This feels a lot like sandwich assembler...
 Reset packet never arrives while print job is in progress
 
 From past Reddit browsings, they said X inputs can be slept and not flushed. It looks like they are right o_o
+
+# First iteration
+Reading from queue works:
+
+Started with a P pin but thinking it's more trouble than it's worth (saves us a register but do we need to yet?)
+
+```
+slp: slx x1
+mov x1 acc
+teq acc -1
++ mov 100 p1
++ jmp slp
+mov acc p1
+mov 5 acc
+loop: slp 6
+mov x1 p1
+sub 1
+teq acc 0
+- jmp loop
+```
