@@ -1,0 +1,16 @@
+# Input variables
+P_SENSE_0
+P_SENSE_1
+P_SENSE_2
+P_SENSE_3
+P_SENSE_4
+P_SENSE_5
+
+# Output variables
+X_OUTPUT
+
+# Gist
+Queue up senses in RAM or some other storage mechanism
+Don't send senses until we have 2 or more
+Don't resend a sent sense within 2s
+Send senses in numerical order
