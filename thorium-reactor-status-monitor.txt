@@ -204,3 +204,23 @@ tlt p0 51
 + mov 33 x2
 slp: slp 1
 ```
+
+Optimized version:
+
+```
+tgt p0 19
+- mov -11 x3
++ mov  11 x3
+tgt p0 39
+- mov -12 x3
++ mov  12 x3
+tgt p0 59
+- mov -13 x3
++ mov  13 x3
+tgt p0 79
+- mov -14 x3
++ mov  14 x3
+slp: slp 1
+```
+
+- We can't consolidate control rod `+/-` due to bad resets
