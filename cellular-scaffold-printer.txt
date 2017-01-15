@@ -373,6 +373,7 @@ mov x3 acc # patt
 mov x3 dat # col
 
 # If we are pattern > 6 (i.e. 7 or 8), then return 000
+# DEV: This must come before other parts, otherwise we can get (n + 6) in our comparions
 tgt acc 6
 + mov 000 x3
 + jmp slp
