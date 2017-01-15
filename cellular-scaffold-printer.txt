@@ -420,3 +420,51 @@ teq p0 8 # patt
 + teq p1 4 # col
 + mov 010 x3
 ```
+
+Motor proof of concept is complete:
+
+Same code as before for queue handling
+
+```
+slp: slx x1
+mov x1 acc
+teq acc -1
++ mov -1 x3
++ jmp slp
+mov acc x3
+mov 5 acc
+loop: slp 6
+mov x1 x3
+sub 1
+teq acc 0
+- jmp loop
+```
+
+Motor controller:
+
+```
+# Reset potor positions
+reset: mov 50 p0
+mov 50 p1
+
+# Wait for signal
+slx x0
+
+# If this is a reset signal, then move Y motor back down 6 spaces for 6 seconds
+teq x0 -1
++ gen p1 0 6 # m:y
++ jmp reset
+
+# Otherwise, flip X direction (0 <-> 100)
+not # x <->
+
+# Move X motor for 5 seconds
+mov acc p0 # m:x
+slp 5
+
+# Reset X motor position
+mov 50 p0 # m:x
+
+# Increment Y motor position up by 1 row
+gen p1 1 0 # m:y
+```
