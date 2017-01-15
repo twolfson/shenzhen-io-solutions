@@ -392,3 +392,31 @@ teq dat 4
 mov acc x1
 mov x0 x3
 ```
+
+Proof of concept with our override logic is in place:
+
+It's a lot bulkier than we wanted but I don't see any way to cut it. It also requires usage of P pins due to so many lines of code:
+
+```
+# Wait for signal from ROM reader
+slx x1
+
+# Output ROM reader value to DX300
+mov x1 x3
+
+# If we are a pattern/column to override, then override it
+teq p0 3 # patt
++ teq p1 0 # col
++ mov 100 x3
+
+# Repeat 3 more times
+teq p0 3 # patt
++ teq p1 1 # col
++ mov 010 x3
+teq p0 7 # patt
++ teq p1 1 # col
++ mov 100 x3
+teq p0 8 # patt
++ teq p1 4 # col
++ mov 010 x3
+```
