@@ -356,3 +356,90 @@ slp: slp 1
 mov p1 acc
 slp 1
 ```
+
+Alright, P pin variant is completed and it's much saner for lines of code on left side (i.e. 2 lines per controller):
+
+- 1 MC6000, logos reader
+- 1 MC6000, telos reader
+- 1 MC6000, logos pumper
+- 1 MC6000, telos pumper
+
+Logos reader:
+
+```
+# Read in data from Logos pump
+mov x3 dat
+
+# If it was -999, reset P pin and go to sleep
+teq x3 -999
++ mov 0 p1
++ jmp slp
+
+# Otherwise, set P pin to logos pump
+mov 1 p1
+
+# Flush our packet (proof of concept only)
+loop: teq x3 -999
+- jmp loop
+
+# Sleep
+slp: slp 1
+```
+
+Telos reader:
+
+Same as logos reader except for `mov 2 p1`
+
+```
+mov x3 dat
+teq x3 -999
++ mov 0 p1
++ jmp slp
+mov 2 p1
+loop: teq x3 -999
+- jmp loop
+slp: slp 1
+```
+
+Logos pumper:
+
+```
+# Wait for P pin to have data
+# DEV: We could use `mov acc dat` and loop for `n` lines of code but this is shorter
+nop
+nop
+nop
+
+# If the P pin is set to logos
+teq p1 1
+  # Trigger a logos pump
++ mov 5 acc
+  # Otherwise, increase accumulator as per normal
+- add 1
+
+# If we've reached 5 seconds (via timeout or P pin)
+tgt acc 4
+  # Then reset our counter
++ mov 0 acc
+  # Pump logos for 1 second
++ gen p0 1 0
+  # Otherwise, sleep
+- slp 1
+```
+
+Telos pumper:
+
+Same as logos pumper except for `teq p1 2`
+
+```
+nop
+nop
+nop
+teq p1 2
++ mov 5 acc
+- add 1
+tgt acc 4
++ mov 0 acc
++ gen p0 1 0
+- slp 1
+```
