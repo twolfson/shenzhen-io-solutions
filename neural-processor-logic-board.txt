@@ -320,3 +320,39 @@ We are currently prototyping an X pin to the right side
 We should also try a P pin, not sure how they 2 mux together
 
 Also, we'd have to do a P pin loop in that scenario but that's arguably less lines
+
+It looks like the P pins work it out:
+
+The following resolves 1:
+
+```
+mov 1 p1
+slp: slp 1
+```
+
+```
+mov 0 p1
+slp: slp 1
+```
+
+```
+mov p1 acc
+slp 1
+```
+
+The following resolves 2:
+
+```
+mov 0 p1
+slp: slp 1
+```
+
+```
+mov 2 p1
+slp: slp 1
+```
+
+```
+mov p1 acc
+slp 1
+```
