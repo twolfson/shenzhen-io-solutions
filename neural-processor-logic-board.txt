@@ -168,3 +168,143 @@ teq x1 12
 # Output data to RAM
 mov acc x0
 ```
+
+We tried adding `dgt` to RAM writer but no luck:
+
+```
+slp: slx x3
+mov x3 acc
+teq acc -100
++ mov 0 x1
++ jmp slp
+teq acc -200
++ mov x0 dat
++ mov dat acc
++ dgt 0
++ mov x3 acc
++ mov dat acc
++ dgt 1 # mov x3
+- dst 1 x3
+- mov acc x0
+```
+
+Maybe try doing `dst` logic in data receiver?
+
+Joint acc/dat tracking doesn't work out lines of code wise
+
+Maybe do straight up `-999` comparisons on data?
+
+```
+mov x3 acc
+teq acc -999
++ jmp slp
+mov 23 dat
+loop: mov acc dat
+mov x3 acc
+dst 1 x3
+mov dat acc
+sub 1
+teq acc 0
+- jmp loop
+mov -100 x1
+mov x3 x0
+slp: slp 1
+```
+
+Wow, we have something that works. It's tight and doesn't support outputting stored data but it's a good start
+
+We should be able to cut down on storing directly in RAM via proxy and move to a `DGT` only reader
+
+- 1 MC6000, data reader
+- 1 MC6000, RAM controller
+- 1 MC4000X, mesh data
+
+Data reader:
+
+```
+# Save incoming data to acc
+mov x3 acc
+
+# If the packet was junk, ignore it
+teq acc -999
++ jmp slp
+
+# Read second packet
+loop: mov x3 dat
+
+# If the second packet was junk, then break out of loop
+# DEV: This is only true at end of 25 piece packet
+#   We have this to avoid overwriting 10s space in checksum
+teq dat -999
++ jmp brk
+
+# Save 10s space to data for compression
+dst 1 dat
+
+# Save compressed data to RAM via RAM controller
+mov acc x1
+
+# Overwrite acc with next packet (matches top of code)
+mov x3 acc
+
+# Loop
+jmp loop
+
+# Tell RAM to reset read position
+brk: mov -100 x1
+
+# Output checksum to mesh data controller
+mov acc x0
+
+# Sleep
+slp: slp 1
+```
+
+RAM controller:
+
+```
+# Wait for signal
+slp: slx x3
+
+# Read incoming signal
+mov x3 acc
+
+# If it's a flag to reset RAM position, then do that
+teq acc -100
++ mov 0 x1
++ jmp slp
+
+# If it's a flag to output DGT info, then do that
+teq acc -200
++ mov x0 dat
++ mov dat acc
++ dgt 0
++ mov acc x3
++ mov dat acc
++ dgt 1
++ mov acc x3
+
+# Otherwise, save data to RAM
+- mov acc x0
+```
+
+Mesh data controller:
+
+```
+# Wait for signal
+slx x3
+
+# Store checksum into accumulator
+mov x3 acc
+
+# Request decompressed data
+loop: mov -200 x2
+
+# Add/subtract decompressed pairs
+add x2
+sub x2
+
+# If we have looped RAM, exit
+teq x1 0
+- jmp loop
+```
