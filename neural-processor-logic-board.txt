@@ -114,3 +114,57 @@ teq acc 0
 + mov x2 x0
 not
 ```
+
+Going to try out 2 digit compression as per Reddit recommendations
+
+Ah, we could use `dst` but that fucks up checksum. How about multiplication though ;)
+
+We could do some compression that makes it so we can add/subtract these together...
+
+Not sure off the top of my head though so I guess we'll be lazy about it
+
+So we have 1 RAM writer working but we are thinking about taking out saving checksum in RAM entirely as it only conflates code logic:
+
+```
+# Read in signal from data
+mov x3 acc
+
+# If the data is -999, then ignore it
+teq acc -999
++ jmp slp
+
+# Otherwise, send data to RAM writer and loop
+mov acc x1
+mov 24 acc
+loop: mov x3 x1
+sub 1
+teq acc 0
+- jmp loop
+
+# Fill last slots of RAM to reset position
+mov 0 x1
+mov 0 x1
+
+# Send which pump was fired to X pin
+mov 2 x0
+
+# Sleep
+slp: slp 1
+```
+
+RAM writer:
+
+```
+# Wait for signal
+slx x3
+
+# Overwrite acc with first digit
+mov x3 acc
+
+# If we aren't in checksum slot, the save second digit
+teq x1 12
+- dst 1 x3
+
+# Output data to RAM
+mov acc x0
+```
