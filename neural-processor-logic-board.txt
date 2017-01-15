@@ -1,0 +1,26 @@
+# Input variables
+X_LOGOS_DATA
+X_TELOS_DATA
+
+# Output variables
+P_LOGOS_PUMP
+P_TELOS_PUMP
+X_MESH_DATA
+
+# Overview
+Data packets = 24 values + 1 checksum
+  If checksm matches, send along data
+
+  Should be activated every 5s
+  When data packet received, activate pump and reset delay
+
+  Validate checksum:
+    Add first value
+    Subtract second
+    Add third
+    Subtract fourth
+    Etc
+    Add checksum (25th)
+  If sum = 0, valid. Else, nope
+
+# Gist leverage
