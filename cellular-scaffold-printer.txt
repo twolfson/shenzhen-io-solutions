@@ -468,3 +468,26 @@ mov 50 p0 # m:x
 # Increment Y motor position up by 1 row
 gen p1 1 0 # m:y
 ```
+
+TODO: We can look at motor X P pin for direction
+
+Sooo... we are currently super close but getting tripped up by motor X being 50 when Y is moving
+
+We are trying to get a column tracking controller to work but our logic keeps on fucking up:
+
+- Send 0
+- Sleep
+- Send 1
+...
+- Send 5
+- Sleep
+- Listen
+
+Then for reverse
+
+- Send 5
+- Sleep
+- ...
+- Send 0
+- Sleep
+- Listen
