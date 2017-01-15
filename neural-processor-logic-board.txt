@@ -23,4 +23,10 @@ Data packets = 24 values + 1 checksum
     Add checksum (25th)
   If sum = 0, valid. Else, nope
 
-# Gist leverage
+# Gist
+Leverage X pins to queue data
+
+Should be plausible with 2 small controllers
+
+- 1 to do checksum
+- 1 to receive queue on 1 pin with checksum pending on another
