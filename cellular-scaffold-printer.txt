@@ -278,3 +278,116 @@ lookup: nop
 ```
 
 Maybe we only read pattern from ROM and directly output to DX300. Then have another controller override DX300 if necessary
+
+Going to flip data order so we can combine 1 and 2 add's into 3 lines instead of 4 lines:
+
+```
+tgt
++ tlt
++ add
+```
+
+Instead of:
+
+```
+teq
++ add
+teq
++ add
+```
+
+0, 3, 5 ROM:
+
+|         | Base (3) | 5   | 0     |
+|---------|----------|-----|-------|
+| 0 -> 0  | 000      | 000 | 000   |
+| 1 -> 1  | 100      | 100 | 100   |
+| 2 -> 2  | 010      | 010 | 010   |
+| 3 -> 3  | 010      | 010 | 100 * |
+| 4 -> 4  | 001      | 001 | 001   |
+| 5 -> 5  | 000      | 000 | 000   |
+| 6 -> 6  | 001      | 001 | 001   |
+
+| 7 -> X  | 000      | 000 | 000   |
+| 8 -> X  | 000      | 000 | 000   |
+
+1, 2, 4 ROM:
+
+|         | Base (2) | 1     | 4     |
+|---------|----------|-------|-------|
+| 0 -> 7  | 000      | 000   | 000   |
+| 1 -> 8  | 100      | 100   | 100   |
+| 2 -> 9  | 010      | 010   | 010   |
+| 3 -> 10 | 100      | 010 * | 100   |
+| 4 -> 11 | 100      | 100   | 100   |
+| 5 -> 12 | 100      | 100   | 100   |
+| 6 -> 13 | 000      | 000   | 000   |
+
+| 7 -> X  | 000      | 100 * | 000   |
+| 8 -> X  | 000      | 000   | 010 * |
+
+Okay, basic ROM reader is good except for the exception overrides we need:
+
+Mock data generator:
+
+```
+# Wait for n seconds to align with verification
+slp 1
+
+# Set up pattern and columns to output
+# DEV: This doesn't test reverse patterns but the reader should handle that fine
+mov 7 dat # patt
+
+# Output column and pattern to ROM reader
+loop: mov dat x1
+mov acc x1
+
+# Output result to DX300
+mov x1 x3
+
+# Sleep
+slp 1
+
+# Loop
+add 1
+teq acc 6
+- jmp loop
+
+# Reset DX300
+mov 000 x3
+
+# Sleep forever
+slp 999
+```
+
+ROM reader:
+
+```
+# Wait for signal from mock data
+slp: slx x3
+
+# Store pattern as ROM index
+mov x3 acc # patt
+
+# Store column for comparison
+mov x3 dat # col
+
+# If we are pattern > 6 (i.e. 7 or 8), then return 000
+tgt acc 6
++ mov 000 x3
++ jmp slp
+
+# If we are column < 3 and > 0 (i.e. 1 or 2), offset our lookup
+# DEV: We compare to 3 first as it's less likely to match than > 0 (i.e. 3/6 vs 1/6)
+tlt dat 3
++ tgt dat 0
++ add 7
+
+# If we are column 4, offset our lookup
+teq dat 4
++ add 7
+
+# Jump to lookup location and return value
+mov acc x1
+mov x0 x3
+```
