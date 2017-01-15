@@ -443,3 +443,79 @@ tgt acc 4
 + gen p0 1 0
 - slp 1
 ```
+
+X pin variant works with similar code but now we have leverage for `dst` computation =D
+
+- 1MC6000, logos reader
+- 1MC6000, telos reader
+- 1MC6000, logos/telos pump demuxer
+- 1MC4000, logos pumper
+- 1MC4000, telos pumper
+
+Logos reader:
+
+```
+mov x3 dat
+teq x3 -999
++ mov 0 x2
++ jmp slp
+mov 1 x2
+loop: teq x3 -999
+- jmp loop
+slp: slp 1
+```
+
+Telos reader:
+
+```
+mov x3 dat
+teq x3 -999
++ mov 0 x2
++ jmp slp
+mov 2 x2
+loop: teq x3 -999
+- jmp loop
+slp: slp 1
+```
+
+Logos/telos pump demuxer:
+
+```
+# Wait for incoming signal
+slx x1
+
+# Replace `acc` with incoming signal (could be logos or telos data)
+# 0 = Logos/telos off, 1 = Logos on, 2 = Telos on
+mov x1 acc
+
+# Add other half of data (logos or telos)
+add x1
+
+# Output flag variant to pumpers
+mov acc x2
+mov acc x3
+```
+
+Logos pumper:
+
+```
+teq x1 1
++ mov 5 acc
+- add 1
+tgt acc 4
++ mov 0 acc
++ gen p0 1 0
+- slp 1
+```
+
+Telos pumper:
+
+```
+teq x1 2
++ mov 5 acc
+- add 1
+tgt acc 4
++ mov 0 acc
++ gen p0 1 0
+- slp 1
+```
