@@ -308,3 +308,9 @@ sub x2
 teq x1 0
 - jmp loop
 ```
+
+We are running into layout issues by sticking only to the left side
+
+Let's proof of concept the timing thing...
+
+Maybe we can store data there?
