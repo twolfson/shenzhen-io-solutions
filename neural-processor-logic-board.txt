@@ -314,3 +314,9 @@ We are running into layout issues by sticking only to the left side
 Let's proof of concept the timing thing...
 
 Maybe we can store data there?
+
+We are currently prototyping an X pin to the right side
+
+We should also try a P pin, not sure how they 2 mux together
+
+Also, we'd have to do a P pin loop in that scenario but that's arguably less lines
