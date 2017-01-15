@@ -491,3 +491,210 @@ Then for reverse
 - Send 0
 - Sleep
 - Listen
+
+Came to a smart conclusion, we can use Y motor as our terminator instead of `tgt 0, tlt 6`:
+
+```
+slp: slx x0
+mov x0 dat
+mov dat x2 # motor
+mov x2 null
+loop: mov acc x1
+tcp p0 50
+- sub 1
++ add 1
+teq p1 100
++ add 1
+tgt acc 0
++ tlt acc 6
++ slp 1
++ jmp loop
+```
+
+```
+slp: slx x0
+mov x0 dat
+mov dat x2 # motor
+mov x2 null
+loop: mov acc x1
+tcp p0 50
+- sub 1
++ add 1
+teq p1 100
++ jmp slp
+```
+
+Alright, we have solved it. Yey. The logic to reset for 0's and -1 is a little bit weird but good enough.
+
+- 1 MC6000, state tracker
+- 1 MC6000, column tracker
+- 1 MC6000, motor controller
+- 1 MC6000, ROM reader
+- 1 MC6000, override controller
+
+Gist:
+
+- Data comes in from X pin to state tracker
+- State tracker tells column about new pattern to write
+- State tracker tells motor to move 6 spaces in whatever direction with given pattern
+- Motor autonomously moved in that direction for 6s
+- Column tracker counts current column based on motor direction
+- State tracker reads column tracker, combines it with pattern data, and sends it to ROM reader
+- ROM reader reads from ROM and sends result to override controller
+- Override controller outputs ROM data and applies hardcoded overrides
+
+State tracker:
+
+```
+# Wait for signal from X pin
+# DEV: These will automatically stack until pulled
+slx x0
+
+# Save pattern for later
+mov x0 dat # patt
+
+# Expose pattern to P pin for override controller
+mov dat p1
+
+# Send pattern to motor controller
+mov dat x3
+
+# If our pattern wasn't a reset button, prepare to read from column tracker for 6s
+teq dat -1
+- mov 5 acc
+
+# Read from column tracker and pass along pattern to ROM reader
+loop: sub 1
+mov dat x1
+mov x3 x1
+slp 1
+
+# If we aren't done looping, then loop
+tlt acc 0
+- jmp loop
+
+# Reset our DX300 by sending an out of band pattern and column that always resolve to 0
+# DEV: These prevent override controller from matching a value like 3, 0
+mov 14 x1
+mov 14 x1
+```
+
+Column tracker:
+
+```
+# Wait for signal from state tracker
+slp: slx x1
+
+# Save pattern to dat and pass along to motor
+# TODO: We can remove this line...
+mov x1 dat
+mov dat x3 # motor
+
+# Wait for motor controller to start moving so we can inspect its P pins
+mov x3 null
+
+# Output current column position to state tracker
+loop: mov acc x1
+
+# If our Y motor isn't at 0 (i.e. it's resetting or it's moving up a row), then stop looping
+teq p0 50 # m:y
+- slp 1
+- jmp slp
+
+# Compare X motor to 50 and add/subtract based on its direction
+tcp p1 50 # m:x
+- sub 1
++ add 1
+
+# Sleep and loop
+slp 1
+jmp loop
+```
+
+Motor controller:
+
+```
+# Reset our motor positions
+reset: mov 50 p0
+mov 50 p1
+
+# Wait for instructions from column tracker
+slx x0
+
+# If we are resetting the motors
+teq x0 -1
+  # Tell the column tracker we are all done
++ mov 100 x0
+  # Move our Y motor back for 6s
++ gen p0 0 6 # m:y
+  # Jump to reset logic
++ jmp reset
+
+# Flip our X motor's direction
+not # x <->
+
+# Move X motor in that direction for 5s
+mov acc p1 # m:x
+mov 100 x0
+slp 5
+
+# Stop X motor
+mov 50 p1 # m:x
+
+# Move Y motor up for 1s
+gen p0 1 0 # m:y
+```
+
+ROM reader:
+
+```
+# Wait for signal from state tracker
+slp: slx x2
+
+# Save pattern and column
+mov x2 acc # patt
+mov x2 dat # col
+
+# Expose column to P pin for override controller
+mov dat p1 # col
+
+# If we are on a 7 or 8 row, then output 0 and exit
+tgt acc 6
++ mov 000 x3
++ jmp slp
+
+# Otherwise, determine if we are in the 1, 2, or 4 column and increase our offset
+tlt dat 3
++ tgt dat 0
++ add 7
+teq dat 4
++ add 7
+
+# Move to ROM position and pass along data to override controller
+mov acc x1
+mov x0 x3
+```
+
+Override controller:
+
+```
+# Wait for signal from ROM reader
+slx x1
+
+# Output ROM reader data to DX300
+mov x1 x3
+
+# If our state matches any known overrides, override DX300 value
+teq p1 3 # patt
++ teq p0 0 # col
++ mov 100 x3
+teq p1 3 # patt
++ teq p0 1 # col
++ mov 010 x3
+teq p1 7 # patt
++ teq p0 1 # col
++ mov 100 x3
+teq p1 8 # patt
++ teq p0 4 # col
++ mov 010 x3
+```
