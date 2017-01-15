@@ -228,6 +228,7 @@ Let - = 000, a = 100, b = 010, c = 001 (based on DX300)
 | 4 -> 4 | 100      | 100   | 100   |
 | 5 -> 5 | 100      | 100   | 100   |
 | 6 -> 6 | 000      | 000   | 000   |
+
 | 7 -> X | 000      | 100 * | 000   |
 | 8 -> X | 000      | 000   | 010 * |
 
@@ -242,5 +243,38 @@ Let - = 000, a = 100, b = 010, c = 001 (based on DX300)
 | 4 -> 11 | 001      | 001 | 001   |
 | 5 -> 12 | 000      | 000 | 000   |
 | 6 -> 13 | 001      | 001 | 001   |
+
 | 7 -> X  | 000      | 000 | 000   |
 | 8 -> X  | 000      | 000 | 000   |
+
+Started on a proof of concept yet its already quite bulky with exception logic:
+
+```
+# Wait for request
+slp: slx x3
+
+# Save pattern and column to acc/dat
+# TODO: We save lines by looking at P pins directly
+mov x3 acc # patt
+mov x3 dat # col
+
+# If we aren't patterns 7 or 8, look up in ROM
+tlt acc 7
++ jmp lookup
+
+# If we are an exception case, then output custom value
+teq acc 7
++ teq dat 1
++ mov 100 x3
++ jmp slp
+# Another exception case
+teq acc 8
++ teq dat 4
++ mov 010 x3
++ jmp slp
+
+# TODO: We are missing lookup itself and else case for 7/8 patterns (i.e. output 000)
+lookup: nop
+```
+
+Maybe we only read pattern from ROM and directly output to DX300. Then have another controller override DX300 if necessary
