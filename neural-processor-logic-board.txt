@@ -30,3 +30,9 @@ Should be plausible with 2 small controllers
 
 - 1 to do checksum
 - 1 to receive queue on 1 pin with checksum pending on another
+
+Ah, not so easy. We need something to flip add/subtract
+
+Also, we can prob reuse data between mesh data but let's keep it simple and solve 1 for now
+
+Probably get a reader on X input that only sends non-999 values as well as a `not acc` value
