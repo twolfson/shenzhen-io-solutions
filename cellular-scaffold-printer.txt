@@ -188,3 +188,31 @@ Cleaned up:
 | 6 -> 9 | c |
 
 But now we have to think of code... but my sleep schedule has gotten wrecked recently so I'm going to stop here
+
+I think we lost track of ourselves here. We can't strip out 0 rows without logic which bloats our code. Let's trip out rows 7/8 and assume they are 0 unless we are in the appropriate column override. That should fit everything into ROM:
+
+|        | Base (2) | 1   | 4   |
+|--------|----------|-----|-----|
+| 0 -> 0 | -        | -   | -   |
+| 1 -> 1 | a        | a   | a   |
+| 2 -> 2 | b        | b   | b   |
+| 3 -> 3 | a        | b * | a   |
+| 4 -> 4 | a        | a   | a   |
+| 5 -> 5 | a        | a   | a   |
+| 6 -> 6 | -        | -   | -   |
+| 7 -> X | -        | a * | -   |
+| 8 -> X | -        | -   | b * |
+
+0, 3, 5 ROM:
+
+|         | Base (3) | 5 | 0   |
+|---------|----------|---|-----|
+| 0 -> 7  | -        | - | -   |
+| 1 -> 8  | a        | a | a   |
+| 2 -> 9  | b        | b | b   |
+| 3 -> 10 | b        | b | a * |
+| 4 -> 11 | c        | c | c   |
+| 5 -> 12 | -        | - | -   |
+| 6 -> 13 | c        | c | c   |
+| 7 -> X  | -        | - | -   |
+| 8 -> X  | -        | - | -   |
