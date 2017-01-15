@@ -36,3 +36,81 @@ Ah, not so easy. We need something to flip add/subtract
 Also, we can prob reuse data between mesh data but let's keep it simple and solve 1 for now
 
 Probably get a reader on X input that only sends non-999 values as well as a `not acc` value
+
+Ah, damn. X pins only can be queued when reading from input. We are getting "blocked on write" with current setup
+
+```
+mov x3 dat
+teq dat -999
++ jmp slp
+mov dat acc
+mov dat x0
+loop: mov x3 dat
+add dat
+mov dat x0
+teq dat -999
+- jmp loop
+slp: slp 1
+```
+
+```
+slp: slx x2
+teq x2 0
+- jmp slp
+mov 26 acc
+loop: mov x3 x0
+sub 1
+teq acc 0
+- jmp loop
+```
+
+Sooo I guess we'll have to use RAM
+
+We could do `dgt` compression but that's going to be code hungry
+
+How about 1 RAM for odd indicies and another for even indicies?
+
+Tried a single controller with 2 RAM and already out of lines of code:
+
+```
+mov x2 dat
+teq x2 -999 # This should be dat
++ jmp slp
+mov dat x1
+mov 26 acc
+# We need to reset dat to 0 before looping
+loop: teq dat 0
+- mov 0 dat
+- mov x2 x1
++ mov 100 dat
++ mov x2 x0
+sub 1
+teq acc 0
+- jmp loop
+slp: slp 1
+```
+
+Let's try that again with a prefix controller
+
+We are definitely missing something... we are out of layout for 2 RAM writing...
+
+```
+mov x3 acc
+teq acc -999
++ jmp slp
+mov acc x1
+mov 25 acc
+loop: mov x3 x1
+sub 1
+teq acc 0
+- jmp loop
+slp: slp 1
+```
+
+```
+slx x3
+teq acc 0
+- mov x2 x1
++ mov x2 x0
+not
+```
