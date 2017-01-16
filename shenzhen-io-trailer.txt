@@ -56,3 +56,93 @@ teq acc 6
 - jmp loop
 slp 999
 ```
+
+TODO: Instead of hardcoded increments, we can prob do an `tlt dat` and `add`
+
+TODO: Save power by using `@slp n` and `teq acc -> slp 999`
+
+Here's our naive solution. I'm sure there's a better way to do it (e.g. see our TODOs) so we have no MX6000's
+
+- 1 MC6000, stage 1 controller
+- 1 MC4000, stage 2 controller
+- 1 MC6000, stage 3 controller
+- 1 MC4000, stage 4 controller
+
+Stage 1 controller:
+
+```
+# Sleep
+slp: slp 1
+
+# If our value changed from 0 to 50, then output 1
+teq p0 50
++ teq acc 0
++ mov 1 x2
+
+# If it changed from 50 to 100, output 2
+teq p0 100
++ teq acc 50
++ mov 2 x2
+
+# If we didn't change from 100 to 0, then save current value and loop
+teq p0 0
++ teq acc 100
+- mov p0 acc
+- jmp slp
+
+# On 100 to 0, output -1 and -2
+mov -1 x2
+mov -2 x2
+
+# Sleep forever
+slp 999
+```
+
+Stage 2 controller:
+
+```
+# Reset accumulator to 3
+@mov 3 acc
+
+# Sleep
+# TODO: This should prob be at the tail
+slp: slp 1
+
+# If we are on, then output value and increment
+teq p0 100
++ mov acc x1
++ add 1
+```
+
+Stage 3 controller:
+
+Same setup as stage 1 with different values and less conditional requirements
+
+```
+slp: slp 1
+teq p0 33
++ teq acc 0
++ mov 12 x2
+teq p0 67
++ teq acc 33
++ mov 13 x2
+teq p0 100
+- mov p0 acc
+- jmp slp
+mov 14 x2
+slp 999
+```
+
+Stage 4 controller:
+
+```
+# Sleep
+slp: slp 1
+
+# If we are flashing
+teq p0 100
+  # Flash on once, sleep, flash off once
++ mov 15 x1
++ slp 1
++ mov -15 x1
+```
