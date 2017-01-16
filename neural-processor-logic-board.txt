@@ -523,3 +523,252 @@ tgt acc 4
 Looked for more help because the layout was killing me
 
 Found some on Steam. Need to combine the readers into 1 and forward stream to a storage system
+
+Here's our variant of the smarter code:
+
+```
+# Reset active reader
+mov 0 acc
+
+# Read in from Logos
+loopl: mov x0 dat
+
+# If the data isn't junk
+teq dat -999
+  # Output data to RAM writer
+- mov dat x1
+  # Set active reader to Logos
+- mov 1 acc
+  # Continue looping
+- jmp loopl
+
+# Perform same logic for Telos
+loopt: mov x3 dat
+teq dat -999
+- mov dat x1
+- mov 2 acc
+- jmp loopt
+
+# Output active reader to X pin
+# DEV: We must use X pin due to timing latency
+mov acc x2
+
+# Sleep
+slp: slp 1
+```
+
+Aaaaand solved with a good chunk of help from Steam. I don't think we would have solved this quickly otherwise =/
+
+So many damn tricks...
+
+- 1 MC6000, Logos/Telos reader
+- 1 MC4000X, Logos/Telos multicaster
+- 1 MC4000, Logos pumper
+- 1 MC4000, Telos pumper
+- 1 MC6000, checksummer
+- 1 MC4000, RAM compressor
+- 1 MC4000X, RAM 1st digit decompressor
+- 1 MC4000X, RAM 2nd digit decompressor
+
+Gist:
+
+- Read data from Logos/Telos
+- If there's data from either one, output it to checksummer
+- Notify Logos/Telos multicaster of active reader
+- Checksummer adds/subtracts values and passes along original to RAM compressor
+- RAM compressor stores values in [0, EVEN, ODD] digits
+- On completion, we verify if checksums align
+- If they do, RAM compressor sends checksum to RAM 1st digit decompressor
+- RAM 1st digit decompressor asks RAM 2nd digit decompressor for RAM data
+- RAM 1st digit decompresses values' 1st digit and sends them to mesh data
+- RAM 2nd digit decompresses values' 2nd digit and sends it to RAM 1st digit decompressor who passes it along to mesh data
+- On completion, RAM 1st digit decompressor sends checksum to mesh data
+
+Code:
+
+Logos/Telos reader:
+
+```
+# Reset active reader
+mov 0 acc
+
+# Read in from Logos
+loopl: mov x1 dat
+
+# If the data isn't junk
+teq dat -999
+  # Output data to RAM writer
+- mov dat x0
+  # Set active reader to Logos
+- mov 1 acc
+  # Continue looping
+- jmp loopl
+
+# Perform same logic for Telos
+loopt: mov x3 dat
+teq dat -999
+- mov dat x0
+- mov 2 acc
+- jmp loopt
+
+# Output active reader to X pin
+# DEV: We must use X pin due to timing latency
+mov acc x2
+
+# Sleep
+slp: slp 1
+```
+
+Logos/Telos multicaster:
+
+```
+# Wait for incoming signal
+slx x0
+
+# Multicast value to Logos/Telos pumpers
+mov x0 acc
+mov acc x2
+mov acc x3
+```
+
+Logos pumper:
+
+```
+teq x1 1
++ mov 5 acc
+- add 1
+tgt acc 4
++ mov 0 acc
++ gen p0 1 0
+- slp 1
+```
+
+Telos pumper:
+
+```
+teq x1 2
++ mov 5 acc
+- add 1
+tgt acc 4
++ mov 0 acc
++ gen p0 1 0
+- slp 1
+```
+
+Checksummer:
+
+```
+# Wait for signal from Logos/Telos reader
+slp: slx x2
+
+# Reset RAM position
+mov 0 x1
+
+# Save incoming packet, append to checksum, and pass along packet
+loop: mov x2 dat
+sub dat
+mov dat x0
+
+# Perform twice for other checksum half
+mov x2 dat
+add dat
+mov dat x0
+
+# If we haven't completed receiving all non-checksum values, then loop
+teq x1 11
+- jmp loop
+
+# Save incoming packet
+# TODO: We can optimize `mov x2 dat ... mov dat x0` into 1 line
+mov x2 dat
+
+# Send current checksum value (positive -- e.g. 26)
+mov acc x0
+
+# Send expected checksum value
+mov dat x0
+
+# Reset our counter
+mov 0 acc
+```
+
+RAM compressor:
+
+```
+# Wait for signal from checksummer
+slp: slx x1
+
+# If we haven't consumed the entire packet, then perform compression
+teq x3 12
+  # Replace acc with 1st digit
+- mov x1 acc
+  # Save next value to 2nd digit
+- dst 1 x1
+  # Save compressed data into ram
+- mov acc x2
+  # Wait for next pair
+- jmp slp
+
+# Otherwise, save incoming checksum
+mov x1 acc
+
+# If the checksum matches its expected value
+teq acc x1
+  # Send along checksum to 1st digit decompressor
++ mov acc x0
+```
+
+1st digit decompressor:
+
+```
+# Wait for signal from RAM compressor
+slx x1
+
+# Tell 2nd digit decompressor to start sending data
+mov 0 x3
+
+# Read in compressed data from 2nd digit decompressor
+loop: mov x3 acc
+
+# Extract 1st digit
+dgt 0
+
+# Send 1st digit to mesh data
+mov acc x0
+
+# Pass along 2nd digit to mesh data
+mov x3 x0
+
+# If we aren't done decompressing data, then loop
+teq x2 12
+- jmp loop
+
+# Output queued checksum to mesh data
+mov x1 x0
+```
+
+2nd digit decompressor:
+
+```
+# Wait for request from 1st digit decompressor
+slx x0
+
+# Reset RAM to position 0 and flush 1st digit decompressor signal
+mov x0 x1
+
+# Save current RAM value to acc
+loop: mov x3 acc
+
+# Pass along compressed value to 1st digit decompressor
+mov acc x0
+
+# Perform our 2nd digit decompression
+dgt 1
+
+# Send 2nd digit to 1st digit decompressor
+mov acc x0
+
+# If we aren't done looping, continue to read data
+teq x1 12
+- jmp loop
+```
