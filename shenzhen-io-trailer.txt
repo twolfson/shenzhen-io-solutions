@@ -16,3 +16,43 @@ Match inputs to output
 Or hardcode output
 
 I want to see if we can hardcode the output =P
+
+# Hardcoded
+Damn, we tried a hardcoded version but it failed as soon as it hit the second test run
+
+```
+slp 1
+mov 1 x1
+slp 5
+mov 2 x1
+slp 6
+mov -1 x1
+mov -2 x1
+slp 999
+```
+
+```
+slp 15
+mov 3 acc
+loop: mov acc x3
+add 1
+teq acc 15
++ jmp out
+tgt acc 11
++ slp 4
+- slp 2
+jmp loop
+out: slp 999
+```
+
+```
+slp 46
+loop: mov 15 x1
+slp 1
+mov -15 x1
+slp 1
+add 1
+teq acc 6
+- jmp loop
+slp 999
+```
