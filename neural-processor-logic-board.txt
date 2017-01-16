@@ -519,3 +519,7 @@ tgt acc 4
 + gen p0 1 0
 - slp 1
 ```
+
+Looked for more help because the layout was killing me
+
+Found some on Steam. Need to combine the readers into 1 and forward stream to a storage system
