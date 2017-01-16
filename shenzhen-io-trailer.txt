@@ -146,3 +146,60 @@ teq p0 100
 + slp 1
 + mov -15 x1
 ```
+
+Sleep optimized:
+
+```
+slp: slp 1
+teq p0 50
++ teq acc 0
++ mov 1 x2
+teq p0 100
++ teq acc 50
++ mov 2 x2
+teq p0 0
++ teq acc 100
+- mov p0 acc
+- jmp slp
+mov -1 x2
+mov -2 x2
+slp 999
+```
+
+```
+mov 3 acc
+slp 14
+loop: teq p0 100
++ mov acc x1
++ add 1
+teq acc 14
+- slp 1
+- jmp loop
+slp 999
+```
+
+```
+slp 35
+loop: teq p0 33
++ teq acc 0
++ mov 12 x2
+teq p0 67
++ teq acc 33
++ mov 13 x2
+teq p0 100
+- mov p0 acc
+- slp 1
+- jmp loop
+mov 14 x2
+slp 999
+```
+
+```
+slp 46
+loop: teq p0 100
++ mov 15 x1
++ slp 1
++ mov -15 x1
+slp 1
+jmp loop
+```
