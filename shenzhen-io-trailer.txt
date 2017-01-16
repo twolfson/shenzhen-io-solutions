@@ -1,0 +1,18 @@
+This is the secret level described in Achievements. It can be accessed via a special code in the Control Panel.
+
+Look at Reddit or Steam forums if you want to know the code
+
+# Input variables
+P_STAGE_1
+P_STAGE_2
+P_STAGE_3
+P_STAGE_4
+
+# Output variables
+X_DISPLAY
+
+# Overview
+Match inputs to output
+Or hardcode output
+
+I want to see if we can hardcode the output =P
